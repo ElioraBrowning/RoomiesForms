@@ -67,8 +67,25 @@ body {
   background: white;
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06); /* Distinct drop shadow */
   margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.form-section {
+  border: 2px solid #005a3c; /* SLU Green */
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  background-color: #fdfdfd;
+}
+
+.form-section h3 {
+  margin-top: 0;
+  color: #005a3c;
+  border-bottom: 2px solid #fdb913; /* SLU Gold line under section title */
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .btn {
@@ -82,10 +99,12 @@ body {
   text-decoration: none;
   display: inline-block;
   font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn:hover {
   background-color: #e5a711;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .btn-secondary {
