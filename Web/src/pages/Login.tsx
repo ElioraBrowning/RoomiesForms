@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
 import '../index.css';
 
 export default function Login() {
@@ -37,13 +38,9 @@ export default function Login() {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: 'var(--bg-body)' }}>
-      <button 
-        onClick={toggleTheme} 
-        title="Toggle Theme" 
-        style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.5rem', fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}
-      >
-        {theme === 'light' ? '🌙' : '☀️'}
-      </button>
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+      </div>
 
       <div className="card" style={{ maxWidth: '400px', width: '100%', margin: '1rem' }}>
         <h2 style={{ textAlign: 'center', color: 'var(--text-heading)' }}>Roomie's Forms Login</h2>

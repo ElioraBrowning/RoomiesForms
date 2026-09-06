@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
+import ThemeToggle from './ThemeToggle';
 import '../index.css';
 
 export default function Layout() {
@@ -40,9 +41,7 @@ export default function Layout() {
         <nav className="navbar-nav">
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/forms/builder">Form Builder</Link>
-          <button onClick={toggleTheme} title="Toggle Theme" style={{ padding: '0.25rem 0.5rem', fontSize: '1.2rem' }}>
-            {theme === 'light' ? '??' : '??'}
-          </button>
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
           <span>Welcome, {user?.fullName || 'User'}</span>
           <button onClick={handleLogout}>Logout</button>
         </nav>
