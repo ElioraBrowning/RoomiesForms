@@ -1,0 +1,19 @@
+# .NET Core
+Backend/bin/
+Backend/obj/
+Backend/*.db
+Backend/*.db-shm
+Backend/*.db-wal
+
+# React / Node
+Web/node_modules/
+Web/dist/
+Web/.env.local
+Web/.env.*.local
+Web/npm-debug.log*
+Web/yarn-debug.log*
+Web/yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
