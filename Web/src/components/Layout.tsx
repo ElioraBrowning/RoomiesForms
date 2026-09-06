@@ -58,7 +58,9 @@ export default function Layout() {
         </div>
         <nav className="navbar-nav">
           <Link to="/dashboard">Dashboard</Link>
-          <Link to="/forms/builder">Form Builder</Link>
+          {user?.roles?.some(r => ['Faculty', 'External'].includes(r)) && (
+            <Link to="/forms/builder">Form Builder</Link>
+          )}
           <div style={{ marginRight: '1rem' }}>
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
           </div>
@@ -88,9 +90,21 @@ export default function Layout() {
                 <div style={{ padding: '0 0.5rem 0.5rem', borderBottom: '1px solid var(--border-card)', color: 'var(--text-help)', fontSize: '0.8rem' }}>
                   {user?.email}
                 </div>
+                
+                <Link 
+                  to="/profile"
+                  onClick={() => setDropdownOpen(false)}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.5rem', marginTop: '0.5rem', 
+                  backgroundColor: 'transparent', color: 'var(--text-main)', border: 'none', cursor: 'pointer', borderRadius: '4px', textDecoration: 'none' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-body)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  My Profile
+                </Link>
+
                 <button 
                   onClick={handleLogout} 
-                  style={{ width: '100%', textAlign: 'left', padding: '0.5rem', marginTop: '0.5rem', 
+                  style={{ width: '100%', textAlign: 'left', padding: '0.5rem', marginTop: '0.25rem', 
                   backgroundColor: 'transparent', color: 'var(--text-main)', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-body)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
