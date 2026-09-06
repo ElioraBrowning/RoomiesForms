@@ -33,13 +33,15 @@ export default function Layout() {
     <div className="layout-container">
       <header className="navbar">
         <div className="navbar-brand">
-          Roomie's Forms
+          <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <img src="/logo.png" alt="Roomie's Forms" style={{ height: '40px', width: 'auto' }} />
+          </Link>
         </div>
         <nav className="navbar-nav">
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/forms/builder">Form Builder</Link>
           <button onClick={toggleTheme} title="Toggle Theme" style={{ padding: '0.25rem 0.5rem', fontSize: '1.2rem' }}>
-            {theme === 'light' ? '🌙' : '☀️'}
+            {theme === 'light' ? '??' : '??'}
           </button>
           <span>Welcome, {user?.fullName || 'User'}</span>
           <button onClick={handleLogout}>Logout</button>
