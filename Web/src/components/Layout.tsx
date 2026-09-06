@@ -1,10 +1,24 @@
 import { Outlet, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
 import '../index.css';
 
 export default function Layout() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   const handleLogout = () => {
     logout();
@@ -24,6 +38,9 @@ export default function Layout() {
         <nav className="navbar-nav">
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/forms/builder">Form Builder</Link>
+          <button onClick={toggleTheme} title="Toggle Theme" style={{ padding: '0.25rem 0.5rem', fontSize: '1.2rem' }}>
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
           <span>Welcome, {user?.fullName || 'User'}</span>
           <button onClick={handleLogout}>Logout</button>
         </nav>
