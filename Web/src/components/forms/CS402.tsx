@@ -8,11 +8,17 @@ export default function CS402({ onSubmit, defaultValues, isReadonly }: FormSubmi
     <form onSubmit={handleSubmit(onSubmit)} className="card">
       <div className="form-section">
         <h3>Employer Agreement</h3>
-        <div className="form-group"><label>Student Name</label><input {...register('studentName')} disabled={isReadonly} /></div>
-        <div className="form-group"><label>Company Name</label><input {...register('companyName')} disabled={isReadonly} /></div>
-        <div className="form-group"><label>Hours Per Week</label><input type="number" {...register('hoursPerWeek')} disabled={isReadonly} /></div>
-        <div className="form-group"><label>Start Date</label><input type="date" {...register('startDate')} disabled={isReadonly} /></div>
-        <div className="form-group"><label>End Date</label><input type="date" {...register('endDate')} disabled={isReadonly} /></div>
+        <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '1.5rem' }}>
+          This section should be completed by the student and reviewed by the employer.
+        </p>
+        <div className="form-group"><label>Student Name</label><input placeholder="Student's Full Name" {...register('studentName')} disabled={isReadonly} /></div>
+        <div className="form-group"><label>Company Name</label><input placeholder="e.g. Acme Corp" {...register('companyName')} disabled={isReadonly} /></div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+          <div className="form-group"><label>Hours Per Week</label><input type="number" placeholder="e.g. 20" {...register('hoursPerWeek')} disabled={isReadonly} /></div>
+          <div className="form-group"><label>Start Date</label><input type="date" {...register('startDate')} disabled={isReadonly} /></div>
+          <div className="form-group"><label>End Date</label><input type="date" {...register('endDate')} disabled={isReadonly} /></div>
+        </div>
       </div>
       
       <div className="form-section">

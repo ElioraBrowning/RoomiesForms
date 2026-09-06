@@ -116,22 +116,41 @@ body {
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem; /* ~24px for breathing room between fields */
 }
 
 .form-group label {
   display: block;
-  font-weight: bold;
+  font-weight: 600;
   margin-bottom: 0.5rem;
+  color: #1a1a1a;
+  font-size: 0.95rem;
 }
 
 .form-group input, .form-group select, .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
   box-sizing: border-box;
   font-family: inherit;
+  font-size: 1rem;
+  min-height: 44px; /* Mobile-first minimum tap target size */
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #fff;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: #005a3c;
+  box-shadow: 0 0 0 3px rgba(0, 90, 60, 0.15); /* Clear visual feedback */
+}
+
+.help-text {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.35rem;
 }
 
 .grid {
