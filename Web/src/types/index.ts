@@ -19,6 +19,7 @@ export interface SubmissionSummary {
   createdAt: string;
   updatedAt: string;
   studentName: string;
+  progress?: number;
 }
 
 export interface SubmissionDetail {

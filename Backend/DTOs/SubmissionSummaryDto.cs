@@ -8,4 +8,5 @@ public class SubmissionSummaryDto
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public string? StudentName { get; set; }
+    public int? Progress { get; set; }
 }

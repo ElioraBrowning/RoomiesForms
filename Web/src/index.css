@@ -21,6 +21,7 @@
   --btn-secondary-bg: #e2e8f0;
   --btn-secondary-hover: #cbd5e1;
   --btn-secondary-text: #333;
+  --bg-card-nested: #e2e8f0; /* Increased contrast in light mode */
 }
 
 [data-theme='dark'] {
@@ -44,6 +45,7 @@
   --btn-secondary-bg: #144f36;
   --btn-secondary-hover: #1b6345;
   --btn-secondary-text: #e2f2eb;
+  --bg-card-nested: #114732; /* Increased contrast in dark mode */
 }
 
 body {
@@ -157,6 +159,7 @@ body {
   font-size: 1rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: background-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
 .btn:hover {
@@ -170,6 +173,15 @@ body {
 }
 .btn-secondary:hover {
   background-color: var(--btn-secondary-hover);
+}
+
+.nested-card {
+  background-color: var(--bg-card-nested);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-card);
+  transition: background-color 0.3s, border-color 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .form-group {

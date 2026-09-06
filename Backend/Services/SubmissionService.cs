@@ -30,14 +30,21 @@ public class SubmissionService : ISubmissionService
             submissions = await _unitOfWork.Submissions.GetSubmissionsByStudentIdAsync(userId);
         }
 
-        return submissions.Select(s => new SubmissionSummaryDto
-        {
-            Id = s.Id,
-            FormTitle = s.Form != null ? s.Form.Title : "Unknown",
-            Status = s.Status,
-            CreatedAt = s.CreatedAt,
-            UpdatedAt = s.UpdatedAt,
-            StudentName = s.Student != null ? s.Student.FullName : (isFaculty || isDepartmentHead ? "Unknown" : "Me")
+        return submissions.Select(s => {
+            int? progress = null;
+            if (s.Status == "Draft" && s.Responses.RootElement.TryGetProperty("__progress", out var prop) && prop.TryGetInt32(out var p)) {
+                progress = p;
+            }
+            return new SubmissionSummaryDto
+            {
+                Id = s.Id,
+                FormTitle = s.Form != null ? s.Form.Title : "Unknown",
+                Status = s.Status,
+                CreatedAt = s.CreatedAt,
+                UpdatedAt = s.UpdatedAt,
+                StudentName = s.Student != null ? s.Student.FullName : (isFaculty || isDepartmentHead ? "Unknown" : "Me"),
+                Progress = progress
+            };
         }).ToList();
     }
 
@@ -56,6 +63,21 @@ public class SubmissionService : ISubmissionService
 
         if (firstStep == null) throw new InvalidOperationException("No review process defined for this form.");
 
+        // Check if there is an existing draft
+        var existingSubmissions = await _unitOfWork.Submissions.GetSubmissionsByStudentIdAsync(userId);
+        var draft = existingSubmissions.FirstOrDefault(s => s.FormId == request.FormId && s.Status == "Draft");
+
+        if (draft != null)
+        {
+            draft.Responses = request.Responses;
+            draft.Status = "Pending";
+            draft.CurrentStepId = firstStep.Id;
+            draft.UpdatedAt = DateTime.UtcNow;
+            _unitOfWork.Submissions.Update(draft);
+            await _unitOfWork.CompleteAsync();
+            return draft;
+        }
+
         var submission = new Submission
         {
             FormId = request.FormId,
@@ -69,6 +91,46 @@ public class SubmissionService : ISubmissionService
         await _unitOfWork.CompleteAsync();
 
         return submission;
+    }
+
+    public async Task<Submission> SaveDraftAsync(int userId, SaveDraftRequestDto request)
+    {
+        var form = await _unitOfWork.Forms.GetByIdAsync(request.FormId);
+        if (form == null) throw new ArgumentException("Form not found");
+
+        var existingSubmissions = await _unitOfWork.Submissions.GetSubmissionsByStudentIdAsync(userId);
+        var draft = existingSubmissions.FirstOrDefault(s => s.FormId == request.FormId && s.Status == "Draft");
+
+        if (draft != null)
+        {
+            draft.Responses = request.Responses;
+            draft.UpdatedAt = DateTime.UtcNow;
+            _unitOfWork.Submissions.Update(draft);
+        }
+        else
+        {
+            var reviewSteps = await _unitOfWork.ReviewSteps.FindAsync(rs => rs.ProcessId == form.ProcessId);
+            var firstStep = reviewSteps.OrderBy(rs => rs.StepOrder).FirstOrDefault();
+            
+            draft = new Submission
+            {
+                FormId = request.FormId,
+                StudentId = userId,
+                Responses = request.Responses,
+                Status = "Draft",
+                CurrentStepId = firstStep?.Id ?? 0 // Safely fallback if missing
+            };
+            await _unitOfWork.Submissions.AddAsync(draft);
+        }
+
+        await _unitOfWork.CompleteAsync();
+        return draft;
+    }
+
+    public async Task<Submission?> GetDraftAsync(int userId, int formId)
+    {
+        var existingSubmissions = await _unitOfWork.Submissions.GetSubmissionsByStudentIdAsync(userId);
+        return existingSubmissions.FirstOrDefault(s => s.FormId == formId && s.Status == "Draft");
     }
 
     public async Task<bool> ApproveSubmissionAsync(int submissionId, int reviewerId, string? comments)

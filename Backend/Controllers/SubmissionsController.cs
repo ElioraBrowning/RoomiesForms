@@ -52,6 +52,34 @@ public class SubmissionsController : ControllerBase
         }
     }
 
+    [HttpPost("drafts")]
+    public async Task<IActionResult> SaveDraft([FromBody] SaveDraftRequestDto request)
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+
+        try
+        {
+            var draft = await _submissionService.SaveDraftAsync(userId, request);
+            return Ok(draft);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+
+    [HttpGet("drafts/{formId}")]
+    public async Task<IActionResult> GetDraft(int formId)
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+
+        var draft = await _submissionService.GetDraftAsync(userId, formId);
+        if (draft == null) return NotFound();
+        return Ok(draft);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSubmission(int id)
     {

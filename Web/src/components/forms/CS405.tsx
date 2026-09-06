@@ -1,16 +1,23 @@
 import { useForm, useFieldArray } from 'react-hook-form';
 import type { FormSubmitProps } from './FormSubmitProps';
+import { FormWrapper, FormStep } from './FormWrapper';
 
-export default function CS405({ onSubmit, defaultValues, isReadonly }: FormSubmitProps) {
-  const { register, handleSubmit, control } = useForm({ 
+export default function CS405({ onSubmit, defaultValues, isReadonly, onSaveDraft }: FormSubmitProps) {
+  const { register, handleSubmit, control, getValues } = useForm({ 
     defaultValues: defaultValues || { logs: [{ week: 1, description: '', hours: 0 }] } 
   });
   
   const { fields, append, remove } = useFieldArray({ control, name: "logs" });
 
+
+  const handleSaveDraft = (progress: number) => {
+    if (onSaveDraft) onSaveDraft({ ...getValues(), __progress: progress });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="card">
-      <div className="form-section">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
+      <FormStep>
         <h3>Weekly Activity Log</h3>
         
         {fields.map((field, index) => (
@@ -36,9 +43,10 @@ export default function CS405({ onSubmit, defaultValues, isReadonly }: FormSubmi
             + Add Week
           </button>
         )}
-      </div>
+      </FormStep>
 
-      {!isReadonly && <button type="submit" className="btn">Submit Activity Log</button>}
+      
+          </FormWrapper>
     </form>
   );
 }

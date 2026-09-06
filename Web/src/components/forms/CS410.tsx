@@ -1,20 +1,27 @@
 import { useForm } from 'react-hook-form';
 import type { FormSubmitProps } from './FormSubmitProps';
+import { FormWrapper, FormStep } from './FormWrapper';
 
-export default function CS410({ onSubmit, defaultValues, isReadonly }: FormSubmitProps) {
-  const { register, handleSubmit } = useForm({ defaultValues });
+export default function CS410({ onSubmit, defaultValues, isReadonly, onSaveDraft }: FormSubmitProps) {
+  const { register, handleSubmit, getValues } = useForm({ defaultValues });
+
+
+  const handleSaveDraft = (progress: number) => {
+    if (onSaveDraft) onSaveDraft({ ...getValues(), __progress: progress });
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="card">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
       <h3>Student's Evaluation of Internship Employer</h3>
       
-      <div className="form-section">
+      <FormStep>
         <h3>Employer Details</h3>
         <div className="form-group"><label>Employer's Name</label><input {...register('employerName')} disabled={isReadonly} /></div>
         <div className="form-group"><label>Job Title</label><input {...register('jobTitle')} disabled={isReadonly} /></div>
-      </div>
+      </FormStep>
 
-      <div className="form-section">
+      <FormStep>
         <h3>Evaluation</h3>
         <div className="form-group">
           <label>Overall Rating of Employer</label>
@@ -70,9 +77,9 @@ export default function CS410({ onSubmit, defaultValues, isReadonly }: FormSubmi
           <label>If not, explain why:</label>
           <textarea {...register('recommendExplain')} disabled={isReadonly}></textarea>
         </div>
-      </div>
+      </FormStep>
       
-      <div className="form-section">
+      <FormStep>
         <h3>Feedback</h3>
         <div className="form-group">
           <label>Based upon your work experience, what additional instructional content or revisions should be included within the Curriculum?</label>
@@ -89,9 +96,10 @@ export default function CS410({ onSubmit, defaultValues, isReadonly }: FormSubmi
             Student Signature (Electronic)
           </label>
         </div>
-      </div>
+      </FormStep>
 
-      {!isReadonly && <button type="submit" className="btn">Submit Evaluation</button>}
+      
+          </FormWrapper>
     </form>
   );
 }

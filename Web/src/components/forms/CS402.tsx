@@ -1,12 +1,19 @@
 import { useForm } from 'react-hook-form';
 import type { FormSubmitProps } from './FormSubmitProps';
+import { FormWrapper, FormStep } from './FormWrapper';
 
-export default function CS402({ onSubmit, defaultValues, isReadonly }: FormSubmitProps) {
-  const { register, handleSubmit } = useForm({ defaultValues });
+export default function CS402({ onSubmit, defaultValues, isReadonly, onSaveDraft }: FormSubmitProps) {
+  const { register, handleSubmit, getValues } = useForm({ defaultValues });
+
+
+  const handleSaveDraft = (progress: number) => {
+    if (onSaveDraft) onSaveDraft({ ...getValues(), __progress: progress });
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="card">
-      <div className="form-section">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
+      <FormStep>
         <h3>Employer Agreement</h3>
         <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '1.5rem' }}>
           This section should be completed by the student and reviewed by the employer.
@@ -19,9 +26,9 @@ export default function CS402({ onSubmit, defaultValues, isReadonly }: FormSubmi
           <div className="form-group"><label>Start Date</label><input type="date" {...register('startDate')} disabled={isReadonly} /></div>
           <div className="form-group"><label>End Date</label><input type="date" {...register('endDate')} disabled={isReadonly} /></div>
         </div>
-      </div>
+      </FormStep>
       
-      <div className="form-section">
+      <FormStep>
         <h3 style={{ marginBottom: '1rem' }}>Conditions of Agreement</h3>
         <ol style={{ marginLeft: '1.5rem', marginBottom: '1.5rem' }}>
           <li>The employer must provide workers compensation coverage for the student intern.</li>
@@ -36,9 +43,10 @@ export default function CS402({ onSubmit, defaultValues, isReadonly }: FormSubmi
             I agree to the above conditions.
           </label>
         </div>
-      </div>
+      </FormStep>
 
-      {!isReadonly && <button type="submit" className="btn">Submit Agreement</button>}
+      
+          </FormWrapper>
     </form>
   );
 }

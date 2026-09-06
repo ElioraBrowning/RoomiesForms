@@ -21,19 +21,29 @@ export default function FormView() {
   
   const [formMeta, setFormMeta] = useState<FormMeta | null>(null);
   const [loading, setLoading] = useState(true);
+  const [draftData, setDraftData] = useState<any>(null);
 
   useEffect(() => {
-    const fetchForm = async () => {
+    const fetchFormAndDraft = async () => {
       try {
         const res = await api.get(`/forms/${formId}`);
         setFormMeta(res.data);
+        
+        try {
+          const draftRes = await api.get(`/submissions/drafts/${formId}`);
+          if (draftRes.data && draftRes.data.responses) {
+            setDraftData(draftRes.data.responses);
+          }
+        } catch (draftErr) {
+          // No draft exists or error, ignore
+        }
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchForm();
+    fetchFormAndDraft();
   }, [formId]);
 
   const onSubmit = async (data: any) => {
@@ -50,10 +60,21 @@ export default function FormView() {
     }
   };
 
+  const onSaveDraft = async (data: any) => {
+    try {
+      await api.post('/submissions/drafts', {
+        formId: Number(formId),
+        responses: data
+      });
+    } catch (err) {
+      console.error('Failed to save draft', err);
+    }
+  };
+
   if (loading) return <div>Loading form...</div>;
   if (!formMeta) return <div>Form not found.</div>;
 
-  const defaultValues = {
+  const defaultValues = draftData || {
     name: user?.fullName,
     wNumber: user?.wNumber,
     email: user?.email,
@@ -62,14 +83,14 @@ export default function FormView() {
 
   const renderForm = () => {
     switch (formMeta.googleFormId) {
-      case 'CS401': return <CS401 onSubmit={onSubmit} defaultValues={defaultValues} />;
-      case 'CS402': return <CS402 onSubmit={onSubmit} defaultValues={defaultValues} />;
-      case 'CS403': return <CS403 onSubmit={onSubmit} defaultValues={defaultValues} />;
-      case 'CS404': return <CS404 onSubmit={onSubmit} defaultValues={defaultValues} />;
-      case 'CS405': return <CS405 onSubmit={onSubmit} defaultValues={defaultValues} />;
-      case 'CS410': return <CS410 onSubmit={onSubmit} defaultValues={defaultValues} />;
-      case 'CS420': return <CS420 onSubmit={onSubmit} defaultValues={defaultValues} />;
-      case 'ExitSurvey': return <ExitSurvey onSubmit={onSubmit} defaultValues={defaultValues} />;
+      case 'CS401': return <CS401 onSubmit={onSubmit} onSaveDraft={onSaveDraft} defaultValues={defaultValues} />;
+      case 'CS402': return <CS402 onSubmit={onSubmit} onSaveDraft={onSaveDraft} defaultValues={defaultValues} />;
+      case 'CS403': return <CS403 onSubmit={onSubmit} onSaveDraft={onSaveDraft} defaultValues={defaultValues} />;
+      case 'CS404': return <CS404 onSubmit={onSubmit} onSaveDraft={onSaveDraft} defaultValues={defaultValues} />;
+      case 'CS405': return <CS405 onSubmit={onSubmit} onSaveDraft={onSaveDraft} defaultValues={defaultValues} />;
+      case 'CS410': return <CS410 onSubmit={onSubmit} onSaveDraft={onSaveDraft} defaultValues={defaultValues} />;
+      case 'CS420': return <CS420 onSubmit={onSubmit} onSaveDraft={onSaveDraft} defaultValues={defaultValues} />;
+      case 'ExitSurvey': return <ExitSurvey onSubmit={onSubmit} onSaveDraft={onSaveDraft} defaultValues={defaultValues} />;
       default: return <div>Generic form renderer goes here...</div>;
     }
   };

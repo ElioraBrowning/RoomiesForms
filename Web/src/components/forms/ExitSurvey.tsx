@@ -1,18 +1,25 @@
 import { useForm } from 'react-hook-form';
 import type { FormSubmitProps } from './FormSubmitProps';
+import { FormWrapper, FormStep } from './FormWrapper';
 
-export default function ExitSurvey({ onSubmit, defaultValues, isReadonly }: FormSubmitProps) {
-  const { register, handleSubmit } = useForm({ defaultValues });
+export default function ExitSurvey({ onSubmit, defaultValues, isReadonly, onSaveDraft }: FormSubmitProps) {
+  const { register, handleSubmit, getValues } = useForm({ defaultValues });
+
+
+  const handleSaveDraft = (progress: number) => {
+    if (onSaveDraft) onSaveDraft({ ...getValues(), __progress: progress });
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="card">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
       <h3>Computer Science Program Feedback Survey</h3>
       <p style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#555' }}>
         The purpose of this survey is to help the department evaluate how effectively your prior computer science coursework prepared you. Your feedback is critical. Please answer honestly based on your academic preparation from coursework only. Do not include knowledge or skills gained through work experience.
       </p>
 
-      <div className="form-group" style={{ border: '2px solid #005a3c', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem', backgroundColor: '#fdfdfd' }}>
-        <label style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '1rem', display: 'block', color: '#005a3c' }}>
+      <FormStep title="Preparation Level">
+        <label style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '1rem', display: 'block', color: 'var(--text-heading)' }}>
           1. Preparation Level: How well prepared did you feel to undertake the project assigned in this course?
         </label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingLeft: '1rem' }}>
@@ -25,28 +32,29 @@ export default function ExitSurvey({ onSubmit, defaultValues, isReadonly }: Form
                 disabled={isReadonly}
                 style={{ margin: 0, width: '1.2rem', height: '1.2rem', cursor: isReadonly ? 'default' : 'pointer' }} 
               />
-              <span style={{ fontSize: '1rem' }}>{opt}</span>
+              <span style={{ fontSize: '1rem', color: 'var(--text-main)' }}>{opt}</span>
             </label>
           ))}
         </div>
-      </div>
+      </FormStep>
 
-      <div className="form-group" style={{ border: '2px solid #005a3c', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem', backgroundColor: '#fdfdfd' }}>
-        <label style={{ fontWeight: 'bold', color: '#005a3c' }}>2. Areas Needing Improvement: In what areas did you feel less than adequately prepared? (e.g., concepts, tools, programming techniques, or skills that prior coursework did not cover or did not prepare you to learn easily.)</label>
+      <FormStep title="Areas Needing Improvement">
+        <label style={{ fontWeight: 'bold', color: 'var(--text-heading)' }}>2. Areas Needing Improvement: In what areas did you feel less than adequately prepared? (e.g., concepts, tools, programming techniques, or skills that prior coursework did not cover or did not prepare you to learn easily.)</label>
         <textarea {...register('improvementAreas')} disabled={isReadonly} rows={4} style={{ marginTop: '0.5rem' }}></textarea>
-      </div>
+      </FormStep>
 
-      <div className="form-group" style={{ border: '2px solid #005a3c', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem', backgroundColor: '#fdfdfd' }}>
-        <label style={{ fontWeight: 'bold', color: '#005a3c' }}>3. Areas of Strength: In what areas did you feel adequately or more than adequately prepared?</label>
+      <FormStep title="Areas of Strength">
+        <label style={{ fontWeight: 'bold', color: 'var(--text-heading)' }}>3. Areas of Strength: In what areas did you feel adequately or more than adequately prepared?</label>
         <textarea {...register('strengthAreas')} disabled={isReadonly} rows={4} style={{ marginTop: '0.5rem' }}></textarea>
-      </div>
+      </FormStep>
 
-      <div className="form-group" style={{ border: '2px solid #005a3c', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem', backgroundColor: '#fdfdfd' }}>
-        <label style={{ fontWeight: 'bold', color: '#005a3c' }}>4. Additional Comments: Please share any other feedback or suggestions that could help improve the Computer Science program.</label>
+      <FormStep title="Additional Comments">
+        <label style={{ fontWeight: 'bold', color: 'var(--text-heading)' }}>4. Additional Comments: Please share any other feedback or suggestions that could help improve the Computer Science program.</label>
         <textarea {...register('additionalComments')} disabled={isReadonly} rows={4} style={{ marginTop: '0.5rem' }}></textarea>
-      </div>
+      </FormStep>
 
-      {!isReadonly && <button type="submit" className="btn">Submit Survey</button>}
+      
+          </FormWrapper>
     </form>
   );
 }

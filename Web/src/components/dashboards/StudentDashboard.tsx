@@ -42,32 +42,51 @@ export default function StudentDashboard() {
 
   return (
     <div>
-      <h1>Student Dashboard</h1>
+      <h1 style={{ marginBottom: '1.5rem', color: 'var(--text-heading)' }}>Student Dashboard</h1>
       
       <div className="card">
-        <h2>Available Forms</h2>
+        <h2>Available Forms & Drafts</h2>
         {forms.length === 0 ? (
           <p>No forms available.</p>
         ) : (
           <div className="grid">
-            {forms.map(f => (
-              <div key={f.id} className="card" style={{ marginBottom: 0, border: '1px solid #ccc' }}>
-                <h3>{f.title}</h3>
-                <Link to={`/forms/${f.id}`} className="btn">Fill Out</Link>
-              </div>
-            ))}
+            {forms.map(f => {
+              const draft = submissions.find(s => s.formTitle === f.title && s.status === 'Draft');
+              const progress = draft?.progress || 0;
+              return (
+                <div key={f.id} className="nested-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
+                  <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-heading)' }}>{f.title}</h3>
+                  {progress > 0 && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-help)', marginBottom: '4px' }}>
+                        <span>Draft in progress</span>
+                        <span>{progress}%</span>
+                      </div>
+                      <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--border-card)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ width: `${progress}%`, height: '100%', backgroundColor: 'var(--slu-gold)', transition: 'width 0.3s ease' }}></div>
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ marginTop: 'auto', paddingTop: progress === 0 ? '1.5rem' : 0 }}>
+                    <Link to={`/forms/${f.id}`} className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                      {progress > 0 ? 'Continue Draft' : 'Start Form'}
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
       <div className="card">
-        <h2>My Submissions</h2>
-        {submissions.length === 0 ? (
+        <h2>Submitted Forms</h2>
+        {submissions.filter(s => s.status !== 'Draft').length === 0 ? (
           <p>You have not submitted any forms yet.</p>
         ) : (
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #ccc' }}>
+              <tr style={{ borderBottom: '2px solid var(--border-card)' }}>
                 <th style={{ padding: '0.5rem' }}>Form</th>
                 <th style={{ padding: '0.5rem' }}>Date</th>
                 <th style={{ padding: '0.5rem' }}>Status</th>
@@ -75,8 +94,8 @@ export default function StudentDashboard() {
               </tr>
             </thead>
             <tbody>
-              {submissions.map(s => (
-                <tr key={s.id} style={{ borderBottom: '1px solid #eee' }}>
+              {submissions.filter(s => s.status !== 'Draft').map(s => (
+                <tr key={s.id} style={{ borderBottom: '1px solid var(--border-card)' }}>
                   <td style={{ padding: '0.5rem' }}>{s.formTitle}</td>
                   <td style={{ padding: '0.5rem' }}>{new Date(s.createdAt).toLocaleDateString()}</td>
                   <td style={{ padding: '0.5rem' }}>

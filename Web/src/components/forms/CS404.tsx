@@ -1,12 +1,19 @@
 import { useForm } from 'react-hook-form';
 import type { FormSubmitProps } from './FormSubmitProps';
+import { FormWrapper, FormStep } from './FormWrapper';
 
-export default function CS404({ onSubmit, defaultValues, isReadonly }: FormSubmitProps) {
-  const { register, handleSubmit } = useForm({ defaultValues });
+export default function CS404({ onSubmit, defaultValues, isReadonly, onSaveDraft }: FormSubmitProps) {
+  const { register, handleSubmit, getValues } = useForm({ defaultValues });
+
+
+  const handleSaveDraft = (progress: number) => {
+    if (onSaveDraft) onSaveDraft({ ...getValues(), __progress: progress });
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="card">
-      <div className="form-section">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
+      <FormStep>
         <h3>Time & Wage Report</h3>
         <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '1.5rem' }}>
           Please enter your cumulative hours and wages for the semester.
@@ -20,9 +27,9 @@ export default function CS404({ onSubmit, defaultValues, isReadonly }: FormSubmi
           <div className="form-group"><label>Average Hours per Week</label><input type="number" step="0.1" placeholder="e.g. 20" {...register('hoursPerWeek')} disabled={isReadonly} /></div>
           <div className="form-group"><label>Hourly Wage</label><input type="number" step="0.01" placeholder="e.g. 15.00" {...register('hourlyWage')} disabled={isReadonly} /></div>
         </div>
-      </div>
+      </FormStep>
 
-      <div className="form-section">
+      <FormStep>
         <h3>Signatures</h3>
         <div className="form-group" style={{ marginBottom: 0 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: isReadonly ? 'default' : 'pointer' }}>
@@ -30,9 +37,10 @@ export default function CS404({ onSubmit, defaultValues, isReadonly }: FormSubmi
             Student Signature (Electronic)
           </label>
         </div>
-      </div>
+      </FormStep>
 
-      {!isReadonly && <button type="submit" className="btn">Submit Report</button>}
+      
+          </FormWrapper>
     </form>
   );
 }
