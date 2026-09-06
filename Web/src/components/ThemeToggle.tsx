@@ -38,7 +38,8 @@ export default function ThemeToggle({ theme, toggleTheme }: ThemeToggleProps) {
         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
       </svg>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f1f5f9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ zIndex: 1, marginRight: '2px' }}>
+      {/* Moon Icon */}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#061c13" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ zIndex: 1, marginRight: '2px' }}>
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
       </svg>
       <div 
