@@ -21,11 +21,11 @@ builder.Services.AddScoped<Backend.Services.ISubmissionService, Backend.Services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Configure CORS for React frontend
+// Configure CORS for React frontend (Allow all for Render prototype)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        builder => builder.WithOrigins("http://localhost:5173")
+        builder => builder.AllowAnyOrigin()
                           .AllowAnyMethod()
                           .AllowAnyHeader());
 });
