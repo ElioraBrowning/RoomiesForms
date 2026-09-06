@@ -6,6 +6,7 @@ import type { FormMeta, SubmissionSummary } from '../../types';
 export default function StudentDashboard() {
   const [forms, setForms] = useState<FormMeta[]>([]);
   const [submissions, setSubmissions] = useState<SubmissionSummary[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,11 +20,25 @@ export default function StudentDashboard() {
         if (subRes.status === 'fulfilled') setSubmissions(subRes.value.data);
       } catch (error) {
         console.error("Failed to fetch data", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <h1 style={{ marginBottom: '1.5rem', color: 'var(--text-heading)' }}>Student Dashboard</h1>
+        <div className="card" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <h2 style={{ marginBottom: '0.5rem' }}>Loading Dashboard...</h2>
+          <p style={{ color: 'var(--text-help)' }}>Please wait while we securely fetch your records.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

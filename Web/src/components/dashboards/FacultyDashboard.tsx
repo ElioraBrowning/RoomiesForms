@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 export default function FacultyDashboard() {
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState<SubmissionSummary[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const isDepartmentHead = user?.roles?.includes('Department Head');
 
@@ -17,10 +18,26 @@ export default function FacultyDashboard() {
         setSubmissions(res.data);
       } catch (error) {
         console.error("Failed to fetch pending approvals", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <h1 style={{ marginBottom: '1.5rem', color: 'var(--text-heading)' }}>
+          {isDepartmentHead ? "Department Head Dashboard" : "Faculty Dashboard"}
+        </h1>
+        <div className="card" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <h2 style={{ marginBottom: '0.5rem' }}>Loading Submissions...</h2>
+          <p style={{ color: 'var(--text-help)' }}>Please wait while we securely fetch pending records.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
