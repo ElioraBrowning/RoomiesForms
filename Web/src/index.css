@@ -24,26 +24,26 @@
 }
 
 [data-theme='dark'] {
-  --bg-body: #0f172a;
-  --text-main: #cbd5e1;
-  --text-heading: #f8fafc;
-  --bg-card: #1e293b;
-  --border-card: #334155;
-  --bg-form-section: #0f172a;
-  --border-form-section: #34d399;
+  --bg-body: #061c13; /* Very dark SLU green */
+  --text-main: #d1e8df; /* Soft minty text */
+  --text-heading: #f0fcf6;
+  --bg-card: #0a2d1f; /* Slightly lighter dark green */
+  --border-card: #144f36;
+  --bg-form-section: #061c13;
+  --border-form-section: #34d399; /* Emerald for contrast */
   --text-form-section-h3: #34d399;
-  --bg-input: #0f172a;
-  --border-input: #475569;
-  --text-input: #f8fafc;
-  --text-label: #e2e8f0;
-  --text-help: #94a3b8;
-  --bg-dynamic-row: #1e293b;
+  --bg-input: #061c13;
+  --border-input: #1b6345;
+  --text-input: #f0fcf6;
+  --text-label: #e2f2eb;
+  --text-help: #87bfa3;
+  --bg-dynamic-row: #0a2d1f;
   --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-  --slu-green: #023621;
-  --slu-green-hover: #012114;
-  --btn-secondary-bg: #334155;
-  --btn-secondary-hover: #475569;
-  --btn-secondary-text: #e2e8f0;
+  --slu-green: #032b1d; /* Even darker for navbar in dark mode to blend in nicely */
+  --slu-green-hover: #021a11;
+  --btn-secondary-bg: #144f36;
+  --btn-secondary-hover: #1b6345;
+  --btn-secondary-text: #e2f2eb;
 }
 
 body {
