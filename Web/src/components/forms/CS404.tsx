@@ -14,7 +14,7 @@ export default function CS404({ onSubmit, defaultValues, isReadonly }: FormSubmi
         <div className="form-group"><label>Student Name</label><input placeholder="e.g. Jane Doe" {...register('studentName')} disabled={isReadonly} /></div>
         <div className="form-group"><label>Employer Name</label><input placeholder="e.g. Acme Corp" {...register('employerName')} disabled={isReadonly} /></div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="form-grid-2">
           <div className="form-group"><label>Total Hours for Semester</label><input type="number" placeholder="e.g. 300" {...register('totalHours')} disabled={isReadonly} /></div>
           <div className="form-group"><label>Total Wages (before deductions)</label><input type="number" step="0.01" placeholder="e.g. 4500.00" {...register('totalWages')} disabled={isReadonly} /></div>
           <div className="form-group"><label>Average Hours per Week</label><input type="number" step="0.1" placeholder="e.g. 20" {...register('hoursPerWeek')} disabled={isReadonly} /></div>

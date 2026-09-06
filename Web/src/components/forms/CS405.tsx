@@ -14,20 +14,20 @@ export default function CS405({ onSubmit, defaultValues, isReadonly }: FormSubmi
         <h3>Weekly Activity Log</h3>
         
         {fields.map((field, index) => (
-          <div key={field.id} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', alignItems: 'flex-start', padding: '1rem', border: '1px solid #eee', borderRadius: '4px', backgroundColor: 'white' }}>
+          <div key={field.id} className="dynamic-field-row">
             <div style={{ width: '80px' }}>
               <label>Week</label>
-              <input type="number" {...register(`logs.${index}.week`)} disabled={isReadonly} style={{ width: '100%' }} />
+              <input type="number" {...register(`logs.${index}.week`)} disabled={isReadonly} />
             </div>
             <div style={{ flex: 1 }}>
-              <label>Description of Activities (1 paragraph)</label>
-              <textarea {...register(`logs.${index}.description`)} disabled={isReadonly} rows={3} style={{ width: '100%' }}></textarea>
+              <label>Description of Activities</label>
+              <textarea {...register(`logs.${index}.description`)} disabled={isReadonly} rows={3}></textarea>
             </div>
-            <div style={{ width: '80px' }}>
+            <div style={{ width: '100px' }}>
               <label>Hours</label>
-              <input type="number" {...register(`logs.${index}.hours`)} disabled={isReadonly} style={{ width: '100%' }} />
+              <input type="number" {...register(`logs.${index}.hours`)} disabled={isReadonly} />
             </div>
-            {!isReadonly && <button type="button" onClick={() => remove(index)} style={{ marginTop: '1.5rem', padding: '0.5rem', cursor: 'pointer' }}>Remove</button>}
+            {!isReadonly && <button type="button" className="btn btn-secondary" onClick={() => remove(index)} style={{ marginTop: '1.5rem', alignSelf: 'flex-start' }}>Remove</button>}
           </div>
         ))}
         

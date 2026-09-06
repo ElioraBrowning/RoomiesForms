@@ -18,16 +18,16 @@ export default function CS403({ onSubmit, defaultValues, isReadonly }: FormSubmi
         </p>
 
         {fields.map((field, index) => (
-          <div key={field.id} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', alignItems: 'center' }}>
+          <div key={field.id} className="dynamic-field-row">
             <div style={{ flex: 1 }}>
               <label>Objective {index + 1}</label>
-              <textarea {...register(`objectives.${index}.text`)} disabled={isReadonly} style={{ width: '100%' }}></textarea>
+              <textarea {...register(`objectives.${index}.text`)} disabled={isReadonly}></textarea>
             </div>
-            <div style={{ width: '100px' }}>
+            <div style={{ width: '120px' }}>
               <label>Supervisor %</label>
               <input type="number" min="0" max="100" {...register(`objectives.${index}.rating`)} disabled={isReadonly} />
             </div>
-            {!isReadonly && <button type="button" onClick={() => remove(index)} style={{ marginTop: '1.5rem' }}>Remove</button>}
+            {!isReadonly && <button type="button" className="btn btn-secondary" onClick={() => remove(index)} style={{ marginTop: '1.5rem', alignSelf: 'flex-start' }}>Remove</button>}
           </div>
         ))}
         

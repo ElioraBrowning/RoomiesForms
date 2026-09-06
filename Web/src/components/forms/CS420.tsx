@@ -32,10 +32,12 @@ export default function CS420({ onSubmit, defaultValues, isReadonly }: FormSubmi
       
       <div className="form-section">
         <h3>Intern Information</h3>
-        <div className="form-group"><label>Student Name</label><input {...register('studentName')} disabled={isReadonly} /></div>
-        <div className="form-group"><label>Job Title</label><input {...register('jobTitle')} disabled={isReadonly} /></div>
-        <div className="form-group"><label>Semester</label><input {...register('semester')} disabled={isReadonly} /></div>
-        <div className="form-group"><label>Employer</label><input {...register('employerName')} disabled={isReadonly} /></div>
+        <div className="form-grid-2">
+          <div className="form-group"><label>Student Name</label><input {...register('studentName')} disabled={isReadonly} /></div>
+          <div className="form-group"><label>Job Title</label><input {...register('jobTitle')} disabled={isReadonly} /></div>
+          <div className="form-group"><label>Semester</label><input {...register('semester')} disabled={isReadonly} /></div>
+          <div className="form-group"><label>Employer</label><input {...register('employerName')} disabled={isReadonly} /></div>
+        </div>
         
         <p style={{ fontSize: '0.9rem', marginTop: '1rem', color: '#555' }}>
           <strong>Instructions:</strong> The immediate supervisor will evaluate the student objectively, comparing him/her with other students of comparable academic level or other personnel assigned the same or similarly classified jobs.
@@ -49,7 +51,7 @@ export default function CS420({ onSubmit, defaultValues, isReadonly }: FormSubmi
       {renderRadioGroup('abilityToLearn', '5. Ability to Learn', ['Learns very quickly', 'Learns readily', 'Average in learning', 'Rather slow to learn', 'Very slow to learn'])}
       {renderRadioGroup('qualityOfWork', '6. Quality of Work', ['Excellent', 'Very good', 'Average', 'Below average', 'Very poor'])}
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <div className="form-grid-2">
         {renderRadioGroup('attendance', '7. Attendance', ['Regular', 'Irregular'])}
         {renderRadioGroup('punctuality', '8. Punctuality', ['Regular', 'Irregular'])}
       </div>
