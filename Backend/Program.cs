@@ -8,10 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Data Source=localdev.db";
+    ?? throw new InvalidOperationException("DefaultConnection is not configured.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseNpgsql(connectionString));
 
 // Register centralized Mock Data Service
 builder.Services.AddScoped<Backend.Services.IMockDataService, Backend.Services.MockDataService>();
