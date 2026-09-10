@@ -1,9 +1,15 @@
 :root {
-  --bg-body: #f8fafc;
-  --text-main: #334155;
-  --text-heading: #0f172a;
+  /* Type */
+  --font-ui: 'Archivo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-display: 'Archivo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  /* Neutrals are tinted toward the SELU green rather than a generic blue-slate,
+     so the greys sit with the brand instead of fighting it. */
+  --bg-body: #f7f9f6;
+  --text-main: #3c4a42;
+  --text-heading: #10261c;
   --bg-card: #ffffff;
-  --border-card: #e2e8f0;
+  --border-card: #d9e1d7;
   --bg-form-section: #ffffff;
   --border-form-section: #005a3c;
   --text-form-section-h3: #005a3c;
@@ -15,6 +21,7 @@
   --bg-dynamic-row: #ffffff;
   --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
   --slu-green: #006039;
+  --slu-green-band: #1d6b3f;
   --slu-green-hover: #004b2b;
   --slu-gold: #fdb913;
   --slu-gold-hover: #e5a711;
@@ -25,11 +32,14 @@
 }
 
 [data-theme='dark'] {
-  --bg-body: #061c13; /* Very dark SLU green */
-  --text-main: #d1e8df; /* Soft minty text */
+  /* The page and the cards need a real gap between them, otherwise every
+     surface reads as one flat sheet of green. */
+  --bg-body: #04120c;
+  --bg-sunken: #071c13;
+  --text-main: #d1e8df;
   --text-heading: #f0fcf6;
-  --bg-card: #0a2d1f; /* Slightly lighter dark green */
-  --border-card: #144f36;
+  --bg-card: #0f2e21;
+  --border-card: #1e5039;
   --bg-form-section: #061c13;
   --border-form-section: #34d399; /* Emerald for contrast */
   --text-form-section-h3: #34d399;
@@ -50,10 +60,38 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.55;
   background-color: var(--bg-body);
   color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s, color 0.3s;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--text-heading);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+h1 { font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.6rem); font-weight: 800; }
+h2 { font-size: clamp(1.4rem, 1.15rem + 0.8vw, 1.8rem); font-weight: 750; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+
+*:focus-visible {
+  outline: 3px solid var(--slu-gold);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .layout-container {
@@ -76,13 +114,53 @@ body {
 .navbar-brand {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 1.25rem;
-  font-weight: bold;
 }
 
-.navbar-brand img {
-  height: 40px;
+/* Brand lockup: the mascot is the mark, the wordmark is set in type.
+   The wide illustrated banner is a hero asset and is never shrunk to nav size. */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  padding: 0.15rem 0.35rem;
+  border-radius: 8px;
+}
+
+.brand-mark {
+  height: 46px;
+  width: auto;
+  display: block;
+  /* Lifts the mascot off the dark green bar so the outline doesn't disappear. */
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+
+.brand-word {
+  display: flex;
+  flex-direction: column;
+  line-height: 0.95;
+  font-family: var(--font-display);
+}
+
+.brand-word-a {
+  font-size: 1.22rem;
+  font-weight: 800;
+  font-stretch: 92%;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.brand-word-b {
+  font-size: 1.02rem;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--slu-gold);
+}
+
+@media (max-width: 480px) {
+  .brand-word { display: none; }
 }
 
 .navbar-nav {
@@ -283,4 +361,600 @@ body {
   .dynamic-field-row > div {
     width: 100% !important;
   }
+}
+
+/* ------------------------------------------------------------------
+   Login
+   The illustrated banner is the one loud moment in the whole app.
+   Everything beside it stays quiet so it can carry the page.
+   ------------------------------------------------------------------ */
+
+/* Darken the artwork so the panel and controls stay readable on top of it. */
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: var(--slu-green);
+}
+
+/* The banner sits as a horizontal band across the middle, with a SELU
+   stripe above and below it, exactly as the university site frames a band. */
+.login-backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 0;
+}
+
+.login-backdrop-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Dims the middle so the panel reads, leaving the edges of the art visible. */
+.login-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 55% 65% at center,
+    rgba(3, 26, 17, 0.86) 0%,
+    rgba(3, 26, 17, 0.66) 45%,
+    rgba(3, 26, 17, 0.28) 100%
+  );
+}
+
+.login-panel,
+.login-theme-toggle {
+  position: relative;
+  z-index: 2;
+}
+
+.login-theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
+
+.login-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  width: 100%;
+  max-width: 940px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.login-hero {
+  background-color: var(--slu-green);
+  align-items: center;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2rem 1.75rem;
+}
+
+.login-mascot {
+  display: block;
+  width: 100%;
+  max-width: 230px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.login-hero-copy {
+  margin: 0;
+  color: #d7ecdf;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  max-width: 34ch;
+}
+
+.login-form-side {
+  padding: 2.5rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(2rem, 1.6rem + 1.4vw, 2.4rem);
+}
+
+.login-sub {
+  margin: 0 0 1.75rem;
+  color: var(--text-help);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  max-width: 34ch;
+}
+
+.login-submit {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1.5rem;
+}
+
+.login-error {
+  margin: -0.75rem 0 1rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  color: #7f1d1d;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+[data-theme='dark'] .login-error {
+  color: #fecaca;
+  background-color: #3f1414;
+  border-color: #7f1d1d;
+}
+
+.login-foot {
+  margin: 1.75rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-card);
+  color: var(--text-help);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.login-foot code {
+  font-size: 0.95em;
+  color: var(--text-main);
+  background-color: var(--bg-card-nested);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+@media (max-width: 860px) {
+  .login-page {
+    padding: 1rem;
+  }
+  .login-panel {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+  .login-hero {
+    padding: 1.5rem 1.25rem;
+    gap: 1rem;
+  }
+  .login-mascot {
+    max-width: 150px;
+  }
+  .login-hero-copy {
+    max-width: none;
+    font-size: 1rem;
+  }
+  .login-form-side {
+    padding: 1.75rem 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .login-page { padding: 0.6rem; }
+  .login-mascot { max-width: 116px; }
+  .login-hero { padding: 1.15rem 1rem; }
+  .login-form-side { padding: 1.5rem 1.15rem 1.75rem; }
+  .login-foot { font-size: 0.85rem; }
+  .login-foot code { word-break: break-all; }
+}
+
+/* ------------------------------------------------------------------
+   Form packet
+   These replace paper forms in a folder, so they're drawn as files in a
+   drawer: a tab carries the form number, the face carries the state.
+   ------------------------------------------------------------------ */
+
+.packet-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.packet-count {
+  color: var(--text-help);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.packet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 2rem 1.25rem;
+}
+
+.folder {
+  position: relative;
+  margin-top: 1.55rem;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 0 10px 10px 10px;
+  padding: 1.15rem 1.15rem 1.15rem;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.07);
+}
+
+.folder-tab {
+  position: absolute;
+  top: -1.55rem;
+  left: -1px;
+  height: 1.55rem;
+  padding: 0 0.9rem;
+  display: flex;
+  align-items: center;
+  background-color: var(--slu-green);
+  color: #ffffff;
+  border-radius: 8px 8px 0 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.folder-name {
+  margin: 0 0 0.9rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-heading);
+}
+
+.folder-state {
+  margin-bottom: 1rem;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-todo     { background-color: var(--status-todo-bg);     color: var(--status-todo-text); }
+.status-draft    { background-color: var(--status-draft-bg);    color: var(--status-draft-text); }
+.status-pending  { background-color: var(--status-pending-bg);  color: var(--status-pending-text); }
+.status-approved { background-color: var(--status-approved-bg); color: var(--status-approved-text); }
+
+.progress-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-help);
+  margin: 0.6rem 0 0.3rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: var(--border-card);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--slu-gold);
+  transition: width 0.3s ease;
+}
+
+.folder-action {
+  margin-top: auto;
+  width: 100%;
+  text-align: center;
+}
+
+/* Submitted forms table */
+
+.sub-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.sub-table th {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 2px solid var(--border-card);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-help);
+}
+
+.sub-table td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--border-card);
+}
+
+.sub-table tr:last-child td {
+  border-bottom: none;
+}
+
+.empty-state {
+  margin: 0;
+  color: var(--text-help);
+}
+
+/* Profile */
+
+.profile {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--slu-gold);
+  color: #1a1a1a;
+  font-weight: 800;
+  font-size: 1.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.profile-email {
+  margin: 0.35rem 0 0;
+  color: var(--text-help);
+  word-break: break-all;
+}
+
+.field-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  padding: 1rem;
+  border: 1px solid var(--border-card);
+  border-radius: 6px;
+  background-color: var(--bg-card-nested);
+}
+
+.field-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-help);
+  margin-bottom: 0.4rem;
+}
+
+.field-value {
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.field-value-muted {
+  color: var(--text-help);
+  font-style: italic;
+}
+
+.role-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.role {
+  padding: 0.25rem 0.75rem;
+  background-color: var(--slu-green);
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+[data-theme='dark'] .role {
+  background-color: #1b6345;
+}
+
+/* Site banner -- sits above the nav on every signed-in page. The band runs
+   full width in the same green as the artwork, so the two read as one strip. */
+
+.page-banner {
+  background-color: var(--slu-green);
+  display: flex;
+  justify-content: center;
+  padding: 0.6rem 1rem 0;
+  transition: background-color 0.3s;
+}
+
+.page-banner a {
+  display: block;
+  line-height: 0;
+  border-radius: 6px;
+}
+
+.page-banner img {
+  height: 104px;
+  width: auto;
+  max-width: 100%;
+  display: block;
+}
+
+@media (max-width: 700px) {
+  .page-banner img { height: 62px; }
+}
+
+
+/* ------------------------------------------------------------------
+   SELU section treatment
+   Green bands, gold display figures, and the green/gold stripe rule --
+   lifted from the university site so the app reads as part of it.
+   ------------------------------------------------------------------ */
+
+.stripes {
+  height: 26px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--slu-gold) 0, var(--slu-gold) 6px,
+    #1c5c38 6px, #1c5c38 10px
+  );
+}
+
+.band {
+  background-color: #1c5c38;
+  color: #ffffff;
+  padding: 3rem 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 10px;
+}
+
+.band h2 {
+  color: #ffffff;
+  text-align: center;
+  margin: 0 0 2.25rem;
+}
+
+.band-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2rem;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-figure {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 2rem + 2.4vw, 3.9rem);
+  font-weight: 800;
+  font-stretch: 78%;
+  line-height: 1;
+  color: var(--slu-gold);
+  margin-bottom: 0.85rem;
+}
+
+.stat p {
+  margin: 0 auto;
+  max-width: 30ch;
+  line-height: 1.5;
+  color: #e6f1ea;
+}
+
+@media (max-width: 700px) {
+  .band { padding: 2.25rem 1.25rem; }
+  .stripes { height: 18px; }
+}
+
+
+/* ------------------------------------------------------------------
+   SELU page furniture
+   Green/gold stripe rule and full-bleed green bands, matching the
+   university site. Light mode is a white page with green sections;
+   dark mode keeps the dark green throughout.
+   ------------------------------------------------------------------ */
+
+.stripe {
+  height: 34px;
+  flex-shrink: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--slu-gold) 0 7px,
+    var(--slu-green-band) 7px 14px
+  );
+}
+
+/* Thin version for use inside a page, between sections */
+.stripe-thin {
+  height: 20px;
+}
+
+.band {
+  background-color: var(--slu-green);
+  color: #ffffff;
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: background-color 0.3s;
+}
+
+.band h2,
+.band h3 {
+  color: #ffffff;
+}
+
+.band-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.band-title {
+  margin: 0 0 2.25rem;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+}
+
+.stat-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 2rem + 2.4vw, 3.9rem);
+  font-weight: 900;
+  font-stretch: 78%;
+  line-height: 1;
+  color: var(--slu-gold);
+  margin-bottom: 0.85rem;
+}
+
+.stat-copy {
+  margin: 0 auto;
+  max-width: 32ch;
+  color: #e4f0e9;
+  line-height: 1.55;
+}
+
+/* Sunken strip for grouping content on the white page */
+.sunken {
+  background-color: var(--bg-sunken);
+  transition: background-color 0.3s;
+}
+
+@media (max-width: 700px) {
+  .band { padding: 2.25rem 1.25rem; }
+  .stripe { height: 24px; }
+  .stripe-thin { height: 14px; }
 }
