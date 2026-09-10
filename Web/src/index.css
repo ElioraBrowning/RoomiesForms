@@ -790,27 +790,27 @@ h3 { font-size: 1.15rem; font-weight: 700; }
 
 .page-banner {
   background-color: var(--slu-green);
-  display: flex;
-  justify-content: center;
-  padding: 0.6rem 1rem 0;
   transition: background-color 0.3s;
 }
 
 .page-banner a {
   display: block;
   line-height: 0;
-  border-radius: 6px;
 }
 
+/* Full-bleed. The art is 2.5:1, so filling the width means cropping the
+   height; a centre crop keeps the lion and the wordmark and loses only
+   the folders above and the dust below. */
 .page-banner img {
-  height: 104px;
-  width: auto;
-  max-width: 100%;
   display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  object-position: center;
 }
 
 @media (max-width: 700px) {
-  .page-banner img { height: 62px; }
+  .page-banner img { height: 110px; }
 }
 
 
@@ -957,4 +957,213 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   .band { padding: 2.25rem 1.25rem; }
   .stripe { height: 24px; }
   .stripe-thin { height: 14px; }
+}
+
+/* Form validation feedback */
+
+.form-group input[aria-invalid='true'],
+.form-group select[aria-invalid='true'],
+.form-group textarea[aria-invalid='true'] {
+  border-color: #d14343;
+  background-color: rgba(209, 67, 67, 0.06);
+}
+
+.form-group input[aria-invalid='true']:focus,
+.form-group select[aria-invalid='true']:focus,
+.form-group textarea[aria-invalid='true']:focus {
+  border-color: #d14343;
+  box-shadow: 0 0 0 3px rgba(209, 67, 67, 0.22);
+}
+
+.form-errors {
+  margin-bottom: 2rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid #e0a3a3;
+  border-left: 4px solid #d14343;
+  border-radius: 6px;
+  background-color: #fdeded;
+  color: #7f1d1d;
+}
+
+.form-errors-title {
+  margin: 0 0 0.6rem;
+  font-weight: 700;
+}
+
+.form-errors ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.form-errors li {
+  margin-bottom: 0.25rem;
+}
+
+.form-errors-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
+  opacity: 0.85;
+}
+
+[data-theme='dark'] .form-errors {
+  background-color: #3a1414;
+  border-color: #7f1d1d;
+  border-left-color: #ef6060;
+  color: #fecaca;
+}
+
+/* Faculty review page */
+
+.review-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.review-head h1 {
+  margin: 0 0 0.35rem;
+}
+
+.review-meta {
+  margin: 0;
+  color: var(--text-help);
+}
+
+.status-rejected {
+  background-color: var(--status-rejected-bg);
+  color: var(--status-rejected-text);
+}
+
+.review-form {
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 0.5rem;
+  background-color: var(--bg-card-nested);
+}
+
+.flag-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 2rem 0 0.35rem;
+}
+
+.flag-count {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background-color: var(--status-rejected-bg);
+  color: var(--status-rejected-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.flag-hint {
+  margin-bottom: 1rem;
+}
+
+.flag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.flag-item {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border-card);
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  background-color: var(--bg-card-nested);
+}
+
+.flag-item-on {
+  border-left-color: #d14343;
+  background-color: var(--status-rejected-bg);
+}
+
+.flag-check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-label);
+}
+
+.flag-check input {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: #d14343;
+}
+
+.flag-field {
+  font-size: 0.95rem;
+}
+
+.flag-value {
+  margin: 0.3rem 0 0 1.75rem;
+  color: var(--text-help);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.flag-note {
+  margin-top: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-input);
+  border-radius: 5px;
+  background-color: var(--bg-input);
+  color: var(--text-input);
+  font-family: inherit;
+  font-size: 0.92rem;
+  box-sizing: border-box;
+}
+
+.review-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-card);
+}
+
+.btn-danger {
+  background-color: #d14343;
+  color: #ffffff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #b93636;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.review-notice {
+  margin: 1rem 0 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #86c9a4;
+  background-color: #e3f5ea;
+  color: #14532d;
+  font-size: 0.9rem;
+}
+
+[data-theme='dark'] .review-notice {
+  background-color: #12331f;
+  border-color: #2f6b47;
+  color: #a7e8c1;
 }

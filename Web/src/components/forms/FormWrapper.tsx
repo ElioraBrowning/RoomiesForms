@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
+import { labelFor } from './useValidatedForm';
 
 interface FormWrapperProps {
   children: React.ReactNode;
@@ -6,9 +7,10 @@ interface FormWrapperProps {
   onSubmit?: () => void;
   isReadonly?: boolean;
   getValues?: () => any;
+  errors?: Record<string, any>;
 }
 
-export function FormWrapper({ children, onSaveDraft, onSubmit, isReadonly, getValues }: FormWrapperProps) {
+export function FormWrapper({ children, onSaveDraft, onSubmit, isReadonly, getValues, errors }: FormWrapperProps) {
   const steps = React.Children.toArray(children).filter(
     (c): c is React.ReactElement => React.isValidElement(c) && (c.type === FormStep || (c.props as any).__isStep)
   );
@@ -74,8 +76,30 @@ export function FormWrapper({ children, onSaveDraft, onSubmit, isReadonly, getVa
     }
   }, [isReadonly, onSaveDraft, calculateProgress]);
 
+  const errorList = Object.entries(errors ?? {});
+
   return (
     <div className="card" onBlur={handleBlur}>
+      {!isReadonly && errorList.length > 0 && (
+        <div className="form-errors" role="alert">
+          <p className="form-errors-title">
+            {errorList.length === 1
+              ? 'One field needs attention before you can submit:'
+              : `${errorList.length} fields need attention before you can submit:`}
+          </p>
+          <ul>
+            {errorList.map(([field, err]) => (
+              <li key={field}>
+                <strong>{labelFor(field)}</strong>
+                {err?.message ? ` - ${err.message}` : ''}
+              </li>
+            ))}
+          </ul>
+          <p className="form-errors-hint">
+            Some of these may be in another section. Use Previous and Next to find them.
+          </p>
+        </div>
+      )}
       {totalSteps > 1 && (
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'var(--text-help)', fontSize: '0.9rem', fontWeight: 'bold' }}>
