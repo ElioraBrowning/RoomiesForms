@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useState, useRef } from 'react';
 import ThemeToggle from './ThemeToggle';
 import '../index.css';
+import banner from '../../brand/banner.png';
 
 export default function Layout() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -50,12 +51,13 @@ export default function Layout() {
 
   return (
     <div className="layout-container">
+      <div className="page-banner">
+        <Link to="/dashboard" aria-label="Roomie's Forms — go to dashboard">
+          <img src={banner} alt="Roomie's Forms" />
+        </Link>
+      </div>
+      <div className="stripes" />
       <header className="navbar">
-        <div className="navbar-brand">
-          <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <img src="/logo.png" alt="Roomie's Forms" style={{ height: '40px', width: 'auto' }} />
-          </Link>
-        </div>
         <nav className="navbar-nav">
           <Link to="/dashboard">Dashboard</Link>
           {user?.roles?.some(r => ['Faculty', 'External'].includes(r)) && (
@@ -116,9 +118,11 @@ export default function Layout() {
           </div>
         </nav>
       </header>
+      <div className="stripe" />
       <main className="main-content">
         <Outlet />
       </main>
+      <div className="stripe" />
     </div>
   );
 }
