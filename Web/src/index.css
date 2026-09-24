@@ -1244,11 +1244,6 @@ h3 { font-size: 1.15rem; font-weight: 700; }
    Mobile
    ================================================================== */
 
-.page-banner img {
-  height: clamp(110px, 13vw, 230px);
-  object-position: center 38%;
-}
-
 @media (max-width: 768px) {
   .main-content { padding: 1rem 0.85rem; }
 
@@ -1279,7 +1274,6 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   .navbar-nav { gap: 0.4rem; }
   .navbar-nav a, .navbar-nav button { padding: 0.5rem 0.65rem; font-size: 0.95rem; }
 
-  /* Buttons stack and go full width so they are easy to hit */
   .form-actions,
   .step-actions {
     display: flex;
@@ -1298,4 +1292,98 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   .form-section { padding: 0.9rem 0.7rem; }
   h1 { font-size: 1.5rem; }
   .btn { padding: 0.75rem 1rem; }
+}
+
+/* ==================================================================
+   Mobile login
+   The panel is taller than a phone screen, and .login-page combines
+   overflow:hidden with align-items:center - so the overflow went both
+   up and down, and the hidden overflow made the top unreachable. On
+   narrow screens the page scrolls normally instead.
+   ================================================================== */
+
+@media (max-width: 860px) {
+  .login-page {
+    align-items: flex-start;
+    overflow-x: hidden;
+    overflow-y: visible;
+    padding: 0;
+  }
+
+  /* Keep the artwork behind the panel while the page scrolls. */
+  .login-backdrop {
+    position: fixed;
+    inset: 0;
+  }
+
+  .login-page::after {
+    position: fixed;
+  }
+
+  .login-panel {
+    max-width: none;
+    margin: 4.25rem 0.75rem 1.5rem;
+    border-radius: 12px;
+  }
+
+  .login-theme-toggle {
+    position: fixed;
+    top: 0.85rem;
+    right: 0.85rem;
+  }
+
+  .login-hero {
+    padding: 1.35rem 1.15rem 1.15rem;
+    gap: 0.8rem;
+  }
+
+  .login-mascot {
+    max-width: 128px;
+  }
+
+  .login-hero-copy {
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .login-form-side {
+    padding: 1.5rem 1.15rem 1.65rem;
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+  }
+
+  .login-sub {
+    font-size: 0.98rem;
+    margin-bottom: 1.35rem;
+    max-width: none;
+  }
+
+  .login-foot {
+    margin-top: 1.35rem;
+    padding-top: 1rem;
+    font-size: 0.84rem;
+  }
+
+  /* Long addresses were breaking mid-word against the panel edge. */
+  .login-foot code {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 400px) {
+  .login-panel { margin: 4rem 0.5rem 1.25rem; }
+  .login-mascot { max-width: 108px; }
+  .login-hero { padding: 1.15rem 0.9rem 1rem; }
+  .login-form-side { padding: 1.3rem 0.9rem 1.5rem; }
+  .login-title { font-size: 1.6rem; }
+}
+
+/* Nothing should be able to push the page sideways. */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
 }
