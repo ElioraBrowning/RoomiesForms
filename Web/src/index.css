@@ -1167,3 +1167,135 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   border-color: #2f6b47;
   color: #a7e8c1;
 }
+/* ==================================================================
+   Form control fallback
+   Several forms put a bare <label> and <textarea> straight inside a
+   FormStep with no .form-group wrapper, so the width rule never reached
+   them and they rendered at the browser default of ~20 characters.
+   These rules style every control in a form section regardless of how
+   it is wrapped, so it cannot happen again.
+   ================================================================== */
+
+.form-section input:not([type='checkbox']):not([type='radio']),
+.form-section select,
+.form-section textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  min-height: 44px;
+  background-color: var(--bg-input);
+  color: var(--text-input);
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
+}
+
+.form-section textarea {
+  display: block;
+  min-height: 110px;
+  resize: vertical;
+}
+
+.form-section input:not([type='checkbox']):not([type='radio']):focus,
+.form-section select:focus,
+.form-section textarea:focus {
+  outline: none;
+  border-color: var(--slu-green);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
+}
+
+.form-section input:disabled,
+.form-section select:disabled,
+.form-section textarea:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* Bare labels are inline by default, which is why long question text
+   wrapped around the box instead of sitting above it. */
+.form-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-label);
+  line-height: 1.45;
+}
+
+.form-section label + input,
+.form-section label + select,
+.form-section label + textarea {
+  margin-top: 0.15rem;
+}
+
+/* Checkbox and radio rows keep their own layout via inline styles,
+   but need the shared sizing. */
+.form-section input[type='checkbox'],
+.form-section input[type='radio'] {
+  width: 1.15rem;
+  height: 1.15rem;
+  min-height: 0;
+  flex-shrink: 0;
+  accent-color: var(--slu-green);
+}
+
+/* ==================================================================
+   Mobile
+   ================================================================== */
+
+.page-banner img {
+  height: clamp(110px, 13vw, 230px);
+  object-position: center 38%;
+}
+
+@media (max-width: 768px) {
+  .main-content { padding: 1rem 0.85rem; }
+
+  .card { padding: 1.15rem 0.9rem; border-radius: 10px; }
+  .form-section { padding: 1.1rem 0.85rem; }
+
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.3rem; }
+
+  /* Tables scroll inside the card instead of pushing the page sideways */
+  .card table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .packet-grid { grid-template-columns: 1fr; gap: 1.75rem 1rem; }
+
+  .review-head { flex-direction: column; align-items: flex-start; }
+  .review-actions { flex-direction: column; }
+  .review-actions .btn { width: 100%; }
+
+  .flag-value { margin-left: 0; }
+
+  .navbar { padding: 0.85rem 0.9rem; }
+  .navbar-nav { gap: 0.4rem; }
+  .navbar-nav a, .navbar-nav button { padding: 0.5rem 0.65rem; font-size: 0.95rem; }
+
+  /* Buttons stack and go full width so they are easy to hit */
+  .form-actions,
+  .step-actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.6rem;
+  }
+  .form-actions .btn,
+  .step-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .main-content { padding: 0.85rem 0.6rem; }
+  .card { padding: 1rem 0.75rem; }
+  .form-section { padding: 0.9rem 0.7rem; }
+  h1 { font-size: 1.5rem; }
+  .btn { padding: 0.75rem 1rem; }
+}
