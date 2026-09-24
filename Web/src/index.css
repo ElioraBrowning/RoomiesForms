@@ -1382,8 +1382,35 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   .login-title { font-size: 1.6rem; }
 }
 
-/* Nothing should be able to push the page sideways. */
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
+/* Nothing should push the page sideways on a phone. Scoped to narrow
+   screens deliberately: overflow-x on html/body breaks position:sticky
+   in descendants, and there is no reason to carry that risk on desktop. */
+@media (max-width: 860px) {
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+/* On a phone the banner's own 2.5:1 shape leaves it a thin strip floating
+   mid-screen. Let it fill the viewport behind the panel instead, with the
+   stripes framing the very top and bottom edges. */
+
+@media (max-width: 860px) {
+  .login-backdrop {
+    justify-content: stretch;
+  }
+
+  .login-backdrop .stripe {
+    height: 20px;
+  }
+
+  .login-backdrop-img {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    object-position: 62% center;
+  }
 }
