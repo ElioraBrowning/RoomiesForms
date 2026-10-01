@@ -1490,16 +1490,23 @@ h3 { font-size: 1.15rem; font-weight: 700; }
 .login-seal {
   display: block;
   /* Height only, never width - the 900x218 lockup keeps its 4.13:1 ratio. */
-  height: 64px;
+  height: 76px;
   width: auto;
-  /* The form side is a flex column, which defaults to align-items: stretch.
-     Without this the logo is pulled to the full column width while its height
-     stays fixed, squashing it. */
-  align-self: flex-start;
+  /* The form side is a flex column, which defaults to align-items: stretch;
+     without an explicit align-self the logo is pulled to the full column
+     width while its height stays fixed, squashing it. */
+  align-self: center;
   flex-shrink: 0;
-  margin-bottom: 1.6rem;
+  /* The wordmark is dark green. On the dark-mode panel that is 1.69 contrast
+     - unreadable - and the brand guide specifies the three-colour logo for
+     light backgrounds, so it gets its own white plate. */
+  background-color: #ffffff;
+  padding: 0.75rem 1.1rem;
+  border-radius: 10px;
+  box-sizing: content-box;
+  margin-bottom: 1.75rem;
 }
 
 @media (max-width: 860px) {
-  .login-seal { height: 48px; margin-bottom: 1.25rem; }
+  .login-seal { height: 56px; padding: 0.6rem 0.9rem; margin-bottom: 1.4rem; }
 }
