@@ -60,14 +60,6 @@ export default function Layout() {
             height={218}
           />
           <Link to="/dashboard" className="site-head-app" aria-label="Roomie's Forms — go to dashboard">
-            <img
-              className="site-head-lion"
-              src="/brand/lion-96.webp"
-              srcSet="/brand/lion-96.webp 1x, /brand/lion-192.webp 2x"
-              alt=""
-              width={96}
-              height={112}
-            />
             <span className="site-head-app-name">Roomie&rsquo;s Forms</span>
           </Link>
         </div>

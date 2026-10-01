@@ -469,6 +469,8 @@ h3 { font-size: 1.15rem; font-weight: 700; }
 
 .login-mascot {
   display: block;
+  align-self: center;
+  flex-shrink: 0;
   width: 100%;
   max-width: 230px;
   height: auto;
@@ -1489,6 +1491,11 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   display: block;
   height: 44px;
   width: auto;
+  /* The form side is a flex column, which defaults to align-items: stretch.
+     Without this the logo is pulled to the full column width while its height
+     stays at 44px, squashing it. */
+  align-self: flex-start;
+  flex-shrink: 0;
   margin-bottom: 1.5rem;
 }
 
