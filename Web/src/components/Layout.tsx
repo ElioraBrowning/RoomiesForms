@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useState, useRef } from 'react';
 import ThemeToggle from './ThemeToggle';
 import '../index.css';
-import banner from '../../brand/banner.png';
 
 export default function Layout() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -51,10 +50,27 @@ export default function Layout() {
 
   return (
     <div className="layout-container">
-      <div className="page-banner">
-        <Link to="/dashboard" aria-label="Roomie's Forms — go to dashboard">
-          <img src={banner} alt="Roomie's Forms" />
-        </Link>
+      <div className="site-head">
+        <div className="site-head-inner">
+          <img
+            className="site-head-seal"
+            src="/brand/selu-logo.png"
+            alt="Southeastern Louisiana University"
+            width={900}
+            height={218}
+          />
+          <Link to="/dashboard" className="site-head-app" aria-label="Roomie's Forms — go to dashboard">
+            <img
+              className="site-head-lion"
+              src="/brand/lion-96.webp"
+              srcSet="/brand/lion-96.webp 1x, /brand/lion-192.webp 2x"
+              alt=""
+              width={96}
+              height={112}
+            />
+            <span className="site-head-app-name">Roomie&rsquo;s Forms</span>
+          </Link>
+        </div>
       </div>
       <div className="stripes" />
       <header className="navbar">
