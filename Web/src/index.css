@@ -405,6 +405,12 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   z-index: 0;
 }
 
+.login-backdrop-fill {
+  flex: 1;
+  min-height: 0;
+  background-color: var(--slu-green);
+}
+
 .login-backdrop-img {
   display: block;
   width: 100%;
@@ -799,29 +805,81 @@ h3 { font-size: 1.15rem; font-weight: 700; }
 /* Site banner -- sits above the nav on every signed-in page. The band runs
    full width in the same green as the artwork, so the two read as one strip. */
 
-.page-banner {
-  background-color: var(--slu-green);
+/* ------------------------------------------------------------------
+   Site header
+   Carries the official SELU horizontal lockup. The three-colour logo is
+   specified for light backgrounds only: its wordmark green is the same
+   green as the navbar, so on green it is literally invisible (contrast
+   1.00). Hence the white band - not a style choice, a brand constraint.
+   ------------------------------------------------------------------ */
+
+.site-head {
+  background-color: #ffffff;
   transition: background-color 0.3s;
 }
 
-.page-banner a {
-  display: block;
-  line-height: 0;
+/* Softened at night so it is not a white slab above a dark page, while
+   staying light enough for the three-colour logo. */
+[data-theme='dark'] .site-head {
+  background-color: #e9ede8;
 }
 
-/* Full-bleed. The art is 2.5:1, so filling the width means cropping the
-   height; a centre crop keeps the lion and the wordmark and loses only
-   the folders above and the dust below. */
-.page-banner img {
-  display: block;
-  width: 100%;
-  height: 190px;
-  object-fit: cover;
-  object-position: center;
+.site-head-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.85rem 2rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
 }
 
-@media (max-width: 700px) {
-  .page-banner img { height: 110px; }
+.site-head-seal {
+  display: block;
+  height: 54px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.site-head-app {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  padding: 0.25rem 0.4rem;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.site-head-lion {
+  height: 46px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+.site-head-app-name {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: #1a5632;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .site-head-inner { padding: 0.7rem 1rem; gap: 1rem; }
+  .site-head-seal { height: 40px; }
+  .site-head-lion { height: 36px; }
+  .site-head-app-name { font-size: 1.08rem; }
+}
+
+@media (max-width: 460px) {
+  .site-head-seal { height: 32px; }
+  .site-head-lion { height: 30px; }
+  .site-head-app-name { display: none; }
 }
 
 
@@ -1424,4 +1482,16 @@ h3 { font-size: 1.15rem; font-weight: 700; }
     object-fit: cover;
     object-position: 62% center;
   }
+}
+
+/* The official lockup sits on the login panel's light side, above the form. */
+.login-seal {
+  display: block;
+  height: 44px;
+  width: auto;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 860px) {
+  .login-seal { height: 36px; margin-bottom: 1.15rem; }
 }

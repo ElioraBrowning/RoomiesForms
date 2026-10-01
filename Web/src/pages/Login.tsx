@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
 import '../index.css';
-import banner from '../../brand/banner.png';
-import icon from '../../brand/icon.png';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -42,10 +40,10 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      {/* Backdrop: the banner as a horizontal band, bracketed by SELU stripes. */}
+      {/* Backdrop: SELU green bracketed by the brand stripe, top and bottom. */}
       <div className="login-backdrop" aria-hidden="true">
         <div className="stripe" />
-        <img className="login-backdrop-img" src={banner} alt="" />
+        <div className="login-backdrop-fill" />
         <div className="stripe" />
       </div>
 
@@ -55,7 +53,14 @@ export default function Login() {
 
       <div className="login-panel">
         <div className="login-hero">
-          <img className="login-mascot" src={icon} alt="Roomie's Forms" />
+          <img
+            className="login-mascot"
+            src="/brand/lion-192.webp"
+            srcSet="/brand/lion-192.webp 1x, /brand/lion-420.webp 2x"
+            alt=""
+            width={192}
+            height={224}
+          />
           <p className="login-hero-copy">
             Every CS internship form in one place. Start one, save a draft, and watch it move
             through faculty review.
@@ -63,6 +68,13 @@ export default function Login() {
         </div>
 
         <div className="login-form-side">
+          <img
+            className="login-seal"
+            src="/brand/selu-logo.png"
+            alt="Southeastern Louisiana University"
+            width={900}
+            height={218}
+          />
           <h1 className="login-title">Sign in</h1>
           <p className="login-sub">
             Use your Southeastern email. No password needed while we're testing.
