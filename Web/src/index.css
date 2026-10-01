@@ -11,8 +11,8 @@
   --bg-card: #ffffff;
   --border-card: #d9e1d7;
   --bg-form-section: #ffffff;
-  --border-form-section: #005a3c;
-  --text-form-section-h3: #005a3c;
+  --border-form-section: #1a5632;
+  --text-form-section-h3: #1a5632;
   --bg-input: #ffffff;
   --border-input: #cbd5e1;
   --text-input: #0f172a;
@@ -20,11 +20,19 @@
   --text-help: #64748b;
   --bg-dynamic-row: #ffffff;
   --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
-  --slu-green: #006039;
-  --slu-green-band: #1d6b3f;
-  --slu-green-hover: #004b2b;
-  --slu-gold: #fdb913;
-  --slu-gold-hover: #e5a711;
+  /* Official SELU brand colors, from the university brand guide:
+     Green = Pantone 357 / #1A5632, Gold = Pantone 123 / #FFC629.
+     The -hover and -band values are darkened/lightened from those two. */
+  --slu-green: #1a5632;
+  --slu-green-band: #226c40;
+  --slu-green-hover: #144327;
+  --slu-gold: #ffc629;
+  --slu-gold-hover: #e3b024;
+  /* Official secondary accents, for status and accent use only */
+  --slu-mint: #6cca98;
+  --slu-dark-gold: #cb9700;
+  --slu-salmon: #ea6852;
+  --slu-orange: #e07c00;
   --btn-secondary-bg: #e2e8f0;
   --btn-secondary-hover: #cbd5e1;
   --btn-secondary-text: #333;
@@ -41,8 +49,8 @@
   --bg-card: #0f2e21;
   --border-card: #1e5039;
   --bg-form-section: #061c13;
-  --border-form-section: #34d399; /* Emerald for contrast */
-  --text-form-section-h3: #34d399;
+  --border-form-section: #6cca98; /* Official SELU mint */
+  --text-form-section-h3: #6cca98;
   --bg-input: #061c13;
   --border-input: #1b6345;
   --text-input: #f0fcf6;
@@ -50,8 +58,11 @@
   --text-help: #87bfa3;
   --bg-dynamic-row: #0a2d1f;
   --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-  --slu-green: #032b1d; /* Even darker for navbar in dark mode to blend in nicely */
-  --slu-green-hover: #021a11;
+  /* Dark mode drops the official green nearly to black for the nav so it
+     recedes; the stripe keeps a true green so gold still reads against it. */
+  --slu-green: #081b10;
+  --slu-green-band: #15452a;
+  --slu-green-hover: #05120a;
   --btn-secondary-bg: #144f36;
   --btn-secondary-hover: #1b6345;
   --btn-secondary-text: #e2f2eb;
@@ -291,7 +302,7 @@ h3 { font-size: 1.15rem; font-weight: 700; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
   outline: none;
   border-color: var(--slu-green);
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
+  box-shadow: 0 0 0 3px rgba(108, 202, 152, 0.3);
 }
 
 .help-text {
@@ -1204,7 +1215,7 @@ h3 { font-size: 1.15rem; font-weight: 700; }
 .form-section textarea:focus {
   outline: none;
   border-color: var(--slu-green);
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
+  box-shadow: 0 0 0 3px rgba(108, 202, 152, 0.3);
 }
 
 .form-section input:disabled,
