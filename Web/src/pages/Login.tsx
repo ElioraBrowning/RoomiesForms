@@ -55,11 +55,11 @@ export default function Login() {
         <div className="login-hero">
           <img
             className="login-mascot"
-            src="/brand/lion-192.webp"
-            srcSet="/brand/lion-192.webp 1x, /brand/lion-420.webp 2x"
+            src="/brand/mascot-230.webp"
+            srcSet="/brand/mascot-230.webp 1x, /brand/mascot-460.webp 2x"
             alt=""
-            width={192}
-            height={224}
+            width={230}
+            height={287}
           />
           <p className="login-hero-copy">
             Every CS internship form in one place. Start one, save a draft, and watch it move
