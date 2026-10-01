@@ -1489,16 +1489,17 @@ h3 { font-size: 1.15rem; font-weight: 700; }
 /* The official lockup sits on the login panel's light side, above the form. */
 .login-seal {
   display: block;
-  height: 44px;
+  /* Height only, never width - the 900x218 lockup keeps its 4.13:1 ratio. */
+  height: 64px;
   width: auto;
   /* The form side is a flex column, which defaults to align-items: stretch.
      Without this the logo is pulled to the full column width while its height
-     stays at 44px, squashing it. */
+     stays fixed, squashing it. */
   align-self: flex-start;
   flex-shrink: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.6rem;
 }
 
 @media (max-width: 860px) {
-  .login-seal { height: 36px; margin-bottom: 1.15rem; }
+  .login-seal { height: 48px; margin-bottom: 1.25rem; }
 }
