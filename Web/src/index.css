@@ -431,17 +431,16 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   );
 }
 
-.login-panel,
-.login-theme-toggle {
+.login-panel {
   position: relative;
   z-index: 2;
 }
 
 .login-theme-toggle {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 2;
+  top: calc(34px + 1.25rem);
+  right: 2rem;
+  z-index: 10;
 }
 
 .login-panel {
@@ -808,80 +807,57 @@ h3 { font-size: 1.15rem; font-weight: 700; }
    full width in the same green as the artwork, so the two read as one strip. */
 
 /* ------------------------------------------------------------------
-   Site header
-   Carries the official SELU horizontal lockup. The three-colour logo is
-   specified for light backgrounds only: its wordmark green is the same
-   green as the navbar, so on green it is literally invisible (contrast
-   1.00). Hence the white band - not a style choice, a brand constraint.
+   Navbar Branding (Integrated University Seal & App Lockup)
    ------------------------------------------------------------------ */
 
-.site-head {
-  background-color: #ffffff;
-  transition: background-color 0.3s;
-}
-
-/* Softened at night so it is not a white slab above a dark page, while
-   staying light enough for the three-colour logo. */
-[data-theme='dark'] .site-head {
-  background-color: #e9ede8;
-}
-
-.site-head-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.85rem 2rem;
-  box-sizing: border-box;
+.navbar-brand-link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.site-head-seal {
-  display: block;
-  height: 54px;
-  width: auto;
-  flex-shrink: 0;
-}
-
-.site-head-app {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
+  gap: 1.1rem;
   text-decoration: none;
-  padding: 0.25rem 0.4rem;
-  border-radius: 8px;
-  min-width: 0;
+  color: #ffffff;
+  transition: opacity 0.2s;
 }
 
-.site-head-lion {
-  height: 46px;
-  width: auto;
+.navbar-brand-link:hover {
+  opacity: 0.92;
+}
+
+.navbar-seal {
   display: block;
+  height: 44px;
+  width: auto;
   flex-shrink: 0;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
 }
 
-.site-head-app-name {
+.navbar-brand-divider {
+  display: inline-block;
+  width: 1.5px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.navbar-app-name {
   font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  color: #1a5632;
+  color: var(--slu-gold);
   white-space: nowrap;
 }
 
-@media (max-width: 760px) {
-  .site-head-inner { padding: 0.7rem 1rem; gap: 1rem; }
-  .site-head-seal { height: 40px; }
-  .site-head-lion { height: 36px; }
-  .site-head-app-name { font-size: 1.08rem; }
+@media (max-width: 860px) {
+  .navbar-seal { height: 38px; }
+  .navbar-app-name { font-size: 1.15rem; }
+  .navbar-brand-link { gap: 0.75rem; }
 }
 
-@media (max-width: 460px) {
-  .site-head-seal { height: 32px; }
-  .site-head-lion { height: 30px; }
-  .site-head-app-name { display: none; }
+@media (max-width: 600px) {
+  .navbar-seal { height: 30px; }
+  .navbar-brand-divider { height: 20px; }
+  .navbar-app-name { font-size: 1rem; }
 }
 
 
@@ -1399,8 +1375,9 @@ h3 { font-size: 1.15rem; font-weight: 700; }
 
   .login-theme-toggle {
     position: fixed;
-    top: 0.85rem;
-    right: 0.85rem;
+    top: calc(24px + 0.85rem);
+    right: 1.25rem;
+    z-index: 10;
   }
 
   .login-hero {
@@ -1486,27 +1463,54 @@ h3 { font-size: 1.15rem; font-weight: 700; }
   }
 }
 
-/* The official lockup sits on the login panel's light side, above the form. */
+/* Login page hero seal and form brand elements */
+.login-hero-seal {
+  display: block;
+  height: 54px;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+.login-form-header {
+  margin-bottom: 1.25rem;
+}
+
+.login-app-badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--slu-green);
+  background-color: rgba(26, 86, 50, 0.08);
+  border: 1px solid rgba(26, 86, 50, 0.22);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+}
+
+[data-theme='dark'] .login-app-badge {
+  color: var(--slu-gold);
+  background-color: rgba(255, 198, 41, 0.12);
+  border-color: rgba(255, 198, 41, 0.3);
+}
+
 .login-seal {
   display: block;
-  /* Height only, never width - the 900x218 lockup keeps its 4.13:1 ratio. */
-  height: 76px;
+  height: 60px;
   width: auto;
-  /* The form side is a flex column, which defaults to align-items: stretch;
-     without an explicit align-self the logo is pulled to the full column
-     width while its height stays fixed, squashing it. */
   align-self: center;
   flex-shrink: 0;
-  /* The wordmark is dark green. On the dark-mode panel that is 1.69 contrast
-     - unreadable - and the brand guide specifies the three-colour logo for
-     light backgrounds, so it gets its own white plate. */
-  background-color: #ffffff;
-  padding: 0.75rem 1.1rem;
-  border-radius: 10px;
-  box-sizing: content-box;
-  margin-bottom: 1.75rem;
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 1.5rem;
 }
 
 @media (max-width: 860px) {
-  .login-seal { height: 56px; padding: 0.6rem 0.9rem; margin-bottom: 1.4rem; }
+  .login-hero-seal { height: 42px; }
+  .login-seal { height: 48px; margin-bottom: 1rem; }
 }

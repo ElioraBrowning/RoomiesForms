@@ -2,6 +2,7 @@ import { Outlet, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState, useRef } from 'react';
 import ThemeToggle from './ThemeToggle';
+import { getInitials } from '../utils/user';
 import '../index.css';
 
 export default function Layout() {
@@ -42,36 +43,30 @@ export default function Layout() {
     return <Navigate to="/login" replace />;
   }
 
-  const getInitials = (name: string) => {
-    const parts = name.trim().split(' ');
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return name.substring(0, 2).toUpperCase();
-  };
-
   return (
     <div className="layout-container">
-      <div className="site-head">
-        <div className="site-head-inner">
-          <img
-            className="site-head-seal"
-            src="/brand/selu-logo.png"
-            alt="Southeastern Louisiana University"
-            width={900}
-            height={218}
-          />
-          <Link to="/dashboard" className="site-head-app" aria-label="Roomie's Forms — go to dashboard">
-            <span className="site-head-app-name">Roomie&rsquo;s Forms</span>
-          </Link>
-        </div>
-      </div>
       <div className="stripes" />
       <header className="navbar">
+        <div className="navbar-brand">
+          <Link to="/dashboard" className="navbar-brand-link" aria-label="Roomie's Forms — go to dashboard">
+            <img
+              className="navbar-seal"
+              src="/brand/selu-logo-white.png"
+              alt="Southeastern Louisiana University"
+              width={900}
+              height={218}
+            />
+            <span className="navbar-brand-divider" aria-hidden="true" />
+            <span className="navbar-app-name">Roomie&rsquo;s Forms</span>
+          </Link>
+        </div>
+
         <nav className="navbar-nav">
           <Link to="/dashboard">Dashboard</Link>
-          {user?.roles?.some(r => ['Faculty', 'External'].includes(r)) && (
+          {user?.roles?.some(r => ['Faculty', 'External', 'Department Head'].includes(r)) && (
             <Link to="/forms/builder">Form Builder</Link>
           )}
-          <div style={{ marginRight: '1rem' }}>
+          <div className="navbar-theme-toggle">
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
           </div>
           
@@ -85,7 +80,7 @@ export default function Layout() {
               }}
               title="User Profile"
             >
-              {getInitials(user?.fullName || 'User')}
+              {getInitials(user?.fullName, user?.email)}
             </button>
             
             {dropdownOpen && (

@@ -11,10 +11,30 @@ public class MockDataService : IMockDataService
         var isFaculty = email.Equals("galkadi@selu.edu", StringComparison.OrdinalIgnoreCase);
         var isDeptHead = email.Equals("bonnie.achee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
 
-        var fullName = "Test User";
-        if (isFaculty) fullName = "Dr. Ghassan Alkadi";
-        else if (isDeptHead) fullName = "Dr. Bonnie Achée";
-        else if (email.Equals("eliora.browning@selu.edu", StringComparison.OrdinalIgnoreCase)) fullName = "Eliora Browning";
+        string fullName;
+        if (isFaculty)
+        {
+            fullName = "Dr. Ghassan Alkadi";
+        }
+        else if (isDeptHead)
+        {
+            fullName = "Dr. Bonnie Achée";
+        }
+        else if (email.Equals("eliora.browning@selu.edu", StringComparison.OrdinalIgnoreCase))
+        {
+            fullName = "Eliora Browning";
+        }
+        else
+        {
+            var prefix = email.Split('@')[0];
+            var cleanPrefix = System.Text.RegularExpressions.Regex.Replace(prefix, @"[-_]?\d+$", "");
+            var parts = cleanPrefix.Split('.', '-', '_')
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .Select(p => char.ToUpper(p[0]) + p.Substring(1).ToLower())
+                .ToList();
+
+            fullName = parts.Count > 0 ? string.Join(" ", parts) : "Test User";
+        }
 
         var user = new User
         {

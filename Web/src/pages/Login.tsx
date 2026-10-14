@@ -54,6 +54,13 @@ export default function Login() {
       <div className="login-panel">
         <div className="login-hero">
           <img
+            className="login-hero-seal"
+            src="/brand/selu-logo-white.png"
+            alt="Southeastern Louisiana University"
+            width={900}
+            height={218}
+          />
+          <img
             className="login-mascot"
             src="/brand/lion-192.webp"
             srcSet="/brand/lion-192.webp 1x, /brand/lion-420.webp 2x"
@@ -68,17 +75,13 @@ export default function Login() {
         </div>
 
         <div className="login-form-side">
-          <img
-            className="login-seal"
-            src="/brand/selu-logo.png"
-            alt="Southeastern Louisiana University"
-            width={900}
-            height={218}
-          />
-          <h1 className="login-title">Sign in</h1>
-          <p className="login-sub">
-            Use your Southeastern email. No password needed while we're testing.
-          </p>
+          <div className="login-form-header">
+            <span className="login-app-badge">Roomie&rsquo;s Forms</span>
+            <h1 className="login-title">Sign in</h1>
+            <p className="login-sub">
+              Use your Southeastern email. No password needed while we're testing.
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} noValidate>
             <div className="form-group">

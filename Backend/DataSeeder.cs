@@ -11,7 +11,11 @@ public static class DataSeeder
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        if (context.Database.IsRelational())
+        if (context.Database.IsSqlite())
+        {
+            await context.Database.EnsureCreatedAsync();
+        }
+        else if (context.Database.IsRelational())
         {
             await context.Database.MigrateAsync();
         }

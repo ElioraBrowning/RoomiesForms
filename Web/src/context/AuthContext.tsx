@@ -18,16 +18,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
   useEffect(() => {
-    // Optionally fetch user profile with token on mount, for now just trust the token exists
     if (token) {
-      // In a real app we'd decode the JWT or call /api/me
       const savedUser = localStorage.getItem('user');
       if (savedUser && savedUser !== 'undefined') {
         try {
           setUser(JSON.parse(savedUser));
+          return;
         } catch (e) {
           console.error('Failed to parse user from local storage');
         }
+      }
+
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const roles = payload.role
+          ? (Array.isArray(payload.role) ? payload.role : [payload.role])
+          : [];
+        const restoredUser: User = {
+          email: payload.email || '',
+          fullName: payload.name || payload.unique_name || 'User',
+          wNumber: payload.wNumber || '',
+          roles
+        };
+        setUser(restoredUser);
+        localStorage.setItem('user', JSON.stringify(restoredUser));
+      } catch (e) {
+        console.error('Failed to decode token on mount', e);
       }
     }
   }, [token]);
@@ -35,17 +51,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string) => {
     try {
       const res = await api.post('/auth/login', { email });
-      const { token } = res.data;
+      const { token, user: apiUser } = res.data;
       setToken(token);
       localStorage.setItem('token', token);
       
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      setUser({
-        email: payload.email,
-        fullName: payload.name,
-        wNumber: payload.wNumber,
-        roles: Array.isArray(payload.role) ? payload.role : [payload.role]
-      });
+      let userData: User;
+      if (apiUser) {
+        userData = {
+          email: apiUser.email || email,
+          fullName: apiUser.fullName || 'User',
+          wNumber: apiUser.wNumber || '',
+          roles: Array.isArray(apiUser.roles) ? apiUser.roles : []
+        };
+      } else {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const roles = payload.role
+          ? (Array.isArray(payload.role) ? payload.role : [payload.role])
+          : [];
+        userData = {
+          email: payload.email || email,
+          fullName: payload.name || payload.unique_name || 'User',
+          wNumber: payload.wNumber || '',
+          roles
+        };
+      }
+
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
       console.error('Login failed', error);
       throw error;

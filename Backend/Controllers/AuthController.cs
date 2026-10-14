@@ -34,38 +34,53 @@ public class AuthController : ControllerBase
         
         if (user == null)
         {
-            // Fallback to Mock Data Service when user is not found in database
             user = await _mockDataService.GetMockUserAsync(request.Email);
-            
-            var isFaculty = request.Email.Equals("galkadi@selu.edu", StringComparison.OrdinalIgnoreCase);
-            if (isFaculty)
-            {
-                var facultyRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Faculty");
-                if (facultyRole != null)
-                {
-                    user.UserRoles.Add(new Entities.UserRole { RoleId = facultyRole.Id });
-                }
-            }
-
-            var isDeptHead = request.Email.Equals("bonnie.achee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
-            if (isDeptHead)
-            {
-                var deptHeadRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Department Head");
-                if (deptHeadRole != null)
-                {
-                    user.UserRoles.Add(new Entities.UserRole { RoleId = deptHeadRole.Id });
-                }
-            }
-
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
         }
+        else
+        {
+            var mockUser = await _mockDataService.GetMockUserAsync(request.Email);
+            if ((user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)) && mockUser.FullName != "Test User")
+            {
+                user.FullName = mockUser.FullName;
+            }
+        }
+
+        var isFaculty = request.Email.Equals("galkadi@selu.edu", StringComparison.OrdinalIgnoreCase);
+        if (isFaculty && !user.UserRoles.Any(ur => ur.Role?.Name == "Faculty"))
+        {
+            var facultyRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Faculty");
+            if (facultyRole == null)
+            {
+                facultyRole = new Entities.Role { Name = "Faculty" };
+                _context.Roles.Add(facultyRole);
+                await _context.SaveChangesAsync();
+            }
+            user.UserRoles.Add(new Entities.UserRole { RoleId = facultyRole.Id });
+        }
+
+        var isDeptHead = request.Email.Equals("bonnie.achee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
+        if (isDeptHead && !user.UserRoles.Any(ur => ur.Role?.Name == "Department Head"))
+        {
+            var deptHeadRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Department Head");
+            if (deptHeadRole == null)
+            {
+                deptHeadRole = new Entities.Role { Name = "Department Head" };
+                _context.Roles.Add(deptHeadRole);
+                await _context.SaveChangesAsync();
+            }
+            user.UserRoles.Add(new Entities.UserRole { RoleId = deptHeadRole.Id });
+        }
+
+        await _context.SaveChangesAsync();
 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.FullName)
+            new Claim(ClaimTypes.Name, user.FullName),
+            new Claim("name", user.FullName),
+            new Claim("wNumber", user.WNumber)
         };
 
         foreach (var ur in user.UserRoles)

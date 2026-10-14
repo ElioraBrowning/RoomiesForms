@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import { getInitials } from '../utils/user';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -14,7 +15,7 @@ export default function Profile() {
             border: 'none', fontWeight: 'bold', fontSize: '2rem', display: 'flex', 
             alignItems: 'center', justifyContent: 'center'
           }}>
-            {user?.fullName?.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) || 'U'}
+            {getInitials(user?.fullName, user?.email)}
           </div>
           <div>
             <h2 style={{ margin: 0, color: 'var(--text-heading)' }}>{user?.fullName}</h2>
