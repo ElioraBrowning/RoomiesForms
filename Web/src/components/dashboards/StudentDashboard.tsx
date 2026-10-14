@@ -51,12 +51,40 @@ export default function StudentDashboard() {
         ) : (
           <div className="grid">
             {forms.map(f => {
-              const draft = submissions.find(s => s.formTitle === f.title && s.status === 'Draft');
+              const draft = submissions.find(s => (s.formId === f.id || s.formTitle === f.title) && s.status === 'Draft');
+              const rejected = submissions.find(s => (s.formId === f.id || s.formTitle === f.title) && s.status === 'Rejected');
+              const pending = submissions.find(s => (s.formId === f.id || s.formTitle === f.title) && s.status === 'Pending');
+              const completed = submissions.find(s => (s.formId === f.id || s.formTitle === f.title) && s.status === 'Completed');
               const progress = draft?.progress || 0;
+
               return (
                 <div key={f.id} className="nested-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-heading)' }}>{f.title}</h3>
-                  {progress > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, color: 'var(--text-heading)' }}>{f.title}</h3>
+                    {rejected && (
+                      <span className="status status-rejected" style={{ fontSize: '0.75rem' }}>
+                        Changes Requested
+                      </span>
+                    )}
+                    {!rejected && pending && (
+                      <span className="status status-pending" style={{ fontSize: '0.75rem' }}>
+                        Under Review
+                      </span>
+                    )}
+                    {!rejected && !pending && completed && (
+                      <span className="status status-approved" style={{ fontSize: '0.75rem' }}>
+                        Approved
+                      </span>
+                    )}
+                  </div>
+
+                  {rejected && (
+                    <p style={{ fontSize: '0.88rem', color: 'var(--text-help)', marginBottom: '1rem' }}>
+                      Revisions requested by faculty. Click below to review feedback and edit your answers.
+                    </p>
+                  )}
+
+                  {!rejected && progress > 0 && (
                     <div style={{ marginBottom: '1.5rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-help)', marginBottom: '4px' }}>
                         <span>Draft in progress</span>
@@ -67,10 +95,21 @@ export default function StudentDashboard() {
                       </div>
                     </div>
                   )}
-                  <div style={{ marginTop: 'auto', paddingTop: progress === 0 ? '1.5rem' : 0 }}>
-                    <Link to={`/forms/${f.id}`} className="btn" style={{ width: '100%', textAlign: 'center' }}>
-                      {progress > 0 ? 'Continue Draft' : 'Start Form'}
-                    </Link>
+
+                  <div style={{ marginTop: 'auto', paddingTop: !rejected && progress === 0 ? '1.5rem' : 0 }}>
+                    {rejected ? (
+                      <Link to={`/forms/${f.id}`} className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                        ✏️ Edit & Resubmit Form
+                      </Link>
+                    ) : pending || completed ? (
+                      <Link to={`/submissions/${(pending || completed)?.id}`} className="btn btn-secondary" style={{ width: '100%', textAlign: 'center' }}>
+                        View Submission
+                      </Link>
+                    ) : (
+                      <Link to={`/forms/${f.id}`} className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                        {progress > 0 ? 'Continue Draft' : 'Start Form'}
+                      </Link>
+                    )}
                   </div>
                 </div>
               );
@@ -84,37 +123,59 @@ export default function StudentDashboard() {
         {submissions.filter(s => s.status !== 'Draft').length === 0 ? (
           <p>You have not submitted any forms yet.</p>
         ) : (
-          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid var(--border-card)' }}>
-                <th style={{ padding: '0.5rem' }}>Form</th>
-                <th style={{ padding: '0.5rem' }}>Date</th>
-                <th style={{ padding: '0.5rem' }}>Status</th>
-                <th style={{ padding: '0.5rem' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.filter(s => s.status !== 'Draft').map(s => (
-                <tr key={s.id} style={{ borderBottom: '1px solid var(--border-card)' }}>
-                  <td style={{ padding: '0.5rem' }}>{s.formTitle}</td>
-                  <td style={{ padding: '0.5rem' }}>{new Date(s.createdAt).toLocaleDateString()}</td>
-                  <td style={{ padding: '0.5rem' }}>
-                    <span style={{ 
-                      padding: '0.25rem 0.5rem', 
-                      borderRadius: '4px',
-                      backgroundColor: s.status === 'Pending' ? '#fff3cd' : '#d4edda',
-                      color: s.status === 'Pending' ? '#856404' : '#155724'
-                    }}>
-                      {s.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '0.5rem' }}>
-                    <Link to={`/submissions/${s.id}`}>View</Link>
-                  </td>
+          <div className="dashboard-table-container">
+            <table className="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Form</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {submissions.filter(s => s.status !== 'Draft').map(s => {
+                  const isRejected = s.status === 'Rejected';
+                  return (
+                    <tr key={s.id}>
+                      <td className="table-cell-title">
+                        {s.formTitle}
+                        {s.isResubmission && (
+                          <span className="status status-resubmitted" style={{ marginLeft: '0.5rem', fontSize: '0.72rem' }}>
+                            Revised
+                          </span>
+                        )}
+                      </td>
+                      <td>{new Date(s.createdAt).toLocaleDateString()}</td>
+                      <td>
+                        <span className={`status ${
+                          s.status === 'Completed' || s.status === 'Approved'
+                            ? 'status-approved'
+                            : isRejected
+                              ? 'status-rejected'
+                              : 'status-pending'
+                        }`}>
+                          {isRejected ? 'Changes Requested' : s.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'inline-flex', gap: '0.4rem', alignItems: 'center' }}>
+                          <Link to={`/submissions/${s.id}`} className="btn-view">
+                            {isRejected ? 'Review Changes' : 'View'}
+                          </Link>
+                          {isRejected && s.formId && (
+                            <Link to={`/forms/${s.formId}`} className="btn-view" style={{ backgroundColor: 'var(--bg-card-nested)', color: 'var(--text-heading) !important', border: '1px solid var(--border-input)' }}>
+                              ✏️ Edit
+                            </Link>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

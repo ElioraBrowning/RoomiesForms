@@ -62,62 +62,59 @@ export default function Layout() {
         </div>
 
         <nav className="navbar-nav">
-          <Link to="/dashboard">Dashboard</Link>
-          {user?.roles?.some(r => ['Faculty', 'External', 'Department Head'].includes(r)) && (
-            <Link to="/forms/builder">Form Builder</Link>
-          )}
-          <div className="navbar-theme-toggle">
-            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-          </div>
-          
-          <div style={{ position: 'relative' }} ref={dropdownRef}>
-            <button 
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              style={{
-                width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--slu-gold)', color: '#000', 
-                border: 'none', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', display: 'flex', 
-                alignItems: 'center', justifyContent: 'center', padding: 0
-              }}
-              title="User Profile"
-            >
-              {getInitials(user?.fullName, user?.email)}
-            </button>
-            
-            {dropdownOpen && (
-              <div style={{
-                position: 'absolute', top: '120%', right: 0, backgroundColor: 'var(--bg-card)', 
-                border: '1px solid var(--border-card)', borderRadius: '8px', padding: '0.5rem', 
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)', minWidth: '150px', zIndex: 10
-              }}>
-                <div style={{ padding: '0.5rem', borderBottom: '1px solid var(--border-card)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                  {user?.fullName || 'User'}
-                </div>
-                <div style={{ padding: '0 0.5rem 0.5rem', borderBottom: '1px solid var(--border-card)', color: 'var(--text-help)', fontSize: '0.8rem' }}>
-                  {user?.email}
-                </div>
-                
-                <Link 
-                  to="/profile"
-                  onClick={() => setDropdownOpen(false)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.5rem', marginTop: '0.5rem', 
-                  backgroundColor: 'transparent', color: 'var(--text-main)', border: 'none', cursor: 'pointer', borderRadius: '4px', textDecoration: 'none' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-body)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  My Profile
-                </Link>
-
-                <button 
-                  onClick={handleLogout} 
-                  style={{ width: '100%', textAlign: 'left', padding: '0.5rem', marginTop: '0.25rem', 
-                  backgroundColor: 'transparent', color: 'var(--text-main)', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-body)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  Logout
-                </button>
-              </div>
+          <div className="navbar-links">
+            <Link to="/dashboard" className="navbar-link">Dashboard</Link>
+            {user?.roles?.some(r => ['Faculty', 'External', 'Department Head'].includes(r)) && (
+              <Link to="/forms/builder" className="navbar-link">Form Builder</Link>
             )}
+          </div>
+          <div className="navbar-actions">
+            <div className="navbar-theme-toggle">
+              <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+            </div>
+            
+            <div className="navbar-profile-container" ref={dropdownRef}>
+              <button 
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="navbar-avatar-btn"
+                title="User Profile"
+                aria-label="User Profile Menu"
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+              >
+                {getInitials(user?.fullName, user?.email)}
+              </button>
+              
+              {dropdownOpen && (
+                <div className="navbar-dropdown" role="menu">
+                  <div className="navbar-dropdown-header">
+                    <div className="navbar-dropdown-name">
+                      {user?.fullName || 'User'}
+                    </div>
+                    <div className="navbar-dropdown-email">
+                      {user?.email}
+                    </div>
+                  </div>
+                  
+                  <Link 
+                    to="/profile"
+                    onClick={() => setDropdownOpen(false)}
+                    className="navbar-dropdown-item"
+                    role="menuitem"
+                  >
+                    My Profile
+                  </Link>
+
+                  <button 
+                    onClick={handleLogout} 
+                    className="navbar-dropdown-item navbar-dropdown-logout"
+                    role="menuitem"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </nav>
       </header>

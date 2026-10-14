@@ -12,3 +12,16 @@ public class ApproveRequestDto
 {
     public string? Comments { get; set; }
 }
+
+public class RejectRequestDto
+{
+    public string? Comments { get; set; }
+    public List<QuestionReviewDto>? QuestionReviews { get; set; }
+}
+
+public class QuestionReviewDto
+{
+    public string Field { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public string? Comment { get; set; }
+}

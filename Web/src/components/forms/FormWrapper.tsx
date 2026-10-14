@@ -171,6 +171,7 @@ export function FormWrapper({
       )}
 
       <div
+        className="step-actions form-wizard-actions"
         style={{
           display: "flex",
           justifyContent: "space-between",

@@ -153,6 +153,7 @@ public class Submission
     public Form? Form { get; set; }
     public User? Student { get; set; }
     public ReviewStep? CurrentStep { get; set; }
+    public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 }
 
 public class AuditLog

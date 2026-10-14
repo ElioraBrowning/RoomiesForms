@@ -121,8 +121,41 @@ const rules: Record<string, RegisterOptions<FieldValues, string>> = {
   agreed: { required: 'You must agree before submitting.' },
 };
 
-/** "supervisorEmail" -> "Supervisor Email", for the error summary. */
-export function labelFor(field: string) {
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Student Full Name',
+  studentName: 'Student Full Name',
+  wNumber: 'W# (University ID)',
+  email: 'University Email',
+  cellPhone: 'Cell Phone',
+  presentAddress: 'Present Address',
+  permanentAddress: 'Permanent Address',
+  degree: 'Degree & Concentration',
+  gpa: 'Major GPA',
+  graduationDate: 'Expected Graduation Date',
+  employerName: 'Employer Name',
+  companyName: 'Company Name',
+  employerAddress: 'Employer Address',
+  supervisorName: 'Supervisor Name & Title',
+  supervisorEmail: 'Supervisor Email',
+  supervisorPhone: 'Supervisor Phone',
+  startDate: 'Proposed Start Date',
+  endDate: 'Proposed End Date',
+  employmentType: 'Employment Type',
+  jobTitle: 'Job Title',
+  jobResponsibilities: 'Job Responsibilities',
+  hoursPerWeek: 'Hours Per Week',
+  totalHours: 'Total Hours',
+  hourlyWage: 'Hourly Wage ($)',
+  totalWages: 'Total Wages ($)',
+  relatedAmount: 'Related Amount ($)',
+  studentSignature: 'Student Signature',
+  supervisorSignature: 'Supervisor Signature',
+  agreed: 'Agreement & Terms Acknowledged',
+};
+
+/** "supervisorEmail" -> "Supervisor Email", for the error summary and review views. */
+export function labelFor(field: string): string {
+  if (FIELD_LABELS[field]) return FIELD_LABELS[field];
   const spaced = field.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
   return spaced.replace('W Number', 'W#').replace('Gpa', 'GPA').trim();
 }

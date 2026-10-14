@@ -99,4 +99,16 @@ public class SubmissionsController : ControllerBase
 
         return Ok(new { Message = "Approved successfully" });
     }
+
+    [HttpPost("{id}/reject")]
+    public async Task<IActionResult> RejectSubmission(int id, [FromBody] RejectRequestDto request)
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+
+        var success = await _submissionService.RejectSubmissionAsync(id, userId, request.Comments);
+        if (!success) return BadRequest("Could not reject submission.");
+
+        return Ok(new { Message = "Submission rejected and returned to student for corrections." });
+    }
 }

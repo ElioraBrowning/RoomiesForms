@@ -14,12 +14,26 @@ export interface FormMeta {
 
 export interface SubmissionSummary {
   id: number;
+  formId?: number;
   formTitle: string;
   status: string;
   createdAt: string;
   updatedAt: string;
   studentName: string;
   progress?: number;
+  isResubmission?: boolean;
+  latestComment?: string | null;
+}
+
+export interface AuditLogEntry {
+  id: number;
+  action: string;
+  comments: string | null;
+  actionTimestamp: string;
+  reviewer?: {
+    fullName: string;
+    email: string;
+  };
 }
 
 export interface SubmissionDetail {
@@ -28,4 +42,5 @@ export interface SubmissionDetail {
   student: User;
   status: string;
   responses: any;
+  auditLogs?: AuditLogEntry[];
 }

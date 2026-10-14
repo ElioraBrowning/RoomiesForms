@@ -28,7 +28,10 @@ builder.Services.AddScoped<Backend.Services.IMockDataService, Backend.Services.M
 builder.Services.AddScoped<Backend.Repositories.IUnitOfWork, Backend.Repositories.UnitOfWork>();
 builder.Services.AddScoped<Backend.Services.ISubmissionService, Backend.Services.SubmissionService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure CORS for React frontend (Allow all for Render prototype)

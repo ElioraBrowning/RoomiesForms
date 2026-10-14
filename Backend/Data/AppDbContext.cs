@@ -117,7 +117,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<AuditLog>()
             .HasOne(al => al.Submission)
-            .WithMany()
+            .WithMany(s => s.AuditLogs)
             .HasForeignKey(al => al.SubmissionId)
             .OnDelete(DeleteBehavior.Cascade);
 

@@ -15,6 +15,7 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
         return await _dbSet
             .Include(s => s.Form)
             .Include(s => s.Student)
+            .Include(s => s.AuditLogs)
             .Include(s => s.CurrentStep)
             .ThenInclude(rs => rs!.RequiredRole)
             .Where(s => s.Status == "Pending" && 
@@ -28,6 +29,7 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
     {
         return await _dbSet
             .Include(s => s.Form)
+            .Include(s => s.AuditLogs)
             .Where(s => s.StudentId == studentId)
             .ToListAsync();
     }
@@ -38,6 +40,8 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
             .Include(s => s.Form)
             .Include(s => s.Student)
             .Include(s => s.CurrentStep)
+            .Include(s => s.AuditLogs)
+                .ThenInclude(a => a.Reviewer)
             .FirstOrDefaultAsync(s => s.Id == submissionId);
     }
 }

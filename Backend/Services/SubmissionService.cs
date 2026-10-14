@@ -35,15 +35,23 @@ public class SubmissionService : ISubmissionService
             if (s.Status == "Draft" && s.Responses.RootElement.TryGetProperty("__progress", out var prop) && prop.TryGetInt32(out var p)) {
                 progress = p;
             }
+            var isResubmission = s.AuditLogs != null && s.AuditLogs.Any(a => a.Action == "Resubmitted");
+            var latestComment = s.AuditLogs?
+                .OrderByDescending(a => a.ActionTimestamp)
+                .FirstOrDefault(a => !string.IsNullOrEmpty(a.Comments))?.Comments;
+
             return new SubmissionSummaryDto
             {
                 Id = s.Id,
+                FormId = s.FormId,
                 FormTitle = s.Form != null ? s.Form.Title : "Unknown",
                 Status = s.Status,
                 CreatedAt = s.CreatedAt,
                 UpdatedAt = s.UpdatedAt,
                 StudentName = s.Student != null ? s.Student.FullName : (isFaculty || isDepartmentHead ? "Unknown" : "Me"),
-                Progress = progress
+                Progress = progress,
+                IsResubmission = isResubmission,
+                LatestComment = latestComment
             };
         }).ToList();
     }
@@ -63,10 +71,10 @@ public class SubmissionService : ISubmissionService
 
         if (firstStep == null) throw new InvalidOperationException("No review process defined for this form.");
 
-        // Check if there is an existing draft
         var existingSubmissions = await _unitOfWork.Submissions.GetSubmissionsByStudentIdAsync(userId);
-        var draft = existingSubmissions.FirstOrDefault(s => s.FormId == request.FormId && s.Status == "Draft");
 
+        // 1. Check if there is an existing draft
+        var draft = existingSubmissions.FirstOrDefault(s => s.FormId == request.FormId && s.Status == "Draft");
         if (draft != null)
         {
             draft.Responses = request.Responses;
@@ -78,6 +86,34 @@ public class SubmissionService : ISubmissionService
             return draft;
         }
 
+        // 2. Check if there is an existing Rejected submission to revise and resubmit
+        var rejected = existingSubmissions
+            .OrderByDescending(s => s.UpdatedAt)
+            .FirstOrDefault(s => s.FormId == request.FormId && s.Status == "Rejected");
+
+        if (rejected != null)
+        {
+            rejected.Responses = request.Responses;
+            rejected.Status = "Pending";
+            rejected.CurrentStepId = firstStep.Id;
+            rejected.UpdatedAt = DateTime.UtcNow;
+
+            var auditLog = new AuditLog
+            {
+                SubmissionId = rejected.Id,
+                StepId = firstStep.Id,
+                ReviewerId = userId,
+                Action = "Resubmitted",
+                Comments = "Student revised and resubmitted form after changes were requested."
+            };
+            await _unitOfWork.AuditLogs.AddAsync(auditLog);
+
+            _unitOfWork.Submissions.Update(rejected);
+            await _unitOfWork.CompleteAsync();
+            return rejected;
+        }
+
+        // 3. Otherwise create brand new submission
         var submission = new Submission
         {
             FormId = request.FormId,
@@ -99,7 +135,7 @@ public class SubmissionService : ISubmissionService
         if (form == null) throw new ArgumentException("Form not found");
 
         var existingSubmissions = await _unitOfWork.Submissions.GetSubmissionsByStudentIdAsync(userId);
-        var draft = existingSubmissions.FirstOrDefault(s => s.FormId == request.FormId && s.Status == "Draft");
+        var draft = existingSubmissions.FirstOrDefault(s => s.FormId == request.FormId && (s.Status == "Draft" || s.Status == "Rejected"));
 
         if (draft != null)
         {
@@ -130,7 +166,8 @@ public class SubmissionService : ISubmissionService
     public async Task<Submission?> GetDraftAsync(int userId, int formId)
     {
         var existingSubmissions = await _unitOfWork.Submissions.GetSubmissionsByStudentIdAsync(userId);
-        return existingSubmissions.FirstOrDefault(s => s.FormId == formId && s.Status == "Draft");
+        return existingSubmissions.FirstOrDefault(s => s.FormId == formId && s.Status == "Draft")
+            ?? existingSubmissions.OrderByDescending(s => s.UpdatedAt).FirstOrDefault(s => s.FormId == formId && s.Status == "Rejected");
     }
 
     public async Task<bool> ApproveSubmissionAsync(int submissionId, int reviewerId, string? comments)
@@ -160,6 +197,29 @@ public class SubmissionService : ISubmissionService
             submission.Status = "Completed";
         }
 
+        submission.UpdatedAt = DateTime.UtcNow;
+        _unitOfWork.Submissions.Update(submission);
+        await _unitOfWork.CompleteAsync();
+
+        return true;
+    }
+
+    public async Task<bool> RejectSubmissionAsync(int submissionId, int reviewerId, string? comments)
+    {
+        var submission = await _unitOfWork.Submissions.GetSubmissionWithDetailsAsync(submissionId);
+        if (submission == null) return false;
+
+        var auditLog = new AuditLog
+        {
+            SubmissionId = submission.Id,
+            StepId = submission.CurrentStepId,
+            ReviewerId = reviewerId,
+            Action = "Rejected",
+            Comments = comments
+        };
+        await _unitOfWork.AuditLogs.AddAsync(auditLog);
+
+        submission.Status = "Rejected";
         submission.UpdatedAt = DateTime.UtcNow;
         _unitOfWork.Submissions.Update(submission);
         await _unitOfWork.CompleteAsync();

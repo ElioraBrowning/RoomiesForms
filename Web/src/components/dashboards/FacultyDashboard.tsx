@@ -48,39 +48,51 @@ export default function FacultyDashboard() {
         {submissions.length === 0 ? (
           <p>You have no pending approvals.</p>
         ) : (
-          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #ccc' }}>
-                <th style={{ padding: '0.5rem' }}>Form</th>
-                <th style={{ padding: '0.5rem' }}>Student</th>
-                <th style={{ padding: '0.5rem' }}>Date</th>
-                <th style={{ padding: '0.5rem' }}>Status</th>
-                <th style={{ padding: '0.5rem' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.map(s => (
-                <tr key={s.id} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '0.5rem' }}>{s.formTitle}</td>
-                  <td style={{ padding: '0.5rem' }}>{s.studentName}</td>
-                  <td style={{ padding: '0.5rem' }}>{new Date(s.createdAt).toLocaleDateString()}</td>
-                  <td style={{ padding: '0.5rem' }}>
-                    <span style={{ 
-                      padding: '0.25rem 0.5rem', 
-                      borderRadius: '4px',
-                      backgroundColor: s.status === 'Pending' ? '#fff3cd' : '#d4edda',
-                      color: s.status === 'Pending' ? '#856404' : '#155724'
-                    }}>
-                      {s.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '0.5rem' }}>
-                    <Link to={`/submissions/${s.id}`}>Review</Link>
-                  </td>
+          <div className="dashboard-table-container">
+            <table className="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Form</th>
+                  <th>Student</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {submissions.map(s => (
+                  <tr key={s.id}>
+                    <td className="table-cell-title">
+                      {s.formTitle}
+                      {s.isResubmission && (
+                        <span className="status status-resubmitted" style={{ marginLeft: '0.5rem', fontSize: '0.72rem' }}>
+                          Revised
+                        </span>
+                      )}
+                    </td>
+                    <td>{s.studentName}</td>
+                    <td>{new Date(s.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <span className={`status ${
+                        s.status === 'Completed' || s.status === 'Approved'
+                          ? 'status-approved'
+                          : s.status === 'Rejected'
+                            ? 'status-rejected'
+                            : 'status-pending'
+                      }`}>
+                        {s.status}
+                      </span>
+                    </td>
+                    <td>
+                      <Link to={`/submissions/${s.id}`} className="btn-review">
+                        Review
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
