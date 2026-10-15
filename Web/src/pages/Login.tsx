@@ -1,38 +1,40 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import ThemeToggle from '../components/ThemeToggle';
-import '../index.css';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import ThemeToggle from "../components/ThemeToggle";
+import "../index.css";
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'light';
+    return localStorage.getItem("theme") || "light";
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
     try {
       await login(email);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch {
-      setError("Couldn't reach the server. Make sure the backend is running on port 5000.");
+      setError(
+        "Couldn't reach the server. Make sure the backend is running on port 5000.",
+      );
     } finally {
       setLoading(false);
     }
@@ -69,17 +71,17 @@ export default function Login() {
             height={224}
           />
           <p className="login-hero-copy">
-            Every CS internship form in one place. Start one, save a draft, and watch it move
-            through faculty review.
+            Every form in one place. Draft and submit responses, then watch them
+            move through the review process.
           </p>
         </div>
 
         <div className="login-form-side">
           <div className="login-form-header">
-            <span className="login-app-badge">Roomie&rsquo;s Forms</span>
             <h1 className="login-title">Sign in</h1>
             <p className="login-sub">
-              Use your Southeastern email. No password needed while we're testing.
+              Use your Southeastern email. No password needed while we're
+              testing.
             </p>
           </div>
 
@@ -95,7 +97,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@selu.edu"
-                aria-describedby={error ? 'login-error' : undefined}
+                aria-describedby={error ? "login-error" : undefined}
                 aria-invalid={error ? true : undefined}
               />
             </div>
@@ -106,14 +108,18 @@ export default function Login() {
               </p>
             )}
 
-            <button type="submit" className="btn login-submit" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
+            <button
+              type="submit"
+              className="btn login-submit"
+              disabled={loading}
+            >
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </form>
 
           <p className="login-foot">
-            Prototype build. Sign in as <code>eliora.browning@selu.edu</code> for the student
-            view or <code>galkadi@selu.edu</code> for faculty.
+            Prototype build. Sign in as <code>eliora.browning@selu.edu</code>{" "}
+            for the student view or <code>galkadi@selu.edu</code> for faculty.
           </p>
         </div>
       </div>

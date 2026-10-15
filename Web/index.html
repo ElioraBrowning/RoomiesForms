@@ -4,12 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Roomie's Forms — SELU Computer Science Internships</title>
-    <meta name="description" content="Submit and track your Southeastern Louisiana University computer science internship forms." />
+    <title>Roomie's Forms</title>
+    <meta
+      name="description"
+      content="Submit and track your Southeastern Louisiana University computer science internship forms."
+    />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
-    <meta name="theme-color" content="#1a5632" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#05130d" media="(prefers-color-scheme: dark)" />
+    <meta
+      name="theme-color"
+      content="#1a5632"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#05130d"
+      media="(prefers-color-scheme: dark)"
+    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,13 +33,15 @@
       // Apply the saved theme before first paint so the page doesn't flash light then go dark.
       (function () {
         try {
-          var saved = localStorage.getItem('theme');
+          var saved = localStorage.getItem("theme");
           var theme =
             saved ||
-            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-          document.documentElement.setAttribute('data-theme', theme);
+            (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+          document.documentElement.setAttribute("data-theme", theme);
         } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'light');
+          document.documentElement.setAttribute("data-theme", "light");
         }
       })();
     </script>

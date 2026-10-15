@@ -118,7 +118,7 @@ export default function Layout() {
           </div>
         </nav>
       </header>
-      <div className="stripe" />
+      <div className="stripes" />
       <main className="main-content">
         <Outlet />
       </main>
