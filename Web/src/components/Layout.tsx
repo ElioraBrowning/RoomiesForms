@@ -11,7 +11,7 @@ export default function Layout() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'light';
+    return localStorage.getItem('theme') || 'dark';
   });
   const [dropdownOpen, setDropdownOpen] = useState(false);
 

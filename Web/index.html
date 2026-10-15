@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,18 +30,14 @@
     />
 
     <script>
-      // Apply the saved theme before first paint so the page doesn't flash light then go dark.
+      // Apply the saved theme before first paint (defaults to dark).
       (function () {
         try {
           var saved = localStorage.getItem("theme");
-          var theme =
-            saved ||
-            (window.matchMedia("(prefers-color-scheme: dark)").matches
-              ? "dark"
-              : "light");
+          var theme = saved || "dark";
           document.documentElement.setAttribute("data-theme", theme);
         } catch (e) {
-          document.documentElement.setAttribute("data-theme", "light");
+          document.documentElement.setAttribute("data-theme", "dark");
         }
       })();
     </script>

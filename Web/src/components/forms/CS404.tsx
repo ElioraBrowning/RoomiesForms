@@ -15,7 +15,7 @@ export default function CS404({ onSubmit, defaultValues, isReadonly, onSaveDraft
       <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
       <FormStep>
         <h3>Time & Wage Report</h3>
-        <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '1.5rem' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--text-help)', marginBottom: '1.5rem' }}>
           Please enter your cumulative hours and wages for the semester.
         </p>
         <div className="form-group"><label>Student Name</label><input placeholder="e.g. Jane Doe" {...register('studentName')} disabled={isReadonly} /></div>

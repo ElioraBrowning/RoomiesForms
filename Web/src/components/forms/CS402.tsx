@@ -15,7 +15,7 @@ export default function CS402({ onSubmit, defaultValues, isReadonly, onSaveDraft
       <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
       <FormStep>
         <h3>Employer Agreement</h3>
-        <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '1.5rem' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--text-help)', marginBottom: '1.5rem' }}>
           This section should be completed by the student and reviewed by the employer.
         </p>
         <div className="form-group"><label>Student Name</label><input placeholder="Student's Full Name" {...register('studentName')} disabled={isReadonly} /></div>

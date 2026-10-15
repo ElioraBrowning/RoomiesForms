@@ -19,7 +19,7 @@ export default function CS403({ onSubmit, defaultValues, isReadonly, onSaveDraft
       <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
       <FormStep>
         <h3>Measurable Learning Objectives</h3>
-        <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '1.5rem' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--text-help)', marginBottom: '1.5rem' }}>
           List specific objectives describing what you plan to accomplish. 
           At the end of the semester, your supervisor will evaluate accomplishment from 0% to 100%.
         </p>

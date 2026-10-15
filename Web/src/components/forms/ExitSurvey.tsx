@@ -14,7 +14,7 @@ export default function ExitSurvey({ onSubmit, defaultValues, isReadonly, onSave
     <form onSubmit={handleSubmit(onSubmit)}>
       <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
       <h3>Computer Science Program Feedback Survey</h3>
-      <p style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#555' }}>
+      <p style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-help)' }}>
         The purpose of this survey is to help the department evaluate how effectively your prior computer science coursework prepared you. Your feedback is critical. Please answer honestly based on your academic preparation from coursework only. Do not include knowledge or skills gained through work experience.
       </p>
 

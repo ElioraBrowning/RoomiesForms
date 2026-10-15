@@ -9,25 +9,26 @@ export default function ThemeToggle({ theme, toggleTheme }: ThemeToggleProps) {
 
   return (
     <button 
+      type="button"
+      role="switch"
+      aria-checked={isDark}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={toggleTheme}
-      style={{
-        background: isDark ? 'var(--border-card)' : '#cbd5e1',
-        border: 'none',
-        borderRadius: '30px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0.25rem',
-        position: 'relative',
-        width: '60px',
-        height: '30px',
-        outline: 'none',
-        transition: 'background 0.3s ease'
-      }}
-      title="Toggle Theme"
+      className={`theme-toggle-btn ${isDark ? 'is-dark' : 'is-light'}`}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ zIndex: 1, marginLeft: '2px' }}>
+      <svg 
+        className="theme-toggle-icon theme-toggle-sun"
+        width="14" 
+        height="14" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2.4" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        aria-hidden="true"
+      >
         <circle cx="12" cy="12" r="5"></circle>
         <line x1="12" y1="1" x2="12" y2="3"></line>
         <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -39,21 +40,23 @@ export default function ThemeToggle({ theme, toggleTheme }: ThemeToggleProps) {
         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
       </svg>
       {/* Moon Icon */}
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#061c13" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ zIndex: 1, marginRight: '2px' }}>
+      <svg 
+        className="theme-toggle-icon theme-toggle-moon"
+        width="14" 
+        height="14" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2.4" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        aria-hidden="true"
+      >
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
       </svg>
-      <div 
-        style={{
-          position: 'absolute',
-          top: '2px',
-          left: isDark ? '32px' : '2px',
-          width: '26px',
-          height: '26px',
-          backgroundColor: '#fff',
-          borderRadius: '50%',
-          transition: 'left 0.3s ease',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-        }}
+      <span 
+        className="theme-toggle-thumb" 
+        aria-hidden="true"
       />
     </button>
   );

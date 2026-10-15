@@ -15,7 +15,7 @@ export default function CS401({ onSubmit, defaultValues, isReadonly, onSaveDraft
       <FormWrapper getValues={getValues} onSaveDraft={handleSaveDraft} onSubmit={handleSubmit(onSubmit)} isReadonly={isReadonly}>
       <FormStep>
         <h3>Student Information</h3>
-        <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '1.5rem' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--text-help)', marginBottom: '1.5rem' }}>
           Please provide your personal and academic details.
         </p>
         <div className="form-group">
@@ -58,7 +58,7 @@ export default function CS401({ onSubmit, defaultValues, isReadonly, onSaveDraft
 
       <FormStep>
         <h3>Employer Information</h3>
-        <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '1.5rem' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--text-help)', marginBottom: '1.5rem' }}>
           Please provide details about the company where you will be interning.
         </p>
         <div className="form-group">

@@ -161,7 +161,8 @@ export default function StudentDashboard() {
                         style={{
                           width: "100%",
                           height: "6px",
-                          backgroundColor: "var(--border-card)",
+                          backgroundColor:
+                            "var(--progress-track-bg, var(--border-card))",
                           borderRadius: "3px",
                           overflow: "hidden",
                         }}
@@ -285,12 +286,7 @@ export default function StudentDashboard() {
                             {isRejected && s.formId && (
                               <Link
                                 to={`/forms/${s.formId}`}
-                                className="btn-view"
-                                style={{
-                                  backgroundColor: "var(--bg-card-nested)",
-                                  color: "var(--text-heading) !important",
-                                  border: "1px solid var(--border-input)",
-                                }}
+                                className="btn-view btn-view-secondary"
                               >
                                 ✏️ Edit
                               </Link>
