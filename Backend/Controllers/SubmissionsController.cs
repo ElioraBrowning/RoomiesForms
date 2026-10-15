@@ -12,10 +12,12 @@ namespace Backend.Controllers;
 public class SubmissionsController : ControllerBase
 {
     private readonly ISubmissionService _submissionService;
+    private readonly Backend.Repositories.IUnitOfWork _unitOfWork;
 
-    public SubmissionsController(ISubmissionService submissionService)
+    public SubmissionsController(ISubmissionService submissionService, Backend.Repositories.IUnitOfWork unitOfWork)
     {
         _submissionService = submissionService;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
@@ -70,12 +72,20 @@ public class SubmissionsController : ControllerBase
     }
 
     [HttpGet("drafts/{formId}")]
-    public async Task<IActionResult> GetDraft(int formId)
+    public async Task<IActionResult> GetDraft(string formId)
     {
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
 
-        var draft = await _submissionService.GetDraftAsync(userId, formId);
+        int targetFormId;
+        if (!int.TryParse(formId, out targetFormId))
+        {
+            var match = (await _unitOfWork.Forms.FindAsync(f => f.GoogleFormId.ToLower() == formId.ToLower())).FirstOrDefault();
+            if (match == null) return NotFound("Form not found.");
+            targetFormId = match.Id;
+        }
+
+        var draft = await _submissionService.GetDraftAsync(userId, targetFormId);
         if (draft == null) return NotFound();
         return Ok(draft);
     }
@@ -94,10 +104,17 @@ public class SubmissionsController : ControllerBase
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
 
-        var success = await _submissionService.ApproveSubmissionAsync(id, userId, request.Comments);
-        if (!success) return BadRequest("Could not approve submission.");
+        try
+        {
+            var success = await _submissionService.ApproveSubmissionAsync(id, userId, request.Comments);
+            if (!success) return BadRequest("Could not approve submission.");
 
-        return Ok(new { Message = "Approved successfully" });
+            return Ok(new { Message = "Approved successfully" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { Message = ex.Message });
+        }
     }
 
     [HttpPost("{id}/reject")]
@@ -106,9 +123,16 @@ public class SubmissionsController : ControllerBase
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
 
-        var success = await _submissionService.RejectSubmissionAsync(id, userId, request.Comments);
-        if (!success) return BadRequest("Could not reject submission.");
+        try
+        {
+            var success = await _submissionService.RejectSubmissionAsync(id, userId, request.Comments);
+            if (!success) return BadRequest("Could not reject submission.");
 
-        return Ok(new { Message = "Submission rejected and returned to student for corrections." });
+            return Ok(new { Message = "Submission rejected and returned to student for corrections." });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { Message = ex.Message });
+        }
     }
 }

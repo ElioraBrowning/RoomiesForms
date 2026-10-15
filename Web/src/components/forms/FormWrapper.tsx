@@ -8,6 +8,7 @@ interface FormWrapperProps {
   isReadonly?: boolean;
   getValues?: () => any;
   errors?: Record<string, any>;
+  submitText?: string;
 }
 
 export function FormWrapper({
@@ -17,7 +18,9 @@ export function FormWrapper({
   isReadonly,
   getValues,
   errors,
+  submitText = "Submit Form",
 }: FormWrapperProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const steps = React.Children.toArray(children).filter(
     (c): c is React.ReactElement =>
       React.isValidElement(c) &&
@@ -39,7 +42,7 @@ export function FormWrapper({
     let totalFields = 0;
 
     for (const key of Object.keys(values)) {
-      if (key === "__progress" || key === "studentName") continue; // studentName is just display
+      if (key === "__progress" || key === "studentName") continue;
 
       const val = values[key];
       totalFields++;
@@ -83,7 +86,6 @@ export function FormWrapper({
   const handleBlur = useCallback(
     (_e: React.FocusEvent) => {
       if (!isReadonly && !isSubmittingRef.current && onSaveDraft) {
-        // Allow react-hook-form to update state before calculating
         setTimeout(() => {
           if (isSubmittingRef.current) return;
           const p = calculateProgress();
@@ -95,17 +97,55 @@ export function FormWrapper({
     [isReadonly, onSaveDraft, calculateProgress],
   );
 
+  // Release submission lock whenever validation errors are received
+  useEffect(() => {
+    if (errors && Object.keys(errors).length > 0) {
+      isSubmittingRef.current = false;
+    }
+  }, [errors]);
+
+  // When validation errors occur, auto-navigate to the step containing the first error
+  useEffect(() => {
+    const errorKeys = Object.keys(errors ?? {});
+    if (errorKeys.length === 0 || totalSteps <= 1) return;
+
+    const firstKey = errorKeys[0];
+    const cardEl = containerRef.current;
+    if (!cardEl) return;
+
+    const formEl = cardEl.closest("form") || cardEl;
+    const targetInput = formEl.querySelector(
+      `[name="${firstKey}"], [name^="${firstKey}."]`,
+    );
+
+    if (targetInput) {
+      const stepEl = targetInput.closest(".form-section");
+      if (stepEl) {
+        const allStepEls = Array.from(cardEl.querySelectorAll(".form-section"));
+        const stepIdx = allStepEls.indexOf(stepEl);
+        if (stepIdx !== -1 && stepIdx !== currentStep) {
+          setCurrentStep(stepIdx);
+        }
+      }
+      setTimeout(() => {
+        targetInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  }, [errors, totalSteps, currentStep]);
+
   const handleSubmitClick = () => {
     if (isSubmittingRef.current) return;
-
     isSubmittingRef.current = true;
     onSubmit?.();
+    setTimeout(() => {
+      isSubmittingRef.current = false;
+    }, 1000);
   };
 
   const errorList = Object.entries(errors ?? {});
 
   return (
-    <div className="card" onBlur={handleBlur}>
+    <div ref={containerRef} className="card" onBlur={handleBlur}>
       {!isReadonly && errorList.length > 0 && (
         <div className="form-errors" role="alert">
           <p className="form-errors-title">
@@ -212,7 +252,7 @@ export function FormWrapper({
                 color: "white",
               }}
             >
-              Submit Application
+              {submitText}
             </button>
           )
         )}

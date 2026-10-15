@@ -75,6 +75,13 @@ export default function SubmissionReview() {
     ),
   );
 
+  const isFacultyUser = user?.email?.trim().toLowerCase() === "galkadi@selu.edu";
+  const isDeptHeadUser = user?.email?.trim().toLowerCase() === "bonnie.achee@southeastern.edu";
+  const currentStepOrder = submission?.currentStep?.stepOrder ?? (submission?.status === "Completed" ? 3 : 1);
+  const isMyTurnToReview =
+    (isFacultyUser && currentStepOrder === 1 && submission?.status === "Pending") ||
+    (isDeptHeadUser && currentStepOrder === 2 && submission?.status === "Pending");
+
   useEffect(() => {
     const fetchSubmission = async () => {
       try {
@@ -263,7 +270,19 @@ export default function SubmissionReview() {
   };
 
   const handleApprove = async () => {
-    if (!isReviewer) return;
+    if (!isReviewer || isClosed || busy !== null) return;
+
+    if (!isMyTurnToReview) {
+      if (isFacultyUser && currentStepOrder === 2) {
+        setError("You have already approved the faculty review step. Department Head Dr. Bonnie Achée must grant final approval.");
+        return;
+      }
+      if (isDeptHeadUser && currentStepOrder === 1) {
+        setError("This form is still awaiting initial review from Dr. Ghassan Alkadi before department head approval.");
+        return;
+      }
+    }
+
     if (rejectedCount > 0) {
       const proceed = window.confirm(
         `There are ${rejectedCount} question(s) marked as rejected. Approving the entire submission will approve all steps. Do you wish to proceed?`,
@@ -288,7 +307,19 @@ export default function SubmissionReview() {
   };
 
   const handleReject = async () => {
-    if (!isReviewer) return;
+    if (!isReviewer || isClosed || busy !== null) return;
+
+    if (!isMyTurnToReview) {
+      if (isFacultyUser && currentStepOrder === 2) {
+        setError("You have already approved the faculty review step. The submission is currently with Department Head Dr. Bonnie Achée.");
+        return;
+      }
+      if (isDeptHeadUser && currentStepOrder === 1) {
+        setError("This form is still awaiting initial review from Dr. Ghassan Alkadi.");
+        return;
+      }
+    }
+
     const flaggedItems = answered
       .map((q) => ({
         field: q.field,
@@ -419,6 +450,170 @@ export default function SubmissionReview() {
         >
           {isSubmissionRejected ? "Changes Requested" : submission.status}
         </span>
+      </div>
+
+      {/* TWO-STAGE APPROVAL WORKFLOW PROGRESS */}
+      <div className="card approval-stepper-card" style={{ marginBottom: "1.5rem" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1rem",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+          }}
+        >
+          <div>
+            <h2 style={{ margin: 0, fontSize: "1.2rem" }}>Approval Workflow Progress</h2>
+            <p style={{ margin: "2px 0 0 0", fontSize: "0.85rem", color: "var(--text-help)" }}>
+              Requires review from both Faculty member and Department Head
+            </p>
+          </div>
+          <span
+            className={`status ${
+              submission.status === "Completed"
+                ? "status-approved"
+                : isSubmissionRejected
+                  ? "status-rejected"
+                  : "status-pending"
+            }`}
+          >
+            {submission.status === "Completed"
+              ? "✓ Fully Approved"
+              : isSubmissionRejected
+                ? "⚠️ Changes Requested"
+                : `Step ${currentStepOrder} of 2 in Review`}
+          </span>
+        </div>
+
+        <div className="approval-stepper-grid">
+          {/* Step 1: Faculty Review */}
+          {(() => {
+            const step1 = submission.approvals?.find((a) => a.stepOrder === 1);
+            const isApproved = step1?.status === "Approved";
+            const isRejected = step1?.status === "Changes Requested";
+            const isPending = step1?.status === "Pending Review";
+
+            return (
+              <div
+                className={`approval-step-box ${
+                  isApproved
+                    ? "step-approved"
+                    : isRejected
+                      ? "step-rejected"
+                      : isPending
+                        ? "step-active"
+                        : "step-waiting"
+                }`}
+              >
+                <div className="approval-step-header">
+                  <div className="approval-step-num">Step 1</div>
+                  <span
+                    className={`status ${
+                      isApproved
+                        ? "status-approved"
+                        : isRejected
+                          ? "status-rejected"
+                          : isPending
+                            ? "status-pending"
+                            : "status-draft"
+                    }`}
+                  >
+                    {isApproved
+                      ? "✓ Approved"
+                      : isRejected
+                        ? "⚠️ Changes Requested"
+                        : isPending
+                          ? "⏳ Pending Review"
+                          : "⏸ Not Submitted"}
+                  </span>
+                </div>
+                <h3 className="approval-step-title">Initial Faculty Review</h3>
+                <p className="approval-step-reviewer">
+                  <strong>Assigned Reviewer:</strong> Dr. Ghassan Alkadi (Faculty)
+                </p>
+                {step1?.actionDate && (
+                  <p className="approval-step-meta">
+                    <strong>Date:</strong> {new Date(step1.actionDate).toLocaleString()}
+                  </p>
+                )}
+                {step1?.comments && (
+                  <div className="approval-step-notes">
+                    <strong>Reviewer Notes:</strong>
+                    <p>{step1.comments}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Step 2: Department Head Review */}
+          {(() => {
+            const step2 = submission.approvals?.find((a) => a.stepOrder === 2);
+            const isApproved = step2?.status === "Approved";
+            const isRejected = step2?.status === "Changes Requested";
+            const isPending = step2?.status === "Pending Review";
+            const isAwaiting = step2?.status === "Awaiting Faculty Approval";
+
+            return (
+              <div
+                className={`approval-step-box ${
+                  isApproved
+                    ? "step-approved"
+                    : isRejected
+                      ? "step-rejected"
+                      : isPending
+                        ? "step-active"
+                        : "step-waiting"
+                }`}
+              >
+                <div className="approval-step-header">
+                  <div className="approval-step-num">Step 2</div>
+                  <span
+                    className={`status ${
+                      isApproved
+                        ? "status-approved"
+                        : isRejected
+                          ? "status-rejected"
+                          : isPending
+                            ? "status-pending"
+                            : "status-draft"
+                    }`}
+                  >
+                    {isApproved
+                      ? "✓ Final Approval Granted"
+                      : isRejected
+                        ? "⚠️ Changes Requested"
+                        : isPending
+                          ? "⏳ Pending Final Approval"
+                          : "⏸ Awaiting Step 1"}
+                  </span>
+                </div>
+                <h3 className="approval-step-title">Department Head Approval</h3>
+                <p className="approval-step-reviewer">
+                  <strong>Assigned Reviewer:</strong> Dr. Bonnie Achée (Department Head)
+                </p>
+                {step2?.actionDate && (
+                  <p className="approval-step-meta">
+                    <strong>Date:</strong> {new Date(step2.actionDate).toLocaleString()}
+                  </p>
+                )}
+                {step2?.comments && (
+                  <div className="approval-step-notes">
+                    <strong>Reviewer Notes:</strong>
+                    <p>{step2.comments}</p>
+                  </div>
+                )}
+                {isAwaiting && (
+                  <p className="approval-step-waiting-hint">
+                    Awaiting completion of Step 1 (Faculty Review)
+                  </p>
+                )}
+              </div>
+            );
+          })()}
+        </div>
       </div>
 
       {/* STUDENT VIEW: Status & Feedback Banner */}
@@ -781,9 +976,48 @@ export default function SubmissionReview() {
       )}
 
       {/* REVIEWER: Final Decision Deck */}
+      {/* REVIEWER: Final Decision Deck */}
       {isReviewer ? (
         <div className="card review-final-card">
-          <h2>Overall Decision</h2>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+              marginBottom: "0.75rem",
+            }}
+          >
+            <div>
+              <h2 style={{ margin: "0 0 0.25rem 0" }}>
+                {isFacultyUser
+                  ? "Faculty Review Decision — Dr. Ghassan Alkadi"
+                  : isDeptHeadUser
+                    ? "Department Head Decision — Dr. Bonnie Achée"
+                    : "Reviewer Decision"}
+              </h2>
+              <p style={{ margin: 0, fontSize: "0.88rem", color: "var(--text-help)" }}>
+                {isFacultyUser && currentStepOrder === 1 && !isClosed && (
+                  "Step 1 of 2: Approving will advance this submission to Department Head Dr. Bonnie Achée for final authorization."
+                )}
+                {isFacultyUser && currentStepOrder === 2 && !isClosed && (
+                  "✓ Step 1 Complete: You approved this submission. It is currently in Department Head Dr. Bonnie Achée's queue."
+                )}
+                {isDeptHeadUser && currentStepOrder === 2 && !isClosed && (
+                  "Step 2 of 2: Pre-approved by Dr. Ghassan Alkadi. Approving will grant final university authorization."
+                )}
+                {isDeptHeadUser && currentStepOrder === 1 && !isClosed && (
+                  "⏳ Awaiting Step 1: This submission is awaiting initial review from Dr. Ghassan Alkadi before departmental authorization."
+                )}
+              </p>
+            </div>
+            {isMyTurnToReview && !isClosed && (
+              <span className="status status-pending" style={{ fontSize: "0.78rem" }}>
+                Your Action Required
+              </span>
+            )}
+          </div>
 
           <div className="form-group">
             <label htmlFor="general-comments">
@@ -794,8 +1028,12 @@ export default function SubmissionReview() {
               rows={3}
               value={generalComments}
               onChange={(e) => setGeneralComments(e.target.value)}
-              placeholder="Add any overall remarks or general message for the student..."
-              disabled={isClosed}
+              placeholder={
+                isMyTurnToReview
+                  ? "Add any overall remarks or general feedback for the student and subsequent reviewer..."
+                  : "Comments disabled when not in your active review step..."
+              }
+              disabled={isClosed || !isMyTurnToReview}
             />
           </div>
 
@@ -814,16 +1052,32 @@ export default function SubmissionReview() {
             <button
               onClick={handleApprove}
               className="btn"
-              disabled={isClosed || busy !== null}
+              disabled={isClosed || busy !== null || !isMyTurnToReview}
+              title={
+                !isMyTurnToReview
+                  ? "Cannot approve while awaiting another reviewer's stage"
+                  : undefined
+              }
             >
-              {busy === "approve" ? "Approving..." : "Approve Submission"}
+              {busy === "approve"
+                ? "Approving..."
+                : isFacultyUser && currentStepOrder === 1
+                  ? "✓ Approve Faculty Review (Advance to Dept Head)"
+                  : isDeptHeadUser && currentStepOrder === 2
+                    ? "✓ Grant Department Head Final Approval"
+                    : "Approve Submission"}
             </button>
             <button
               onClick={handleReject}
               className="btn btn-danger"
-              disabled={isClosed || busy !== null}
+              disabled={isClosed || busy !== null || !isMyTurnToReview}
+              title={
+                !isMyTurnToReview
+                  ? "Cannot request changes while awaiting another reviewer's stage"
+                  : undefined
+              }
             >
-              {busy === "reject" ? "Sending..." : "Request Changes"}
+              {busy === "reject" ? "Sending..." : "Request Changes (Return to Student)"}
             </button>
             <button
               onClick={() => navigate("/dashboard")}
@@ -837,6 +1091,15 @@ export default function SubmissionReview() {
             <p className="help-text" style={{ marginTop: "1rem" }}>
               This submission is {submission.status.toLowerCase()} and can no
               longer be modified.
+            </p>
+          )}
+          {!isClosed && !isMyTurnToReview && (
+            <p className="help-text" style={{ marginTop: "1rem", color: "var(--text-help)" }}>
+              {isFacultyUser && currentStepOrder === 2
+                ? "ℹ️ You have completed your faculty review step. Final decision is with Department Head Dr. Bonnie Achée."
+                : isDeptHeadUser && currentStepOrder === 1
+                  ? "ℹ️ This submission must first be reviewed and approved by Faculty member Dr. Ghassan Alkadi before you can grant department approval."
+                  : "This submission is currently assigned to another step in the review process."}
             </p>
           )}
         </div>

@@ -8,6 +8,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<Form> Forms { get; }
     IRepository<ReviewStep> ReviewSteps { get; }
     IRepository<AuditLog> AuditLogs { get; }
+    IRepository<User> Users { get; }
     
     Task<int> CompleteAsync();
 }

@@ -159,5 +159,11 @@ public class AppDbContext : DbContext
                     v => JsonDocument.Parse(v, default)
                 );
         }
+        else
+        {
+            modelBuilder.Entity<Submission>()
+                .Property(e => e.Responses)
+                .HasColumnType("jsonb");
+        }
     }
 }

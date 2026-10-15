@@ -135,12 +135,74 @@ export default function StudentDashboard() {
                       style={{
                         fontSize: "0.88rem",
                         color: "var(--text-help)",
-                        marginBottom: "1rem",
+                        marginBottom: "0.75rem",
                       }}
                     >
-                      Revisions requested by faculty. Click below to review
+                      Revisions requested by reviewer. Click below to review
                       feedback and edit your answers.
                     </p>
+                  )}
+
+                  {/* Two-Stage Approval Pipeline in Card */}
+                  {(rejected || pending || completed) && (rejected || pending || completed)?.approvals && (
+                    <div style={{ marginBottom: "1rem" }}>
+                      <div
+                        style={{
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          color: "var(--text-heading)",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        Approval Pipeline:
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                        {(rejected || pending || completed)!.approvals!.map((app) => {
+                          const isAppApproved = app.status === "Approved";
+                          const isAppRejected = app.status === "Changes Requested";
+                          const isAppPending = app.status === "Pending Review";
+                          return (
+                            <div
+                              key={app.stepOrder}
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                fontSize: "0.75rem",
+                                padding: "4px 8px",
+                                borderRadius: "4px",
+                                background: "var(--bg-main)",
+                                border: "1px solid var(--border-card)",
+                              }}
+                            >
+                              <span style={{ color: "var(--text-main)" }}>
+                                {app.stepOrder}. {app.roleName} ({app.reviewerName.replace("Dr. ", "")})
+                              </span>
+                              <span
+                                className={`status ${
+                                  isAppApproved
+                                    ? "status-approved"
+                                    : isAppRejected
+                                      ? "status-rejected"
+                                      : isAppPending
+                                        ? "status-pending"
+                                        : "status-draft"
+                                }`}
+                                style={{ fontSize: "0.68rem", padding: "1px 6px" }}
+                              >
+                                {isAppApproved
+                                  ? "✓ Approved"
+                                  : isAppRejected
+                                    ? "⚠️ Changes"
+                                    : isAppPending
+                                      ? "⏳ In Review"
+                                      : "⏸ Awaiting"}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
 
                   {!rejected && progress > 0 && (
@@ -230,6 +292,7 @@ export default function StudentDashboard() {
                   <th>Form</th>
                   <th>Date</th>
                   <th>Status</th>
+                  <th>Approvals</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -269,6 +332,57 @@ export default function StudentDashboard() {
                             {isRejected ? "Changes Requested" : s.status}
                           </span>
                         </td>
+                        <td style={{ minWidth: "230px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                            {s.approvals && s.approvals.length > 0 ? (
+                              s.approvals.map((app) => {
+                                const isAppApproved = app.status === "Approved";
+                                const isAppRejected = app.status === "Changes Requested";
+                                const isAppPending = app.status === "Pending Review";
+                                return (
+                                  <div
+                                    key={app.stepOrder}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-between",
+                                      gap: "8px",
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    <span style={{ color: "var(--text-help)", whiteSpace: "nowrap" }}>
+                                      {app.roleName === "Faculty" ? "Faculty (Alkadi):" : "Dept Head (Achée):"}
+                                    </span>
+                                    <span
+                                      className={`status ${
+                                        isAppApproved
+                                          ? "status-approved"
+                                          : isAppRejected
+                                            ? "status-rejected"
+                                            : isAppPending
+                                              ? "status-pending"
+                                              : "status-draft"
+                                      }`}
+                                      style={{ fontSize: "0.68rem", padding: "1px 6px", whiteSpace: "nowrap" }}
+                                    >
+                                      {isAppApproved
+                                        ? "✓ Approved"
+                                        : isAppRejected
+                                          ? "⚠️ Changes"
+                                          : isAppPending
+                                            ? "⏳ In Review"
+                                            : "⏸ Awaiting"}
+                                    </span>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-help)" }}>
+                                1. Faculty &middot; 2. Dept Head
+                              </span>
+                            )}
+                          </div>
+                        </td>
                         <td>
                           <div
                             style={{
@@ -281,7 +395,22 @@ export default function StudentDashboard() {
                               to={`/submissions/${s.id}`}
                               className="btn-view"
                             >
-                              {isRejected ? "Review Changes" : "View"}
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                                style={{ flexShrink: 0 }}
+                              >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                              </svg>
+                              <span>{isRejected ? "Requested Changes" : "View"}</span>
                             </Link>
                             {isRejected && s.formId && (
                               <Link

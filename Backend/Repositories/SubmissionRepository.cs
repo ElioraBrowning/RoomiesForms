@@ -15,9 +15,12 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
         return await _dbSet
             .Include(s => s.Form)
             .Include(s => s.Student)
-            .Include(s => s.AuditLogs)
             .Include(s => s.CurrentStep)
-            .ThenInclude(rs => rs!.RequiredRole)
+                .ThenInclude(rs => rs!.RequiredRole)
+            .Include(s => s.AuditLogs)
+                .ThenInclude(a => a.Reviewer)
+            .Include(s => s.AuditLogs)
+                .ThenInclude(a => a.Step)
             .Where(s => s.Status == "Pending" && 
                         s.CurrentStep != null && 
                         s.CurrentStep.RequiredRole != null && 
@@ -29,7 +32,13 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
     {
         return await _dbSet
             .Include(s => s.Form)
+            .Include(s => s.Student)
+            .Include(s => s.CurrentStep)
+                .ThenInclude(rs => rs!.RequiredRole)
             .Include(s => s.AuditLogs)
+                .ThenInclude(a => a.Reviewer)
+            .Include(s => s.AuditLogs)
+                .ThenInclude(a => a.Step)
             .Where(s => s.StudentId == studentId)
             .ToListAsync();
     }
@@ -40,8 +49,11 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
             .Include(s => s.Form)
             .Include(s => s.Student)
             .Include(s => s.CurrentStep)
+                .ThenInclude(rs => rs!.RequiredRole)
             .Include(s => s.AuditLogs)
                 .ThenInclude(a => a.Reviewer)
+            .Include(s => s.AuditLogs)
+                .ThenInclude(a => a.Step)
             .FirstOrDefaultAsync(s => s.Id == submissionId);
     }
 }

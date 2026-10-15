@@ -36,9 +36,19 @@ public class FormsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetForm(int id)
+    public async Task<IActionResult> GetForm(string id)
     {
-        var form = await _context.Forms.FindAsync(id);
+        Form? form = null;
+        if (int.TryParse(id, out int numericId))
+        {
+            form = await _context.Forms.FindAsync(numericId);
+        }
+
+        if (form == null)
+        {
+            form = await _context.Forms.FirstOrDefaultAsync(f => f.GoogleFormId.ToLower() == id.ToLower());
+        }
+
         if (form == null) return NotFound("Form not found.");
 
         return Ok(form);

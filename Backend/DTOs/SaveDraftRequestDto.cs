@@ -5,5 +5,6 @@ namespace Backend.DTOs;
 public class SaveDraftRequestDto
 {
     public int FormId { get; set; }
+    public string? FormSlug { get; set; }
     public JsonDocument Responses { get; set; } = JsonDocument.Parse("{}");
 }

@@ -12,6 +12,17 @@ export interface FormMeta {
   publicUrl: string;
 }
 
+export interface ApprovalStepStatus {
+  stepOrder: number;
+  stepName: string;
+  roleName: string;
+  reviewerName: string;
+  status: string; // "Approved" | "Pending Review" | "Changes Requested" | "Awaiting Faculty Approval" | "Not Submitted"
+  approvedBy?: string | null;
+  actionDate?: string | null;
+  comments?: string | null;
+}
+
 export interface SubmissionSummary {
   id: number;
   formId?: number;
@@ -23,6 +34,9 @@ export interface SubmissionSummary {
   progress?: number;
   isResubmission?: boolean;
   latestComment?: string | null;
+  currentStepName?: string;
+  currentStepOrder?: number;
+  approvals?: ApprovalStepStatus[];
 }
 
 export interface AuditLogEntry {
@@ -42,5 +56,15 @@ export interface SubmissionDetail {
   student: User;
   status: string;
   responses: any;
+  currentStep?: {
+    id: number;
+    stepOrder: number;
+    actionName: string;
+    requiredRole?: {
+      id: number;
+      name: string;
+    };
+  };
   auditLogs?: AuditLogEntry[];
+  approvals?: ApprovalStepStatus[];
 }

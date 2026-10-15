@@ -29,10 +29,11 @@ export default function FormView() {
     const fetchFormAndDraft = async () => {
       try {
         const res = await api.get(`/forms/${formId}`);
-        setFormMeta(res.data);
+        const meta = res.data;
+        setFormMeta(meta);
         
         try {
-          const draftRes = await api.get(`/submissions/drafts/${formId}`);
+          const draftRes = await api.get(`/submissions/drafts/${meta.id}`);
           if (draftRes.data && draftRes.data.responses) {
             setDraftData(draftRes.data.responses);
 
@@ -62,8 +63,10 @@ export default function FormView() {
 
   const onSubmit = async (data: any) => {
     try {
+      const resolvedFormId = formMeta?.id ?? (isNaN(Number(formId)) ? 0 : Number(formId));
       await api.post('/submissions', {
-        formId: Number(formId),
+        formId: resolvedFormId,
+        formSlug: formMeta?.googleFormId || (isNaN(Number(formId)) ? formId : undefined),
         responses: data
       });
       alert(
@@ -80,8 +83,10 @@ export default function FormView() {
 
   const onSaveDraft = async (data: any) => {
     try {
+      const resolvedFormId = formMeta?.id ?? (isNaN(Number(formId)) ? 0 : Number(formId));
       await api.post('/submissions/drafts', {
-        formId: Number(formId),
+        formId: resolvedFormId,
+        formSlug: formMeta?.googleFormId || (isNaN(Number(formId)) ? formId : undefined),
         responses: data
       });
     } catch (err) {
@@ -98,12 +103,22 @@ export default function FormView() {
   }
   if (!formMeta) return <div className="card"><p>Form not found.</p></div>;
 
-  const defaultValues = draftData || {
-    name: user?.fullName,
-    wNumber: user?.wNumber,
-    email: user?.email,
-    studentName: user?.fullName,
-  };
+  const isEliora = user?.email?.trim().toLowerCase() === 'eliora.browning@selu.edu';
+
+  const defaultValues = draftData
+    ? {
+        ...draftData,
+        // Make sure forms do not autofill with fake W numbers other than for Eliora Browning
+        wNumber: isEliora
+          ? (draftData.wNumber || user?.wNumber || 'W0712345')
+          : (draftData.wNumber || ''),
+      }
+    : {
+        name: user?.fullName || '',
+        wNumber: isEliora ? (user?.wNumber || 'W0712345') : '',
+        email: user?.email || '',
+        studentName: user?.fullName || '',
+      };
 
   const renderForm = () => {
     const props = { onSubmit, onSaveDraft, defaultValues };

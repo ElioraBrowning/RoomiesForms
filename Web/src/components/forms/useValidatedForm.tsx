@@ -115,10 +115,41 @@ const rules: Record<string, RegisterOptions<FieldValues, string>> = {
       v === '' || v === undefined || Number(v) >= 0 ? true : 'Amount cannot be negative.',
   },
 
-  // Sign-off
-  studentSignature: { required: 'Type your name to sign.' },
-  supervisorSignature: { required: 'Type the supervisor name to sign.' },
-  agreed: { required: 'You must agree before submitting.' },
+  // Sign-off & Confirmation
+  studentSignature: {
+    validate: (v) =>
+      v === true || (typeof v === 'string' && v.trim().length > 0) || 'Please confirm your electronic signature.',
+  },
+  supervisorSignature: {
+    validate: (v) =>
+      v === true || (typeof v === 'string' && v.trim().length > 0) || 'Please confirm the supervisor signature.',
+  },
+  agreed: {
+    validate: (v) => v === true || 'You must agree before submitting.',
+  },
+
+  // CS 410 Evaluation
+  ratingEmployer: { required: REQUIRED },
+  ratingExperience: { required: REQUIRED },
+  ratingLearning: { required: REQUIRED },
+  repeatExperience: { required: REQUIRED },
+  recommendEmployer: { required: REQUIRED },
+
+  // CS 420 Evaluation
+  relations: { required: REQUIRED },
+  attitude: { required: REQUIRED },
+  judgement: { required: REQUIRED },
+  dependability: { required: REQUIRED },
+  abilityToLearn: { required: REQUIRED },
+  qualityOfWork: { required: REQUIRED },
+  attendance: { required: REQUIRED },
+  punctuality: { required: REQUIRED },
+  overall: { required: REQUIRED },
+
+  // Exit Survey
+  preparationLevel: { required: REQUIRED },
+  improvementAreas: { required: REQUIRED },
+  strengthAreas: { required: REQUIRED },
 };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -147,10 +178,34 @@ const FIELD_LABELS: Record<string, string> = {
   totalHours: 'Total Hours',
   hourlyWage: 'Hourly Wage ($)',
   totalWages: 'Total Wages ($)',
-  relatedAmount: 'Related Amount ($)',
-  studentSignature: 'Student Signature',
-  supervisorSignature: 'Supervisor Signature',
+  relatedAmount: 'Relevance to CS Studies',
+  studentSignature: 'Student Electronic Signature',
+  supervisorSignature: 'Supervisor Electronic Signature',
   agreed: 'Agreement & Terms Acknowledged',
+  semester: 'Academic Semester',
+  ratingEmployer: 'Overall Rating of Employer',
+  ratingExperience: 'Overall Rating of Work Experience',
+  ratingLearning: 'Rating of Learning Experience',
+  repeatExperience: 'Repeat Experience with Employer',
+  repeatExplain: 'Reason for Not Repeating',
+  recommendEmployer: 'Recommend Employer to Others',
+  recommendExplain: 'Reason for Not Recommending',
+  curriculumRevisions: 'Curriculum Revisions & Suggestions',
+  additionalComments: 'Additional Comments',
+  relations: 'Relations with Others',
+  attitude: 'Attitude & Application to Work',
+  judgement: 'Judgement',
+  dependability: 'Dependability',
+  abilityToLearn: 'Ability to Learn',
+  qualityOfWork: 'Quality of Work',
+  attendance: 'Attendance',
+  punctuality: 'Punctuality',
+  overall: 'Overall Performance',
+  remarks: 'Supervisor Remarks',
+  discussedWithStudent: 'Report Discussed with Student',
+  preparationLevel: 'Preparation Level',
+  improvementAreas: 'Areas Needing Improvement',
+  strengthAreas: 'Areas of Strength',
 };
 
 /** "supervisorEmail" -> "Supervisor Email", for the error summary and review views. */
@@ -158,6 +213,18 @@ export function labelFor(field: string): string {
   if (FIELD_LABELS[field]) return FIELD_LABELS[field];
   const spaced = field.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
   return spaced.replace('W Number', 'W#').replace('Gpa', 'GPA').trim();
+}
+
+function hasFieldError(errors: Record<string, any> | undefined, name: string): boolean {
+  if (!errors) return false;
+  if (errors[name]) return true;
+  const parts = name.split('.');
+  let cur: any = errors;
+  for (const part of parts) {
+    if (!cur) return false;
+    cur = cur[part];
+  }
+  return Boolean(cur);
 }
 
 /**
@@ -170,7 +237,7 @@ export function useValidatedForm<T extends FieldValues = FieldValues>(props?: Us
 
   const register = ((name: string, extra?: RegisterOptions) => ({
     ...form.register(name as never, { ...(rules[name] ?? {}), ...(extra ?? {}) } as never),
-    'aria-invalid': form.formState.errors[name] ? true : undefined,
+    'aria-invalid': hasFieldError(form.formState.errors, name) ? true : undefined,
   })) as unknown as typeof form.register;
 
   return { ...form, register };

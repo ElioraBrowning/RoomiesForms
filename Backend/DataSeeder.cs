@@ -17,7 +17,22 @@ public static class DataSeeder
         }
         else if (context.Database.IsRelational())
         {
-            await context.Database.MigrateAsync();
+            try
+            {
+                await context.Database.MigrateAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DataSeeder] Migration notice: {ex.Message}");
+                try
+                {
+                    await context.Database.EnsureCreatedAsync();
+                }
+                catch
+                {
+                    // Schema already exists in database
+                }
+            }
         }
 
         var mockDataService = scope.ServiceProvider.GetRequiredService<Backend.Services.IMockDataService>();

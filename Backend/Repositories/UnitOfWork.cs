@@ -11,6 +11,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Form> Forms { get; private set; }
     public IRepository<ReviewStep> ReviewSteps { get; private set; }
     public IRepository<AuditLog> AuditLogs { get; private set; }
+    public IRepository<User> Users { get; private set; }
 
     public UnitOfWork(AppDbContext context)
     {
@@ -19,6 +20,7 @@ public class UnitOfWork : IUnitOfWork
         Forms = new Repository<Form>(_context);
         ReviewSteps = new Repository<ReviewStep>(_context);
         AuditLogs = new Repository<AuditLog>(_context);
+        Users = new Repository<User>(_context);
     }
 
     public async Task<int> CompleteAsync()

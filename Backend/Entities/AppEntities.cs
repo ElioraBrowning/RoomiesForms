@@ -154,6 +154,9 @@ public class Submission
     public User? Student { get; set; }
     public ReviewStep? CurrentStep { get; set; }
     public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public List<DTOs.ApprovalStepStatusDto> Approvals { get; set; } = new();
 }
 
 public class AuditLog

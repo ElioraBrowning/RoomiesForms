@@ -47,6 +47,7 @@
   --btn-secondary-hover: #eaf2ed;
   --btn-secondary-border-hover: #1a5632;
   --btn-secondary-text: #0a1f14;
+  --login-title-color: #144327;
 
   /* Theme Toggle in light mode */
   --theme-toggle-bg: #0d3822;
@@ -110,6 +111,7 @@
   --btn-secondary-hover: #19583d;
   --btn-secondary-border-hover: #6cca98;
   --btn-secondary-text: #f0fcf6;
+  --login-title-color: var(--slu-gold);
 
   --theme-toggle-bg: #04140c;
   --theme-toggle-border: #1e553a;
@@ -665,8 +667,9 @@ h3 {
   justify-content: center;
   padding: 1.5rem;
   box-sizing: border-box;
-  overflow: hidden;
-  background-color: var(--slu-green);
+  overflow-x: hidden;
+  background-color: var(--bg-body);
+  transition: background-color 0.3s ease;
 }
 
 /* The banner sits as a horizontal band across the middle, with a SELU
@@ -676,14 +679,16 @@ h3 {
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   z-index: 0;
+  pointer-events: none;
 }
 
 .login-backdrop-fill {
   flex: 1;
   min-height: 0;
-  background-color: var(--slu-green);
+  background-color: var(--bg-body);
+  transition: background-color 0.3s ease;
 }
 
 .login-backdrop-img {
@@ -692,12 +697,17 @@ h3 {
   height: auto;
 }
 
-/* Dims the middle so the panel reads, leaving the edges of the art visible. */
 .login-page::after {
+  display: none;
+}
+
+[data-theme="dark"] .login-page::after {
   content: "";
+  display: block;
   position: absolute;
   inset: 0;
   z-index: 1;
+  pointer-events: none;
   background: radial-gradient(
     ellipse 55% 65% at center,
     rgba(3, 26, 17, 0.86) 0%,
@@ -706,9 +716,30 @@ h3 {
   );
 }
 
-.login-panel {
+.login-container {
   position: relative;
   z-index: 2;
+  width: 100%;
+  max-width: 940px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-app-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 1.8rem + 1.8vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.35rem 0;
+  text-align: center;
+  color: var(--login-title-color, #144327);
+  transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .login-app-title {
+  color: var(--slu-gold, #ffc629);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
 /* ------------------------------------------------------------------
@@ -806,14 +837,47 @@ h3 {
 }
 
 .login-hero {
-  background-color: var(--slu-green);
+  background: linear-gradient(165deg, #134226 0%, #1a5632 50%, #0f341e 100%);
   align-items: center;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 1.25rem;
-  padding: 2rem 1.75rem;
+  padding: 2.25rem 1.75rem;
+  transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .login-hero {
+  background: linear-gradient(165deg, #071c12 0%, #0c2b1c 50%, #05140d 100%);
+}
+
+.login-mascot-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 250px;
+  margin: 0 auto;
+  padding: 0.5rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 198, 41, 0.22) 0%,
+    rgba(255, 198, 41, 0.08) 50%,
+    transparent 72%
+  );
+  transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .login-mascot-wrapper {
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 198, 41, 0.26) 0%,
+    rgba(255, 198, 41, 0.08) 50%,
+    transparent 72%
+  );
 }
 
 .login-mascot {
@@ -821,9 +885,15 @@ h3 {
   align-self: center;
   flex-shrink: 0;
   width: 100%;
-  max-width: 230px;
+  max-width: 210px;
   height: auto;
   margin: 0 auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+  transition: transform 0.25s ease;
+}
+
+.login-mascot:hover {
+  transform: scale(1.03);
 }
 
 .login-hero-copy {
@@ -896,15 +966,25 @@ h3 {
 
 @media (max-width: 860px) {
   .login-page {
-    padding: 1rem;
+    padding: 1rem 0.75rem;
+  }
+  .login-container {
+    max-width: 480px;
+  }
+  .login-app-title {
+    font-size: 1.95rem;
+    margin-bottom: 1rem;
   }
   .login-panel {
     grid-template-columns: 1fr;
-    max-width: 460px;
+    max-width: 480px;
   }
   .login-hero {
     padding: 1.5rem 1.25rem;
     gap: 1rem;
+  }
+  .login-mascot-wrapper {
+    max-width: 170px;
   }
   .login-mascot {
     max-width: 150px;
@@ -920,7 +1000,14 @@ h3 {
 
 @media (max-width: 400px) {
   .login-page {
-    padding: 0.6rem;
+    padding: 0.6rem 0.5rem;
+  }
+  .login-app-title {
+    font-size: 1.65rem;
+    margin-bottom: 0.75rem;
+  }
+  .login-mascot-wrapper {
+    max-width: 130px;
   }
   .login-mascot {
     max-width: 116px;
@@ -2777,9 +2864,16 @@ h3 {
     position: fixed;
   }
 
+  .login-container {
+    width: 100%;
+    margin: 4.25rem 0.75rem 1.5rem;
+    box-sizing: border-box;
+  }
+
   .login-panel {
     max-width: none;
-    margin: 4.25rem 0.75rem 1.5rem;
+    margin: 0;
+    width: 100%;
     border-radius: 12px;
   }
 
@@ -2833,8 +2927,11 @@ h3 {
 }
 
 @media (max-width: 400px) {
+  .login-container {
+    margin: 3.8rem 0.5rem 1.25rem;
+  }
   .login-panel {
-    margin: 4rem 0.5rem 1.25rem;
+    margin: 0;
   }
   .login-mascot {
     max-width: 108px;
@@ -2940,3 +3037,110 @@ h3 {
     margin-bottom: 1rem;
   }
 }
+
+/* ==========================================================================
+   Two-Stage Approval Workflow Stepper & Progress Styling
+   ========================================================================== */
+.approval-stepper-card {
+  padding: 1.25rem 1.5rem;
+}
+
+.approval-stepper-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.approval-step-box {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: var(--bg-body);
+  border: 1px solid var(--border-card);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.approval-step-box.step-approved {
+  border-color: var(--status-approved-border);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.approval-step-box.step-rejected {
+  border-color: var(--status-rejected-border);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.approval-step-box.step-active {
+  border-color: var(--slu-gold);
+  background: rgba(255, 198, 41, 0.06);
+  box-shadow: 0 0 0 1px var(--slu-gold);
+}
+
+.approval-step-box.step-waiting {
+  opacity: 0.85;
+}
+
+.approval-step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.approval-step-num {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-help);
+}
+
+.approval-step-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.05rem;
+  color: var(--text-heading);
+}
+
+.approval-step-reviewer {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.approval-step-meta {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  color: var(--text-help);
+}
+
+.approval-step-notes {
+  margin-top: auto;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  font-size: 0.82rem;
+}
+
+.approval-step-notes strong {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-help);
+  margin-bottom: 2px;
+}
+
+.approval-step-notes p {
+  margin: 0;
+  color: var(--text-main);
+  white-space: pre-wrap;
+}
+
+.approval-step-waiting-hint {
+  margin: auto 0 0 0;
+  font-size: 0.8rem;
+  color: var(--text-help);
+  font-style: italic;
+}
+
