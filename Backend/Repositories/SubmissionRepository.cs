@@ -17,6 +17,10 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
             .Include(s => s.Student)
             .Include(s => s.CurrentStep)
                 .ThenInclude(rs => rs!.RequiredRole)
+            .Include(s => s.CurrentStep)
+                .ThenInclude(rs => rs!.Process)
+                    .ThenInclude(p => p!.ReviewSteps)
+                        .ThenInclude(rs => rs.RequiredRole)
             .Include(s => s.AuditLogs)
                 .ThenInclude(a => a.Reviewer)
             .Include(s => s.AuditLogs)
@@ -25,6 +29,7 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
                         s.CurrentStep != null && 
                         s.CurrentStep.RequiredRole != null && 
                         s.CurrentStep.RequiredRole.Name == roleName)
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -35,11 +40,16 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
             .Include(s => s.Student)
             .Include(s => s.CurrentStep)
                 .ThenInclude(rs => rs!.RequiredRole)
+            .Include(s => s.CurrentStep)
+                .ThenInclude(rs => rs!.Process)
+                    .ThenInclude(p => p!.ReviewSteps)
+                        .ThenInclude(rs => rs.RequiredRole)
             .Include(s => s.AuditLogs)
                 .ThenInclude(a => a.Reviewer)
             .Include(s => s.AuditLogs)
                 .ThenInclude(a => a.Step)
             .Where(s => s.StudentId == studentId)
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -50,10 +60,15 @@ public class SubmissionRepository : Repository<Submission>, ISubmissionRepositor
             .Include(s => s.Student)
             .Include(s => s.CurrentStep)
                 .ThenInclude(rs => rs!.RequiredRole)
+            .Include(s => s.CurrentStep)
+                .ThenInclude(rs => rs!.Process)
+                    .ThenInclude(p => p!.ReviewSteps)
+                        .ThenInclude(rs => rs.RequiredRole)
             .Include(s => s.AuditLogs)
                 .ThenInclude(a => a.Reviewer)
             .Include(s => s.AuditLogs)
                 .ThenInclude(a => a.Step)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(s => s.Id == submissionId);
     }
 }

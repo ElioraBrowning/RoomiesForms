@@ -1,0 +1,50 @@
+{
+  "id": "ExitSurvey",
+  "title": "CS Exit Survey",
+  "department": "Computer Science",
+  "category": "Program feedback",
+  "description": "Tell the department how well your coursework prepared you. Your answers are anonymous.",
+  "needs": [
+    "Nothing to look up. It takes about five minutes."
+  ],
+  "submitLabel": "Submit survey",
+  "anonymous": true,
+  "intro": {
+    "title": "This survey is anonymous",
+    "body": [
+      "Your answers are not linked to your name, W# or email. Faculty see the answers, but not who wrote them.",
+      "Please be honest, and please keep it constructive. Feedback that is aggressive or uses profanity is hard to act on, and the faculty reading it are people too."
+    ]
+  },
+  "pages": [
+    {
+      "id": "preparation",
+      "title": "How prepared were you?",
+      "description": "Answer based on how your coursework prepared you, not on the internship itself.",
+      "questions": [
+        { "id": "preparationLevel", "type": "choice", "label": "How well prepared did you feel for the project in this course?", "options": ["Not prepared at all", "Somewhat prepared", "Adequately prepared", "More than adequately prepared", "Extremely well prepared"] }
+      ]
+    },
+    {
+      "id": "gaps",
+      "title": "Where did you feel underprepared?",
+      "questions": [
+        { "id": "improvementAreas", "type": "longText", "label": "Concepts, tools or skills your coursework did not cover well enough", "minLength": 10, "maxLength": 2000 }
+      ]
+    },
+    {
+      "id": "strengths",
+      "title": "Where did you feel well prepared?",
+      "questions": [
+        { "id": "strengthAreas", "type": "longText", "label": "Concepts, tools or skills your coursework prepared you well for", "minLength": 10, "maxLength": 2000 }
+      ]
+    },
+    {
+      "id": "comments",
+      "title": "Anything else?",
+      "questions": [
+        { "id": "additionalComments", "type": "longText", "label": "Other suggestions for the program", "required": false, "maxLength": 2000 }
+      ]
+    }
+  ]
+}

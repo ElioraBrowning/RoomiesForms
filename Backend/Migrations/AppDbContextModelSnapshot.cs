@@ -23,6 +23,31 @@ namespace Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Backend.Entities.AnonymousResponse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FormId")
+                        .HasColumnType("integer");
+
+                    b.Property<JsonDocument>("Responses")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("SubmittedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FormId");
+
+                    b.ToTable("AnonymousResponses");
+                });
+
             modelBuilder.Entity("Backend.Entities.AuditLog", b =>
                 {
                     b.Property<int>("Id")
@@ -130,6 +155,9 @@ namespace Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("IpAddress")
                         .HasColumnType("text");
 
@@ -192,6 +220,115 @@ namespace Server.Migrations
                     b.HasIndex("ProcessId");
 
                     b.ToTable("Forms");
+                });
+
+            modelBuilder.Entity("Backend.Entities.FormAssignment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("AssignedById")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FormId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedById");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("FormId", "StudentId")
+                        .IsUnique();
+
+                    b.ToTable("FormAssignments");
+                });
+
+            modelBuilder.Entity("Backend.Entities.FormDefinition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FormKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Json")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UpdatedById")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FormKey")
+                        .IsUnique();
+
+                    b.ToTable("FormDefinitions");
+                });
+
+            modelBuilder.Entity("Backend.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "ReadAt");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Backend.Entities.Program", b =>
@@ -422,6 +559,17 @@ namespace Server.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("Backend.Entities.AnonymousResponse", b =>
+                {
+                    b.HasOne("Backend.Entities.Form", "Form")
+                        .WithMany()
+                        .HasForeignKey("FormId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Form");
+                });
+
             modelBuilder.Entity("Backend.Entities.AuditLog", b =>
                 {
                     b.HasOne("Backend.Entities.User", "Reviewer")
@@ -437,7 +585,7 @@ namespace Server.Migrations
                         .IsRequired();
 
                     b.HasOne("Backend.Entities.Submission", "Submission")
-                        .WithMany()
+                        .WithMany("AuditLogs")
                         .HasForeignKey("SubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -488,6 +636,43 @@ namespace Server.Migrations
                     b.Navigation("OwnerDepartment");
 
                     b.Navigation("Process");
+                });
+
+            modelBuilder.Entity("Backend.Entities.FormAssignment", b =>
+                {
+                    b.HasOne("Backend.Entities.User", "AssignedBy")
+                        .WithMany()
+                        .HasForeignKey("AssignedById")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Backend.Entities.Form", "Form")
+                        .WithMany()
+                        .HasForeignKey("FormId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Entities.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssignedBy");
+
+                    b.Navigation("Form");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Backend.Entities.Notification", b =>
+                {
+                    b.HasOne("Backend.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Backend.Entities.Program", b =>
@@ -614,6 +799,11 @@ namespace Server.Migrations
             modelBuilder.Entity("Backend.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("Backend.Entities.Submission", b =>
+                {
+                    b.Navigation("AuditLogs");
                 });
 
             modelBuilder.Entity("Backend.Entities.User", b =>

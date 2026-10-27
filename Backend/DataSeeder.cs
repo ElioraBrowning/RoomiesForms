@@ -37,5 +37,13 @@ public static class DataSeeder
 
         var mockDataService = scope.ServiceProvider.GetRequiredService<Backend.Services.IMockDataService>();
         await mockDataService.SeedUniversityDataAsync(context);
+
+        // Forms edited in the form builder override the JSON files that ship with the app.
+        var registry = scope.ServiceProvider.GetRequiredService<Backend.Forms.IFormSchemaRegistry>();
+        foreach (var definition in await context.FormDefinitions.ToListAsync())
+        {
+            var schema = System.Text.Json.JsonSerializer.Deserialize<Backend.Forms.FormSchema>(definition.Json, Backend.Forms.FormSchemaJson.Options);
+            if (schema != null) registry.Set(schema);
+        }
     }
 }
