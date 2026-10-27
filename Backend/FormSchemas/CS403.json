@@ -1,0 +1,41 @@
+{
+  "id": "CS403",
+  "title": "CS 403: Measurable Learning Objectives",
+  "department": "Computer Science",
+  "category": "Internship",
+  "description": "The goals you plan to reach this semester. Your supervisor rates how well you met each one at the end of the semester.",
+  "needs": [
+    "One to ten objectives you've agreed on with your supervisor",
+    "Each objective written so someone could check whether it was met"
+  ],
+  "submitLabel": "Submit objectives",
+  "pages": [
+    {
+      "id": "objectives",
+      "title": "What do you plan to accomplish?",
+      "description": "Write each objective so someone could check whether it was met. For example: \"Ship the login page redesign to production by October 15.\"",
+      "questions": [
+        {
+          "id": "objectives",
+          "reviewRequired": true,
+          "type": "list",
+          "label": "Objectives",
+          "itemLabel": "Objective",
+          "addLabel": "Add an objective",
+          "minItems": 1,
+          "maxItems": 10,
+          "fields": [
+            { "id": "text", "type": "longText", "label": "Objective", "minLength": 10, "maxLength": 500 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "signature",
+      "title": "Sign your objectives",
+      "questions": [
+        { "id": "studentSignature", "type": "signature", "label": "Type your full name to sign", "statement": "I confirm these are my learning objectives for this semester." }
+      ]
+    }
+  ]
+}

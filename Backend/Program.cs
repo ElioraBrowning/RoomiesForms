@@ -20,6 +20,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     else
     {
         options.UseNpgsql(connectionString);
+        // The schema is applied by hand-checked migrations; don't let a snapshot drift stop startup.
+        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 });
 
@@ -27,10 +29,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<Backend.Services.IMockDataService, Backend.Services.MockDataService>();
 builder.Services.AddScoped<Backend.Repositories.IUnitOfWork, Backend.Repositories.UnitOfWork>();
 builder.Services.AddScoped<Backend.Services.ISubmissionService, Backend.Services.SubmissionService>();
+builder.Services.AddScoped<Backend.Services.IAssignmentService, Backend.Services.AssignmentService>();
+builder.Services.AddScoped<Backend.Services.INotificationService, Backend.Services.NotificationService>();
+builder.Services.AddSingleton<Backend.Forms.IFormSchemaRegistry, Backend.Forms.FormSchemaRegistry>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 });
 builder.Services.AddEndpointsApiExplorer();
 

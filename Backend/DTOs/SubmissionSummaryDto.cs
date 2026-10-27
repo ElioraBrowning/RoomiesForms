@@ -27,4 +27,23 @@ public class SubmissionSummaryDto
     public string? CurrentStepName { get; set; }
     public int? CurrentStepOrder { get; set; }
     public List<ApprovalStepStatusDto> Approvals { get; set; } = new();
+    public string? FormKey { get; set; }
+    public EmployerReviewDto? EmployerReview { get; set; }
+
+    /// <summary>Only on the "previously reviewed" list: what the signed-in reviewer did and when.</summary>
+    public string? ReviewedAction { get; set; }
+    public DateTime? ReviewedAt { get; set; }
+}
+
+public class EmployerReviewDto
+{
+    public string EmployerEmail { get; set; } = string.Empty;
+    public string? EmployerName { get; set; }
+    public string Status { get; set; } = string.Empty;
+
+    /// <summary>Only filled in for the student who owns the submission and for reviewers, so they can send the link.</summary>
+    public string? AccessToken { get; set; }
+    public DateTime? SignedAt { get; set; }
+    public DateTime? ExpiresAt { get; set; }
+    public bool Expired { get; set; }
 }

@@ -21,6 +21,10 @@ public class AppDbContext : DbContext
     public DbSet<Submission> Submissions { get; set; } = null!;
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
     public DbSet<ExternalApproval> ExternalApprovals { get; set; } = null!;
+    public DbSet<FormAssignment> FormAssignments { get; set; } = null!;
+    public DbSet<AnonymousResponse> AnonymousResponses { get; set; } = null!;
+    public DbSet<Notification> Notifications { get; set; } = null!;
+    public DbSet<FormDefinition> FormDefinitions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -139,6 +143,47 @@ public class AppDbContext : DbContext
             .HasForeignKey(ea => ea.SubmissionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<FormAssignment>()
+            .HasOne(fa => fa.Form)
+            .WithMany()
+            .HasForeignKey(fa => fa.FormId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FormAssignment>()
+            .HasOne(fa => fa.Student)
+            .WithMany()
+            .HasForeignKey(fa => fa.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FormAssignment>()
+            .HasOne(fa => fa.AssignedBy)
+            .WithMany()
+            .HasForeignKey(fa => fa.AssignedById)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<FormAssignment>()
+            .HasIndex(fa => new { fa.FormId, fa.StudentId })
+            .IsUnique();
+
+        modelBuilder.Entity<AnonymousResponse>()
+            .HasOne(ar => ar.Form)
+            .WithMany()
+            .HasForeignKey(ar => ar.FormId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.UserId, n.ReadAt });
+
+        modelBuilder.Entity<FormDefinition>()
+            .HasIndex(f => f.FormKey)
+            .IsUnique();
+
         // Unique constraints
         modelBuilder.Entity<UniversitySetting>().HasIndex(us => us.SettingKey).IsUnique();
         modelBuilder.Entity<College>().HasIndex(c => c.Code).IsUnique();
@@ -158,10 +203,19 @@ public class AppDbContext : DbContext
                     v => v.RootElement.ToString(),
                     v => JsonDocument.Parse(v, default)
                 );
+            modelBuilder.Entity<AnonymousResponse>()
+                .Property(e => e.Responses)
+                .HasConversion(
+                    v => v.RootElement.ToString(),
+                    v => JsonDocument.Parse(v, default)
+                );
         }
         else
         {
             modelBuilder.Entity<Submission>()
+                .Property(e => e.Responses)
+                .HasColumnType("jsonb");
+            modelBuilder.Entity<AnonymousResponse>()
                 .Property(e => e.Responses)
                 .HasColumnType("jsonb");
         }

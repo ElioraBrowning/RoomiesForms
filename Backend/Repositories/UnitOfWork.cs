@@ -12,6 +12,9 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<ReviewStep> ReviewSteps { get; private set; }
     public IRepository<AuditLog> AuditLogs { get; private set; }
     public IRepository<User> Users { get; private set; }
+    public IRepository<FormAssignment> FormAssignments { get; private set; }
+    public IRepository<AnonymousResponse> AnonymousResponses { get; private set; }
+    public IRepository<ExternalApproval> ExternalApprovals { get; private set; }
 
     public UnitOfWork(AppDbContext context)
     {
@@ -21,6 +24,9 @@ public class UnitOfWork : IUnitOfWork
         ReviewSteps = new Repository<ReviewStep>(_context);
         AuditLogs = new Repository<AuditLog>(_context);
         Users = new Repository<User>(_context);
+        FormAssignments = new Repository<FormAssignment>(_context);
+        AnonymousResponses = new Repository<AnonymousResponse>(_context);
+        ExternalApprovals = new Repository<ExternalApproval>(_context);
     }
 
     public async Task<int> CompleteAsync()

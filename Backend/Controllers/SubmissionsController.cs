@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.DTOs;
 using Backend.Services;
-using System.Security.Claims;
 
 namespace Backend.Controllers;
 
@@ -23,64 +22,69 @@ public class SubmissionsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMySubmissions()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+        if (User.GetUserId() is not int userId) return Unauthorized();
+        return Ok(await _submissionService.GetSubmissionsForUserAsync(userId, User.GetRoles()));
+    }
 
-        var isFaculty = User.IsInRole("Faculty");
-        var isDepartmentHead = User.IsInRole("Department Head");
+    /// <summary>Submissions waiting on an employer's sign-off or evaluation.</summary>
+    [HttpGet("awaiting-employer")]
+    [Authorize(Roles = Roles.Faculty + "," + Roles.DepartmentHead)]
+    public async Task<IActionResult> GetAwaitingEmployer()
+    {
+        return Ok(await _submissionService.GetAwaitingEmployerAsync());
+    }
 
-        var submissions = await _submissionService.GetSubmissionsForUserAsync(userId, isFaculty, isDepartmentHead);
-        return Ok(submissions);
+    /// <summary>Submissions the signed-in reviewer has already approved or sent back.</summary>
+    [HttpGet("reviewed")]
+    [Authorize(Roles = Roles.Faculty + "," + Roles.DepartmentHead)]
+    public async Task<IActionResult> GetReviewed()
+    {
+        if (User.GetUserId() is not int userId) return Unauthorized();
+        return Ok(await _submissionService.GetReviewedByAsync(userId));
+    }
+
+    /// <summary>Makes a new employer link (the old one stops working). For expired or lost links.</summary>
+    [HttpPost("{id:int}/employer-link")]
+    public async Task<IActionResult> RenewEmployerLink(int id)
+    {
+        if (User.GetUserId() is not int userId) return Unauthorized();
+        return await Run(async () => Ok(await _submissionService.RenewEmployerLinkAsync(id, userId, User.GetRoles())));
     }
 
     [HttpPost]
     public async Task<IActionResult> SubmitForm([FromBody] SubmitFormRequestDto request)
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+        if (User.GetUserId() is not int userId) return Unauthorized();
 
-        try
+        return await Run(async () =>
         {
-            var submission = await _submissionService.SubmitFormAsync(userId, request);
-            return CreatedAtAction(nameof(GetSubmission), new { id = submission.Id }, submission);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+            var result = await _submissionService.SubmitFormAsync(userId, request);
+            if (result.Anonymous) return Ok(new { Anonymous = true });
+            return CreatedAtAction(nameof(GetSubmission), new { id = result.Submission!.Id }, result.Submission);
+        });
     }
 
     [HttpPost("drafts")]
     public async Task<IActionResult> SaveDraft([FromBody] SaveDraftRequestDto request)
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+        if (User.GetUserId() is not int userId) return Unauthorized();
 
-        try
+        return await Run(async () =>
         {
             var draft = await _submissionService.SaveDraftAsync(userId, request);
-            return Ok(draft);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(ex.Message);
-        }
+            return Ok(new { draft.Id, draft.Status, draft.UpdatedAt });
+        });
     }
 
     [HttpGet("drafts/{formId}")]
     public async Task<IActionResult> GetDraft(string formId)
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+        if (User.GetUserId() is not int userId) return Unauthorized();
 
-        int targetFormId;
-        if (!int.TryParse(formId, out targetFormId))
+        if (!int.TryParse(formId, out var targetFormId))
         {
-            var match = (await _unitOfWork.Forms.FindAsync(f => f.GoogleFormId.ToLower() == formId.ToLower())).FirstOrDefault();
+            var lowered = formId.ToLower();
+            var match = (await _unitOfWork.Forms.FindAsync(f => f.GoogleFormId.ToLower() == lowered)).FirstOrDefault();
             if (match == null) return NotFound("Form not found.");
             targetFormId = match.Id;
         }
@@ -90,49 +94,66 @@ public class SubmissionsController : ControllerBase
         return Ok(draft);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetSubmission(int id)
     {
-        var submission = await _submissionService.GetSubmissionByIdAsync(id);
-        if (submission == null) return NotFound();
-        return Ok(submission);
+        if (User.GetUserId() is not int userId) return Unauthorized();
+
+        return await Run(async () =>
+        {
+            var submission = await _submissionService.GetSubmissionForViewerAsync(id, userId, User.GetRoles());
+            return submission == null ? NotFound() : Ok(submission);
+        });
     }
 
-    [HttpPost("{id}/approve")]
+    [HttpPost("{id:int}/approve")]
+    [Authorize(Roles = Roles.Faculty + "," + Roles.DepartmentHead)]
     public async Task<IActionResult> ApproveSubmission(int id, [FromBody] ApproveRequestDto request)
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+        if (User.GetUserId() is not int userId) return Unauthorized();
 
-        try
+        return await Run(async () =>
         {
-            var success = await _submissionService.ApproveSubmissionAsync(id, userId, request.Comments);
-            if (!success) return BadRequest("Could not approve submission.");
-
-            return Ok(new { Message = "Approved successfully" });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return StatusCode(403, new { Message = ex.Message });
-        }
+            var success = await _submissionService.ApproveSubmissionAsync(id, userId, User.GetRoles(), request.Comments);
+            return success ? Ok(new { Message = "Approved." }) : NotFound();
+        });
     }
 
-    [HttpPost("{id}/reject")]
+    [HttpPost("{id:int}/reject")]
+    [Authorize(Roles = Roles.Faculty + "," + Roles.DepartmentHead)]
     public async Task<IActionResult> RejectSubmission(int id, [FromBody] RejectRequestDto request)
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdStr, out int userId)) return Unauthorized();
+        if (User.GetUserId() is not int userId) return Unauthorized();
 
+        return await Run(async () =>
+        {
+            var success = await _submissionService.RejectSubmissionAsync(id, userId, User.GetRoles(), request.Comments);
+            return success ? Ok(new { Message = "Sent back to the student." }) : NotFound();
+        });
+    }
+
+    /// <summary>Maps the service's exceptions to status codes in one place.</summary>
+    private async Task<IActionResult> Run(Func<Task<IActionResult>> action)
+    {
         try
         {
-            var success = await _submissionService.RejectSubmissionAsync(id, userId, request.Comments);
-            if (!success) return BadRequest("Could not reject submission.");
-
-            return Ok(new { Message = "Submission rejected and returned to student for corrections." });
+            return await action();
+        }
+        catch (FormValidationException ex)
+        {
+            return BadRequest(new { Message = ex.Message, Errors = ex.Errors });
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { Message = ex.Message });
         }
         catch (UnauthorizedAccessException ex)
         {
             return StatusCode(403, new { Message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
         }
     }
 }

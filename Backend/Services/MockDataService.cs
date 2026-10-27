@@ -6,7 +6,7 @@ namespace Backend.Services;
 
 public class MockDataService : IMockDataService
 {
-        public async Task<User> GetMockUserAsync(string email)
+    public async Task<User> GetMockUserAsync(string email)
     {
         var isFaculty = email.Equals("galkadi@selu.edu", StringComparison.OrdinalIgnoreCase);
         var isDeptHead = email.Equals("bonnie.achee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
@@ -44,7 +44,7 @@ public class MockDataService : IMockDataService
             FullName = fullName,
             WNumber = isEliora ? "W0712345" : ("W" + new Random().Next(1000000, 9999999)),
             DepartmentId = 1, // CS Department
-            PrimaryProgramId = 1 
+            PrimaryProgramId = 1
         };
 
         return await Task.FromResult(user);
@@ -84,58 +84,27 @@ public class MockDataService : IMockDataService
         }
 
         // 4. Roles
-        var roleFaculty = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Faculty");
-        if (roleFaculty == null)
-        {
-            roleFaculty = new Role { Name = "Faculty" };
-            context.Roles.Add(roleFaculty);
-            await context.SaveChangesAsync();
-        }
+        var roleFaculty = await EnsureRoleAsync(context, Roles.Faculty);
+        var roleDeptHead = await EnsureRoleAsync(context, Roles.DepartmentHead);
+        var roleStudent = await EnsureRoleAsync(context, Roles.Student);
+        var roleEmployer = await EnsureRoleAsync(context, Roles.Employer);
 
-        var roleDeptHead = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Department Head");
-        if (roleDeptHead == null)
+        // 5. Review processes. Most forms go Faculty -> Department Head. Forms the employer has to
+        //    sign or fill in (CS 402, CS 420) go Employer -> Faculty -> Department Head.
+        var defaultProcess = await EnsureProcessAsync(context, "CS Internship Approval", deptCS.Id, new[]
         {
-            roleDeptHead = new Role { Name = "Department Head" };
-            context.Roles.Add(roleDeptHead);
-            await context.SaveChangesAsync();
-        }
+            (roleFaculty, "Faculty Review"),
+            (roleDeptHead, "Department Head Approval"),
+        });
 
-        // 5. ReviewProcess
-        var defaultProcess = await context.ReviewProcesses.FirstOrDefaultAsync(p => p.Name == "CS Internship Approval");
-        if (defaultProcess == null)
+        var employerProcess = await EnsureProcessAsync(context, "CS Internship Approval with Employer", deptCS.Id, new[]
         {
-            defaultProcess = new ReviewProcess { Name = "CS Internship Approval", DepartmentId = deptCS.Id };
-            context.ReviewProcesses.Add(defaultProcess);
-            await context.SaveChangesAsync();
-        }
+            (roleEmployer, "Employer Review"),
+            (roleFaculty, "Faculty Review"),
+            (roleDeptHead, "Department Head Approval"),
+        });
 
-        // 6. ReviewSteps: Step 1 (Faculty - Dr. Ghassan Alkadi), Step 2 (Department Head - Dr. Bonnie Achée)
-        var step1 = await context.ReviewSteps.FirstOrDefaultAsync(rs => rs.ProcessId == defaultProcess.Id && rs.StepOrder == 1);
-        if (step1 == null)
-        {
-            step1 = new ReviewStep { ProcessId = defaultProcess.Id, RequiredRoleId = roleFaculty.Id, StepOrder = 1, ActionName = "Faculty Review (Dr. Ghassan Alkadi)" };
-            context.ReviewSteps.Add(step1);
-        }
-        else
-        {
-            step1.RequiredRoleId = roleFaculty.Id;
-            step1.ActionName = "Faculty Review (Dr. Ghassan Alkadi)";
-        }
-
-        var step2 = await context.ReviewSteps.FirstOrDefaultAsync(rs => rs.ProcessId == defaultProcess.Id && rs.StepOrder == 2);
-        if (step2 == null)
-        {
-            step2 = new ReviewStep { ProcessId = defaultProcess.Id, RequiredRoleId = roleDeptHead.Id, StepOrder = 2, ActionName = "Department Head Review (Dr. Bonnie Achée)" };
-            context.ReviewSteps.Add(step2);
-        }
-        else
-        {
-            step2.RequiredRoleId = roleDeptHead.Id;
-            step2.ActionName = "Department Head Review (Dr. Bonnie Achée)";
-        }
-        await context.SaveChangesAsync();
-
-        // 7. Cleanup old duplicate CS401 form from earlier prototyping
+        // 6. Cleanup old duplicate CS401 form from earlier prototyping
         var oldForm = await context.Forms.FirstOrDefaultAsync(f => f.GoogleFormId == "seeded_401");
         if (oldForm != null)
         {
@@ -143,34 +112,145 @@ public class MockDataService : IMockDataService
             await context.SaveChangesAsync();
         }
 
-        // 8. Always ensure all 8 required forms exist and map to the active process
-        var formsToSeed = new List<Form>
+        // 7. Always ensure all 8 required forms exist and map to the right process.
+        //    Submissions already in review keep the step they are on.
+        var formsToSeed = new List<(string Key, string Title, ReviewProcess Process)>
         {
-            new Form { Title = "CS Form 401: Internship Application", GoogleFormId = "CS401", OwnerDepartmentId = deptCS.Id, ProcessId = defaultProcess.Id, PublicUrl = "/forms/CS401" },
-            new Form { Title = "CS Form 402: Employer Agreement", GoogleFormId = "CS402", OwnerDepartmentId = deptCS.Id, ProcessId = defaultProcess.Id, PublicUrl = "/forms/CS402" },
-            new Form { Title = "CS Form 403: Measurable Learning Objectives", GoogleFormId = "CS403", OwnerDepartmentId = deptCS.Id, ProcessId = defaultProcess.Id, PublicUrl = "/forms/CS403" },
-            new Form { Title = "CS Form 404: Time & Wage Report", GoogleFormId = "CS404", OwnerDepartmentId = deptCS.Id, ProcessId = defaultProcess.Id, PublicUrl = "/forms/CS404" },
-            new Form { Title = "CS Form 405: Weekly Activity Log", GoogleFormId = "CS405", OwnerDepartmentId = deptCS.Id, ProcessId = defaultProcess.Id, PublicUrl = "/forms/CS405" },
-            new Form { Title = "CS Form 410: Student's Evaluation of Employer", GoogleFormId = "CS410", OwnerDepartmentId = deptCS.Id, ProcessId = defaultProcess.Id, PublicUrl = "/forms/CS410" },
-            new Form { Title = "CS Form 420: Employer's Evaluation of Student", GoogleFormId = "CS420", OwnerDepartmentId = deptCS.Id, ProcessId = defaultProcess.Id, PublicUrl = "/forms/CS420" },
-            new Form { Title = "Exit Survey: CS Program Feedback", GoogleFormId = "ExitSurvey", OwnerDepartmentId = deptCS.Id, ProcessId = defaultProcess.Id, PublicUrl = "/forms/ExitSurvey" }
+            ("CS401", "CS 401: Internship Application", defaultProcess),
+            ("CS402", "CS 402: Employer Agreement", employerProcess),
+            ("CS403", "CS 403: Measurable Learning Objectives", defaultProcess),
+            ("CS404", "CS 404: Time and Wage Report", defaultProcess),
+            ("CS405", "CS 405: Weekly Activity Log", defaultProcess),
+            ("CS410", "CS 410: Student's Evaluation of Employer", defaultProcess),
+            ("CS420", "CS 420: Employer's Evaluation of Student", employerProcess),
+            ("ExitSurvey", "CS Exit Survey", defaultProcess),
         };
 
-        foreach (var form in formsToSeed)
+        foreach (var (key, title, process) in formsToSeed)
         {
-            var existing = await context.Forms.FirstOrDefaultAsync(f => f.GoogleFormId == form.GoogleFormId);
+            var existing = await context.Forms.FirstOrDefaultAsync(f => f.GoogleFormId == key);
             if (existing == null)
             {
-                context.Forms.Add(form);
+                context.Forms.Add(new Form { Title = title, GoogleFormId = key, OwnerDepartmentId = deptCS.Id, ProcessId = process.Id, PublicUrl = "/forms/" + key });
             }
             else
             {
-                if (existing.ProcessId != defaultProcess.Id || existing.OwnerDepartmentId != deptCS.Id)
-                {
-                    existing.ProcessId = defaultProcess.Id;
-                    existing.OwnerDepartmentId = deptCS.Id;
-                }
+                existing.Title = title;
+                existing.ProcessId = process.Id;
+                existing.OwnerDepartmentId = deptCS.Id;
             }
+        }
+        await context.SaveChangesAsync();
+
+        // 8. Demo accounts, so the assignment screen has people in it before anyone signs in.
+        await EnsureUserAsync(context, "galkadi@selu.edu", roleFaculty, deptCS.Id);
+        await EnsureUserAsync(context, "bonnie.achee@southeastern.edu", roleDeptHead, deptCS.Id);
+        await EnsureUserAsync(context, "eliora.browning@selu.edu", roleStudent, deptCS.Id);
+        await EnsureUserAsync(context, "marcus.thibodeaux@selu.edu", roleStudent, deptCS.Id);
+        await EnsureUserAsync(context, "ava.landry@selu.edu", roleStudent, deptCS.Id);
+
+        // 9. Submissions made before assignments existed keep working: give each one an assignment.
+        var pairs = await context.Submissions
+            .Select(s => new { s.FormId, s.StudentId })
+            .Distinct()
+            .ToListAsync();
+        foreach (var pair in pairs)
+        {
+            if (!await context.FormAssignments.AnyAsync(a => a.FormId == pair.FormId && a.StudentId == pair.StudentId))
+            {
+                context.FormAssignments.Add(new FormAssignment { FormId = pair.FormId, StudentId = pair.StudentId, Note = "Assigned automatically for a form you had already started." });
+            }
+        }
+        await context.SaveChangesAsync();
+
+        // 10. The exit survey is anonymous now. Move any exit surveys submitted before that into
+        //     anonymous responses and delete the originals, which were tied to a student.
+        var exitSurvey = await context.Forms.FirstAsync(f => f.GoogleFormId == "ExitSurvey");
+        var linkedSurveys = await context.Submissions
+            .Where(s => s.FormId == exitSurvey.Id && s.Status != "Draft")
+            .ToListAsync();
+        foreach (var old in linkedSurveys)
+        {
+            var answers = System.Text.Json.Nodes.JsonNode.Parse(old.Responses.RootElement.GetRawText()) as System.Text.Json.Nodes.JsonObject
+                          ?? new System.Text.Json.Nodes.JsonObject();
+            answers.Remove("__progress");
+            answers.Remove("name");
+            answers.Remove("studentName");
+            answers.Remove("email");
+            answers.Remove("wNumber");
+
+            context.AnonymousResponses.Add(new AnonymousResponse
+            {
+                FormId = exitSurvey.Id,
+                Responses = System.Text.Json.JsonDocument.Parse(answers.ToJsonString()),
+                SubmittedOn = DateTime.SpecifyKind(old.CreatedAt.Date, DateTimeKind.Utc),
+            });
+
+            var assignment = await context.FormAssignments.FirstOrDefaultAsync(a => a.FormId == exitSurvey.Id && a.StudentId == old.StudentId);
+            if (assignment != null) assignment.CompletedOn = DateTime.SpecifyKind(old.CreatedAt.Date, DateTimeKind.Utc);
+
+            context.Submissions.Remove(old);
+        }
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task<Role> EnsureRoleAsync(AppDbContext context, string name)
+    {
+        var role = await context.Roles.FirstOrDefaultAsync(r => r.Name == name);
+        if (role != null) return role;
+        role = new Role { Name = name };
+        context.Roles.Add(role);
+        await context.SaveChangesAsync();
+        return role;
+    }
+
+    private static async Task<ReviewProcess> EnsureProcessAsync(AppDbContext context, string name, int departmentId, (Role Role, string ActionName)[] steps)
+    {
+        var process = await context.ReviewProcesses.FirstOrDefaultAsync(p => p.Name == name);
+        if (process == null)
+        {
+            process = new ReviewProcess { Name = name, DepartmentId = departmentId };
+            context.ReviewProcesses.Add(process);
+            await context.SaveChangesAsync();
+        }
+
+        for (var i = 0; i < steps.Length; i++)
+        {
+            var order = i + 1;
+            var step = await context.ReviewSteps.FirstOrDefaultAsync(rs => rs.ProcessId == process.Id && rs.StepOrder == order);
+            if (step == null)
+            {
+                context.ReviewSteps.Add(new ReviewStep { ProcessId = process.Id, StepOrder = order, RequiredRoleId = steps[i].Role.Id, ActionName = steps[i].ActionName });
+            }
+            else
+            {
+                step.RequiredRoleId = steps[i].Role.Id;
+                step.ActionName = steps[i].ActionName;
+            }
+        }
+        await context.SaveChangesAsync();
+        return process;
+    }
+
+    private async Task EnsureUserAsync(AppDbContext context, string email, Role role, int departmentId)
+    {
+        var user = await context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            user = await GetMockUserAsync(email);
+            user.DepartmentId = departmentId;
+            var program = await context.Programs.FirstOrDefaultAsync(p => p.DepartmentId == departmentId);
+            if (program != null) user.PrimaryProgramId = program.Id;
+            while (await context.Users.AnyAsync(u => u.WNumber == user.WNumber))
+            {
+                user.WNumber = "W" + Random.Shared.Next(1000000, 9999999);
+            }
+            context.Users.Add(user);
+        }
+
+        if (!user.UserRoles.Any(ur => ur.RoleId == role.Id))
+        {
+            user.UserRoles.Add(new UserRole { RoleId = role.Id });
         }
         await context.SaveChangesAsync();
     }

@@ -1,0 +1,80 @@
+{
+  "id": "CS402",
+  "title": "CS 402: Employer Agreement",
+  "department": "Computer Science",
+  "category": "Internship",
+  "description": "The agreement between you, your employer and the department. You fill in the details, then your supervisor signs it through a link.",
+  "needs": [
+    "The company's name",
+    "Your supervisor's name, title and email (they'll get a link to sign)",
+    "Hours per week (20 for fall or spring, 40 for summer)",
+    "The internship's start and end dates"
+  ],
+  "submitLabel": "Send to employer",
+  "employer": {
+    "emailField": "supervisorEmail",
+    "nameField": "supervisorName",
+    "mode": "signoff",
+    "instructions": "A student from Southeastern Louisiana University's Computer Science department has listed you as their internship supervisor. Please check the details below and sign the agreement, or send it back to the student with what needs to change."
+  },
+  "pages": [
+    {
+      "id": "student",
+      "title": "Who is the intern?",
+      "questions": [
+        { "id": "studentName", "type": "text", "label": "Student full name", "minLength": 2, "maxLength": 100 }
+      ]
+    },
+    {
+      "id": "company",
+      "title": "Who is the employer?",
+      "questions": [
+        { "id": "companyName", "reviewRequired": true, "type": "text", "label": "Company name", "placeholder": "Acme Corp", "maxLength": 120 }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "title": "Who will sign for the employer?",
+      "description": "Your supervisor will get a link to review and sign this agreement after you submit.",
+      "questions": [
+        { "id": "supervisorName", "type": "text", "label": "Supervisor name and title", "placeholder": "John Smith, Senior Developer", "maxLength": 120 },
+        { "id": "supervisorEmail", "reviewRequired": true, "type": "email", "label": "Supervisor email", "placeholder": "john.smith@acme.com" }
+      ]
+    },
+    {
+      "id": "hours",
+      "title": "How many hours a week?",
+      "description": "Fall and spring internships are 20 hours a week for three credit hours. Summer internships are 40.",
+      "questions": [
+        { "id": "hoursPerWeek", "reviewRequired": true, "type": "number", "label": "Hours per week", "placeholder": "20", "min": 1, "max": 60, "step": 1 }
+      ]
+    },
+    {
+      "id": "dates",
+      "title": "When is the internship?",
+      "questions": [
+        { "id": "startDate", "reviewRequired": true, "type": "date", "label": "Start date" },
+        { "id": "endDate", "reviewRequired": true, "type": "date", "label": "End date", "after": "startDate" }
+      ]
+    },
+    {
+      "id": "conditions",
+      "title": "Conditions of the agreement",
+      "description": "1. The employer provides workers' compensation coverage for the intern.\n2. The intern works 20 hours a week for three credit hours in fall or spring, or 40 hours a week in summer.\n3. Transfers, withdrawals or dismissals are decided jointly by the Department Head, the student and the employer.\n4. All evaluations, logs and summaries are due by 4:00 p.m. on the last class day of the semester.",
+      "questions": [
+        { "id": "agreed", "type": "signature", "label": "Type your full name to sign", "statement": "I agree to these conditions and understand my responsibilities.", "matchField": "studentName" }
+      ]
+    },
+    {
+      "id": "employerSignoff",
+      "respondent": "employer",
+      "title": "Employer sign-off",
+      "description": "1. The employer provides workers' compensation coverage for the intern.\n2. The intern works 20 hours a week for three credit hours in fall or spring, or 40 hours a week in summer.\n3. Transfers, withdrawals or dismissals are decided jointly by the Department Head, the student and the employer.\n4. All evaluations, logs and summaries are due by 4:00 p.m. on the last class day of the semester.",
+      "questions": [
+        { "id": "employerSignerName", "reviewRequired": true, "type": "text", "label": "Your name", "minLength": 2, "maxLength": 100 },
+        { "id": "employerSignerTitle", "type": "text", "label": "Your title", "maxLength": 100 },
+        { "id": "employerAgreed", "reviewRequired": true, "type": "signature", "label": "Type your full name to sign", "statement": "On behalf of the employer, I agree to these conditions, including workers' compensation coverage for the intern.", "matchField": "employerSignerName" }
+      ]
+    }
+  ]
+}
