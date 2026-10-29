@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { SkeletonForm } from '../components/Skeleton';
 import { CopyLink } from '../components/CopyLink';
 import { employerLink } from '../utils/links';
+import { submitToGoogleWorkspace } from '../services/googleSheetsService';
 
 type Done =
   | { kind: 'submitted' }
@@ -145,6 +146,17 @@ export default function FormView() {
   const submit = async (answers: Answers) => {
     try {
       const res = await api.post('/submissions', { ...payloadBase, responses: answers });
+
+      // Append record to Google Sheet via Google Apps Script
+      await submitToGoogleWorkspace({
+        studentName: user?.fullName || '',
+        studentEmail: user?.email || '',
+        submissionId: res.data?.id || form.id,
+        formId: form.googleFormId,
+        summary: isRevision ? 'Resubmission after changes requested' : 'Initial submission',
+        responses: answers,
+      }).catch((err) => console.error('Google Sheets write notice:', err));
+
       if (res.data?.anonymous) {
         setDone({ kind: 'anonymous' });
         return;
