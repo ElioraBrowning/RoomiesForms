@@ -1,56 +1,50 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import api from "../services/api";
-import type { SubmissionDetail, AuditLogEntry } from "../types";
-import { labelFor } from "../components/forms/useValidatedForm";
-import { useAuth } from "../context/AuthContext";
-import "../index.css";
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import api, { readApiError } from '../services/api';
+import type { FormDetail, SubmissionDetail } from '../types';
+import type { FormPage, FormQuestion, FormSchema } from '../forms/types';
+import { AnswerSummary } from '../forms/AnswerSummary';
+import { FormLayoutReview } from '../forms/FormLayoutReview';
+import { formatAnswer } from '../forms/format';
+import { useAuth } from '../context/AuthContext';
+import { ApprovalProgress } from '../components/ApprovalProgress';
+import { StatusBadge } from '../components/StatusBadge';
+import { CopyLink } from '../components/CopyLink';
+import { SkeletonForm } from '../components/Skeleton';
+import { employerLink } from '../utils/links';
 
-import CS401 from "../components/forms/CS401";
-import CS402 from "../components/forms/CS402";
-import CS403 from "../components/forms/CS403";
-import CS404 from "../components/forms/CS404";
-import CS405 from "../components/forms/CS405";
-import CS410 from "../components/forms/CS410";
-import CS420 from "../components/forms/CS420";
-import ExitSurvey from "../components/forms/ExitSurvey";
-
-interface QuestionReviewState {
-  status: "unreviewed" | "approved" | "rejected" | "note";
+type Mark = 'ok' | 'flag' | 'note';
+interface QuestionReview {
+  mark?: Mark;
   comment: string;
-  isCommentOpen: boolean;
 }
+type View = 'check' | 'all' | 'layout';
 
-function parseQuestionFeedback(
-  comments: string | null | undefined,
-): Record<string, string> {
-  if (!comments) return {};
-  const feedbackMap: Record<string, string> = {};
-  const lines = comments.split("\n");
-  for (const line of lines) {
-    const match = line.match(
-      /^\[(Changes Needed|Rejected|Note)\]\s*([^:]+):\s*(.+)$/i,
-    );
-    if (match) {
-      const qTitle = match[2].trim().toLowerCase();
-      const feedback = match[3].trim();
-      feedbackMap[qTitle] = feedback;
-    }
+const REVIEWER_ROLES = ['Faculty', 'Department Head'];
+
+/** Feedback lines look like "[Changes Needed] Label: what to fix". */
+function parseQuestionFeedback(comments?: string | null): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const line of (comments ?? '').split('\n')) {
+    const m = line.match(/^\[(Changes Needed|Note)\]\s*([^:]+):\s*(.+)$/i);
+    if (m) map[m[2].trim().toLowerCase()] = m[3].trim();
   }
-  return feedbackMap;
+  return map;
 }
 
-function getGeneralReviewerComment(
-  comments: string | null | undefined,
-): string {
-  if (!comments) return "";
-  const lines = comments.split("\n");
-  const generalLines = lines.filter(
-    (l) =>
-      !l.match(/^\[(Changes Needed|Rejected|Note)\]/i) &&
-      !l.startsWith("Question Feedback:"),
-  );
-  return generalLines.join("\n").trim();
+function generalComment(comments?: string | null): string {
+  return (comments ?? '')
+    .split('\n')
+    .filter((l) => !/^\[(Changes Needed|Note)\]/i.test(l) && !/^question feedback:/i.test(l))
+    .join('\n')
+    .trim();
+}
+
+/** Keeps only the questions that pass `keep`, and drops pages left empty. */
+function filterPages(pages: FormPage[], keep: (q: FormQuestion) => boolean): FormPage[] {
+  return pages
+    .map((p) => ({ ...p, questions: p.questions.filter(keep) }))
+    .filter((p) => p.questions.length > 0);
 }
 
 export default function SubmissionReview() {
@@ -59,1090 +53,406 @@ export default function SubmissionReview() {
   const { user } = useAuth();
 
   const [submission, setSubmission] = useState<SubmissionDetail | null>(null);
-  const [activeTab, setActiveTab] = useState<"questions" | "form">("questions");
-  const [generalComments, setGeneralComments] = useState("");
-  const [questionReviews, setQuestionReviews] = useState<
-    Record<string, QuestionReviewState>
-  >({});
-  const [busy, setBusy] = useState<"approve" | "reject" | null>(null);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [schema, setSchema] = useState<FormSchema | null>(null);
+  const [loadError, setLoadError] = useState('');
+  const [reviews, setReviews] = useState<Record<string, QuestionReview>>({});
+  const [view, setView] = useState<View>('check');
+  const [remarks, setRemarks] = useState('');
+  const [busy, setBusy] = useState<'approve' | 'reject' | null>(null);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
-  // Check whether the active logged-in user is a reviewer (Faculty, Dept Head, External)
-  const isReviewer = Boolean(
-    user?.roles?.some((r) =>
-      ["Faculty", "Department Head", "External"].includes(r),
-    ),
-  );
-
-  const isFacultyUser = user?.email?.trim().toLowerCase() === "galkadi@selu.edu";
-  const isDeptHeadUser = user?.email?.trim().toLowerCase() === "bonnie.achee@southeastern.edu";
-  const currentStepOrder = submission?.currentStep?.stepOrder ?? (submission?.status === "Completed" ? 3 : 1);
-  const isMyTurnToReview =
-    (isFacultyUser && currentStepOrder === 1 && submission?.status === "Pending") ||
-    (isDeptHeadUser && currentStepOrder === 2 && submission?.status === "Pending");
+  const isReviewer = Boolean(user?.roles?.some((r) => REVIEWER_ROLES.includes(r)));
 
   useEffect(() => {
-    const fetchSubmission = async () => {
+    (async () => {
       try {
-        const res = await api.get(`/submissions/${id}`);
+        const res = await api.get<SubmissionDetail>(`/submissions/${id}`);
         setSubmission(res.data);
+        const formKey = res.data.form?.googleFormId;
+        if (formKey) {
+          const formRes = await api.get<FormDetail>(`/forms/${formKey}`).catch(() => null);
+          setSchema(formRes?.data.schema ?? null);
+        }
       } catch (err) {
-        console.error(err);
-        setError("Could not load this submission.");
+        setLoadError(readApiError(err, "Couldn't load this submission.").message);
       }
-    };
-    fetchSubmission();
+    })();
   }, [id]);
 
-  // Extract every answered field to present for question review
-  const answered = useMemo(() => {
-    const r = (submission?.responses ?? {}) as Record<string, unknown>;
-    return Object.entries(r)
-      .filter(
-        ([k, v]) =>
-          k !== "__progress" && v !== "" && v !== null && v !== undefined,
-      )
-      .map(([k, v]) => {
-        let displayVal = "";
-        if (typeof v === "boolean") {
-          displayVal = v ? "Yes / Agreed" : "No";
-        } else if (Array.isArray(v)) {
-          displayVal = v.join(", ");
-        } else {
-          displayVal = String(v);
-        }
-        return {
-          field: k,
-          label: labelFor(k),
-          value: displayVal,
-        };
-      });
+  const requiredRole = submission?.currentStep?.requiredRole?.name;
+  const isMyTurn = Boolean(isReviewer && submission?.status === 'Pending' && requiredRole && user?.roles?.includes(requiredRole));
+  const isWithEmployer = submission?.status === 'Pending' && requiredRole === 'Employer';
+
+  const latestFeedback = useMemo(() => {
+    const logs = submission?.auditLogs ?? [];
+    return [...logs].reverse().find((l) => l.action === 'Rejected' && l.comments);
   }, [submission]);
+  const studentFeedback = useMemo(() => parseQuestionFeedback(latestFeedback?.comments), [latestFeedback]);
 
-  // Find the latest audit log entry with reviewer comments
-  const latestAuditLog: AuditLogEntry | undefined = useMemo(() => {
-    if (!submission?.auditLogs || submission.auditLogs.length === 0)
-      return undefined;
-    return [...submission.auditLogs].reverse().find((a) => a.comments?.trim());
-  }, [submission]);
+  // The student's pages, plus the employer's once they have answers in them.
+  const pages: FormPage[] = useMemo(() => {
+    if (!schema || !submission) return [];
+    const answers = submission.responses ?? {};
+    return schema.pages.filter(
+      (p) => (p.respondent ?? 'student') === 'student' || p.questions.some((q) => answers[q.id] !== undefined),
+    );
+  }, [schema, submission]);
 
-  const studentQuestionFeedback = useMemo(() => {
-    return parseQuestionFeedback(latestAuditLog?.comments);
-  }, [latestAuditLog]);
+  const hasCheckList = pages.some((p) => p.questions.some((q) => q.reviewRequired));
 
-  const generalFeedbackMessage = useMemo(() => {
-    return getGeneralReviewerComment(latestAuditLog?.comments);
-  }, [latestAuditLog]);
+  if (loadError) {
+    return (
+      <div className="card page-message">
+        <h1>Can't open this submission</h1>
+        <p>{loadError}</p>
+        <Link to="/dashboard" className="btn btn-secondary">Back to dashboard</Link>
+      </div>
+    );
+  }
+  if (!submission) return <div className="review-page"><SkeletonForm /></div>;
 
-  const isClosed =
-    submission?.status === "Completed" || submission?.status === "Rejected";
+  const answers = submission.responses ?? {};
+  const allQuestions = pages.flatMap((p) => p.questions);
+  const toCheck = allQuestions.filter((q) => q.reviewRequired);
+  const flagged = allQuestions.filter((q) => reviews[q.id]?.mark === 'flag');
+  const noted = allQuestions.filter((q) => reviews[q.id]?.comment.trim() && reviews[q.id]?.mark !== 'flag');
+  const checkedCount = toCheck.filter((q) => reviews[q.id]?.mark).length;
+  const unmarked = toCheck.filter((q) => !reviews[q.id]?.mark);
+  const approvedCount = allQuestions.filter((q) => reviews[q.id]?.mark === 'ok').length;
+  const flagsWithoutComment = flagged.filter((q) => !reviews[q.id]?.comment.trim());
 
-  // Metrics for reviewer
-  const approvedCount = Object.values(questionReviews).filter(
-    (q) => q.status === "approved",
-  ).length;
-  const rejectedCount = Object.values(questionReviews).filter(
-    (q) => q.status === "rejected",
-  ).length;
-  const noteCount = Object.values(questionReviews).filter(
-    (q) => q.status === "note" || (q.comment.trim() && q.status !== "rejected"),
-  ).length;
+  // Sending back needs every checked answer decided, a reason on each "needs changes",
+  // and something for the student to act on.
+  const sendBackBlocker =
+    unmarked.length > 0
+      ? `Approve or flag the ${unmarked.length} remaining answer${unmarked.length === 1 ? '' : 's'} first.`
+      : flagsWithoutComment.length > 0
+        ? `Say what to fix on ${flagsWithoutComment.length === 1 ? '"' + flagsWithoutComment[0].label + '"' : flagsWithoutComment.length + ' flagged answers'}.`
+        : flagged.length === 0 && noted.length === 0 && !remarks.trim()
+          ? 'Flag an answer or write a remark so the student knows what to fix.'
+          : '';
 
-  const handleApproveQuestion = (field: string) => {
-    if (!isReviewer || isClosed) return;
-    setQuestionReviews((prev) => {
-      const current = prev[field] ?? {
-        status: "unreviewed",
-        comment: "",
-        isCommentOpen: false,
-      };
-      return {
-        ...prev,
-        [field]: {
-          ...current,
-          status: "approved",
-        },
-      };
-    });
-  };
-
-  const handleRejectQuestion = (field: string) => {
-    if (!isReviewer || isClosed) return;
-    setQuestionReviews((prev) => {
-      const current = prev[field] ?? {
-        status: "unreviewed",
-        comment: "",
-        isCommentOpen: false,
-      };
-      return {
-        ...prev,
-        [field]: {
-          ...current,
-          status: "rejected",
-          isCommentOpen: true, // Revealing comment box underneath question
-        },
-      };
-    });
-  };
-
-  const handleNoteQuestion = (field: string) => {
-    if (!isReviewer || isClosed) return;
-    setQuestionReviews((prev) => {
-      const current = prev[field] ?? {
-        status: "unreviewed",
-        comment: "",
-        isCommentOpen: false,
-      };
-      return {
-        ...prev,
-        [field]: {
-          ...current,
-          status: current.status === "unreviewed" ? "note" : current.status,
-          isCommentOpen: true, // Revealing comment box underneath question
-        },
-      };
-    });
-  };
-
-  const handleCommentChange = (field: string, comment: string) => {
-    if (!isReviewer || isClosed) return;
-    setQuestionReviews((prev) => {
-      const current = prev[field] ?? {
-        status: "unreviewed",
-        comment: "",
-        isCommentOpen: true,
-      };
-      return {
-        ...prev,
-        [field]: {
-          ...current,
-          comment,
-        },
-      };
-    });
-  };
-
-  const handleClearComment = (field: string) => {
-    if (!isReviewer || isClosed) return;
-    setQuestionReviews((prev) => {
-      const current = prev[field] ?? {
-        status: "unreviewed",
-        comment: "",
-        isCommentOpen: false,
-      };
-      return {
-        ...prev,
-        [field]: {
-          ...current,
-          comment: "",
-          isCommentOpen: current.status === "rejected",
-        },
-      };
-    });
-  };
-
-  const handleApproveAll = () => {
-    if (!isReviewer || isClosed) return;
-    setQuestionReviews((prev) => {
+  const approveAllRemaining = () =>
+    setReviews((prev) => {
       const next = { ...prev };
-      for (const item of answered) {
-        if (!next[item.field] || next[item.field].status === "unreviewed") {
-          next[item.field] = {
-            ...(next[item.field] ?? { comment: "", isCommentOpen: false }),
-            status: "approved",
-          };
-        }
-      }
+      for (const q of unmarked) next[q.id] = { ...(next[q.id] ?? { comment: '' }), mark: 'ok' };
       return next;
     });
-  };
 
-  const describeFailure = (err: unknown, action: string) => {
-    const status = (err as { response?: { status?: number } })?.response
-      ?.status;
-    if (status === 404 || status === 405) {
-      return `The ${action} endpoint does not exist on the backend yet.`;
-    }
-    if (status === 403)
-      return "Your account is not allowed to perform this action.";
-    return `Could not ${action} this submission. Check that the backend is running.`;
-  };
+  // "Needs review" shows the questions marked reviewRequired, plus anything already flagged.
+  const activeView: View = view === 'check' && !hasCheckList ? 'all' : view;
+  const shownPages =
+    activeView === 'check' ? filterPages(pages, (q) => Boolean(q.reviewRequired) || Boolean(reviews[q.id]?.mark)) : pages;
 
-  const handleApprove = async () => {
-    if (!isReviewer || isClosed || busy !== null) return;
+  const setMark = (qid: string, mark: Mark) =>
+    setReviews((prev) => {
+      const current = prev[qid] ?? { comment: '' };
+      return { ...prev, [qid]: { ...current, mark: current.mark === mark ? undefined : mark } };
+    });
+  const setComment = (qid: string, comment: string) =>
+    setReviews((prev) => ({ ...prev, [qid]: { ...(prev[qid] ?? {}), comment } }));
 
-    if (!isMyTurnToReview) {
-      if (isFacultyUser && currentStepOrder === 2) {
-        setError("You have already approved the faculty review step. Department Head Dr. Bonnie Achée must grant final approval.");
-        return;
-      }
-      if (isDeptHeadUser && currentStepOrder === 1) {
-        setError("This form is still awaiting initial review from Dr. Ghassan Alkadi before department head approval.");
-        return;
-      }
-    }
-
-    if (rejectedCount > 0) {
-      const proceed = window.confirm(
-        `There are ${rejectedCount} question(s) marked as rejected. Approving the entire submission will approve all steps. Do you wish to proceed?`,
-      );
-      if (!proceed) return;
-    }
-
-    setError("");
-    setBusy("approve");
+  const approve = async () => {
+    if (flagged.length > 0 && !window.confirm(`${flagged.length} answer(s) are marked as needing changes. Approve anyway?`)) return;
+    setError('');
+    setBusy('approve');
     try {
-      await api.post(`/submissions/${id}/approve`, {
-        comments: generalComments.trim() || null,
-      });
-      setNotice("Approved successfully. Returning to the dashboard...");
-      setTimeout(() => navigate("/dashboard"), 900);
+      await api.post(`/submissions/${id}/approve`, { comments: remarks.trim() || null });
+      setNotice('Approved. Returning to the dashboard…');
+      window.setTimeout(() => navigate('/dashboard'), 900);
     } catch (err) {
-      console.error(err);
-      setError(describeFailure(err, "approve"));
+      setError(readApiError(err, "Couldn't approve this submission.").message);
     } finally {
       setBusy(null);
     }
   };
 
-  const handleReject = async () => {
-    if (!isReviewer || isClosed || busy !== null) return;
-
-    if (!isMyTurnToReview) {
-      if (isFacultyUser && currentStepOrder === 2) {
-        setError("You have already approved the faculty review step. The submission is currently with Department Head Dr. Bonnie Achée.");
-        return;
-      }
-      if (isDeptHeadUser && currentStepOrder === 1) {
-        setError("This form is still awaiting initial review from Dr. Ghassan Alkadi.");
-        return;
-      }
-    }
-
-    const flaggedItems = answered
-      .map((q) => ({
-        field: q.field,
-        label: q.label,
-        review: questionReviews[q.field],
-      }))
-      .filter(
-        (item) =>
-          item.review &&
-          (item.review.status === "rejected" || item.review.comment.trim()),
-      );
-
-    if (flaggedItems.length === 0 && !generalComments.trim()) {
-      setError(
-        "Please reject at least one question (using ✗) or provide comments so the student knows what to change.",
-      );
+  const reject = async () => {
+    const items = [...flagged, ...noted];
+    if (sendBackBlocker) {
+      setError(sendBackBlocker);
       return;
     }
+    const lines = items.map((q) => {
+      const r = reviews[q.id];
+      const tag = r.mark === 'flag' ? '[Changes Needed]' : '[Note]';
+      return `${tag} ${q.label}: ${r.comment.trim() || 'Please check this answer.'}`;
+    });
+    const comments = [remarks.trim(), lines.length ? `Question feedback:\n${lines.join('\n')}` : ''].filter(Boolean).join('\n\n');
 
-    const questionFeedbackSummary = flaggedItems
-      .map((item) => {
-        const action =
-          item.review.status === "rejected" ? "[Changes Needed]" : "[Note]";
-        const note = item.review.comment.trim()
-          ? item.review.comment.trim()
-          : "Requires review/correction";
-        return `${action} ${item.label}: ${note}`;
-      })
-      .join("\n");
-
-    const compiledComments = generalComments.trim()
-      ? `${generalComments.trim()}\n\nQuestion Feedback:\n${questionFeedbackSummary}`
-      : questionFeedbackSummary;
-
-    setError("");
-    setBusy("reject");
+    setError('');
+    setBusy('reject');
     try {
-      await api.post(`/submissions/${id}/reject`, {
-        comments: compiledComments,
-        questionReviews: flaggedItems.map((item) => ({
-          field: item.field,
-          status: item.review.status,
-          comment: item.review.comment.trim() || null,
-        })),
-      });
-      setNotice(
-        "Sent back to student with corrections. Returning to the dashboard...",
-      );
-      setTimeout(() => navigate("/dashboard"), 900);
+      await api.post(`/submissions/${id}/reject`, { comments });
+      setNotice('Sent back to the student. Returning to the dashboard…');
+      window.setTimeout(() => navigate('/dashboard'), 900);
     } catch (err) {
-      console.error(err);
-      setError(describeFailure(err, "reject"));
+      setError(readApiError(err, "Couldn't send this back.").message);
     } finally {
       setBusy(null);
     }
   };
 
-  if (error && !submission)
-    return (
-      <div className="card">
-        <p>{error}</p>
-      </div>
-    );
-  if (!submission)
-    return (
-      <div className="card">
-        <p className="empty-state">Loading submission...</p>
-      </div>
-    );
-
-  const formId = submission.form?.googleFormId;
-  const formProps = {
-    onSubmit: () => {},
-    defaultValues: submission.responses,
-    isReadonly: true,
-  };
-  const renderForm = () => {
-    switch (formId) {
-      case "CS401":
-        return <CS401 {...formProps} />;
-      case "CS402":
-        return <CS402 {...formProps} />;
-      case "CS403":
-        return <CS403 {...formProps} />;
-      case "CS404":
-        return <CS404 {...formProps} />;
-      case "CS405":
-        return <CS405 {...formProps} />;
-      case "CS410":
-        return <CS410 {...formProps} />;
-      case "CS420":
-        return <CS420 {...formProps} />;
-      case "ExitSurvey":
-        return <ExitSurvey {...formProps} />;
-      default:
-        return <pre>{JSON.stringify(submission.responses, null, 2)}</pre>;
-    }
-  };
-
-  const isSubmissionRejected = submission.status === "Rejected";
+  const status = submission.status;
+  const controls = (q: FormQuestion) => (
+    <ReviewControls review={reviews[q.id]} onMark={(m) => setMark(q.id, m)} onComment={(c) => setComment(q.id, c)} />
+  );
 
   return (
-    <div>
-      {/* Top Header */}
-      <div className="review-head">
-        <div>
-          <h1>
-            {!isReviewer && isSubmissionRejected
-              ? `Change Request: ${submission.form?.title}`
-              : isReviewer
-                ? `Review submission #${submission.id}`
-                : `Submission #${submission.id}: ${submission.form?.title}`}
-          </h1>
-          <p className="review-meta">
-            {submission.form?.title} &middot; {submission.student?.fullName} (
-            {submission.student?.wNumber})
+    <div className={`review-page ${isMyTurn ? 'has-decision-bar' : ''}`}>
+      <div className="page-head">
+        <p className="page-eyebrow">{isReviewer ? `Submission #${submission.id}` : 'Your submission'}</p>
+        <h1>{submission.form?.title}</h1>
+        {isReviewer && (
+          <p className="page-meta">
+            {submission.student?.fullName}
+            {submission.student?.wNumber ? ` · ${submission.student.wNumber}` : ''}
+            {submission.student?.email ? ` · ${submission.student.email}` : ''}
+            {submission.updatedAt ? ` · submitted ${new Date(submission.updatedAt).toLocaleDateString()}` : ''}
           </p>
-        </div>
-        <span
-          className={
-            submission.status === "Completed" ||
-            submission.status === "Approved"
-              ? "status status-approved"
-              : isSubmissionRejected
-                ? "status status-rejected"
-                : "status status-pending"
-          }
-        >
-          {isSubmissionRejected ? "Changes Requested" : submission.status}
-        </span>
+        )}
       </div>
 
-      {/* TWO-STAGE APPROVAL WORKFLOW PROGRESS */}
-      <div className="card approval-stepper-card" style={{ marginBottom: "1.5rem" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "1rem",
-            flexWrap: "wrap",
-            gap: "0.5rem",
-          }}
-        >
-          <div>
-            <h2 style={{ margin: 0, fontSize: "1.2rem" }}>Approval Workflow Progress</h2>
-            <p style={{ margin: "2px 0 0 0", fontSize: "0.85rem", color: "var(--text-help)" }}>
-              Requires review from both Faculty member and Department Head
+      <section className="card card-tight">
+        <ApprovalProgress steps={submission.approvals ?? []} />
+        {isWithEmployer && submission.employerReview && (
+          <div className="employer-wait">
+            <p>
+              Waiting on <strong>{submission.employerReview.employerEmail}</strong>.{' '}
+              {isReviewer ? 'Send them this link if they need it again:' : 'If they lost the link, send it again:'}
             </p>
+            {submission.employerReview.accessToken && <CopyLink url={employerLink(submission.employerReview.accessToken)} />}
           </div>
-          <span
-            className={`status ${
-              submission.status === "Completed"
-                ? "status-approved"
-                : isSubmissionRejected
-                  ? "status-rejected"
-                  : "status-pending"
-            }`}
-          >
-            {submission.status === "Completed"
-              ? "✓ Fully Approved"
-              : isSubmissionRejected
-                ? "⚠️ Changes Requested"
-                : `Step ${currentStepOrder} of 2 in Review`}
-          </span>
-        </div>
+        )}
+      </section>
 
-        <div className="approval-stepper-grid">
-          {/* Step 1: Faculty Review */}
-          {(() => {
-            const step1 = submission.approvals?.find((a) => a.stepOrder === 1);
-            const isApproved = step1?.status === "Approved";
-            const isRejected = step1?.status === "Changes Requested";
-            const isPending = step1?.status === "Pending Review";
+      {/* ---------------- Student view: status and only what needs fixing ---------------- */}
+      {!isReviewer && status === 'Rejected' && (
+        <section className="card fix-card">
+          <h2 className="card-title">What to fix</h2>
+          {latestFeedback && (
+            <p className="help-text">
+              Requested by {latestFeedback.reviewer?.fullName ?? 'a reviewer'} on{' '}
+              {new Date(latestFeedback.actionTimestamp).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}.
+            </p>
+          )}
+          {generalComment(latestFeedback?.comments) && (
+            <pre className="alert-quote">{generalComment(latestFeedback?.comments)}</pre>
+          )}
+          <ul className="fix-list">
+            {allQuestions
+              .filter((q) => studentFeedback[q.label.toLowerCase()])
+              .map((q) => (
+                <li key={q.id}>
+                  <span className="fix-label">{q.label}</span>
+                  <span className="fix-answer">You answered: {formatAnswer(q, answers[q.id]) || 'nothing'}</span>
+                  <span className="fix-note">{studentFeedback[q.label.toLowerCase()]}</span>
+                </li>
+              ))}
+          </ul>
+          <Link to={`/forms/${submission.form?.id}`} className="btn btn-primary">Edit and resubmit</Link>
+        </section>
+      )}
+      {!isReviewer && status === 'Pending' && !isWithEmployer && (
+        <p className="alert alert-warning">{submission.currentStep?.actionName ?? 'A reviewer'} has your submission. You'll get a notification when it moves.</p>
+      )}
+      {!isReviewer && status === 'Completed' && <p className="alert alert-success">This form has been through every review step.</p>}
 
-            return (
-              <div
-                className={`approval-step-box ${
-                  isApproved
-                    ? "step-approved"
-                    : isRejected
-                      ? "step-rejected"
-                      : isPending
-                        ? "step-active"
-                        : "step-waiting"
-                }`}
-              >
-                <div className="approval-step-header">
-                  <div className="approval-step-num">Step 1</div>
-                  <span
-                    className={`status ${
-                      isApproved
-                        ? "status-approved"
-                        : isRejected
-                          ? "status-rejected"
-                          : isPending
-                            ? "status-pending"
-                            : "status-draft"
-                    }`}
-                  >
-                    {isApproved
-                      ? "✓ Approved"
-                      : isRejected
-                        ? "⚠️ Changes Requested"
-                        : isPending
-                          ? "⏳ Pending Review"
-                          : "⏸ Not Submitted"}
-                  </span>
-                </div>
-                <h3 className="approval-step-title">Initial Faculty Review</h3>
-                <p className="approval-step-reviewer">
-                  <strong>Assigned Reviewer:</strong> Dr. Ghassan Alkadi (Faculty)
-                </p>
-                {step1?.actionDate && (
-                  <p className="approval-step-meta">
-                    <strong>Date:</strong> {new Date(step1.actionDate).toLocaleString()}
-                  </p>
-                )}
-                {step1?.comments && (
-                  <div className="approval-step-notes">
-                    <strong>Reviewer Notes:</strong>
-                    <p>{step1.comments}</p>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* Step 2: Department Head Review */}
-          {(() => {
-            const step2 = submission.approvals?.find((a) => a.stepOrder === 2);
-            const isApproved = step2?.status === "Approved";
-            const isRejected = step2?.status === "Changes Requested";
-            const isPending = step2?.status === "Pending Review";
-            const isAwaiting = step2?.status === "Awaiting Faculty Approval";
-
-            return (
-              <div
-                className={`approval-step-box ${
-                  isApproved
-                    ? "step-approved"
-                    : isRejected
-                      ? "step-rejected"
-                      : isPending
-                        ? "step-active"
-                        : "step-waiting"
-                }`}
-              >
-                <div className="approval-step-header">
-                  <div className="approval-step-num">Step 2</div>
-                  <span
-                    className={`status ${
-                      isApproved
-                        ? "status-approved"
-                        : isRejected
-                          ? "status-rejected"
-                          : isPending
-                            ? "status-pending"
-                            : "status-draft"
-                    }`}
-                  >
-                    {isApproved
-                      ? "✓ Final Approval Granted"
-                      : isRejected
-                        ? "⚠️ Changes Requested"
-                        : isPending
-                          ? "⏳ Pending Final Approval"
-                          : "⏸ Awaiting Step 1"}
-                  </span>
-                </div>
-                <h3 className="approval-step-title">Department Head Approval</h3>
-                <p className="approval-step-reviewer">
-                  <strong>Assigned Reviewer:</strong> Dr. Bonnie Achée (Department Head)
-                </p>
-                {step2?.actionDate && (
-                  <p className="approval-step-meta">
-                    <strong>Date:</strong> {new Date(step2.actionDate).toLocaleString()}
-                  </p>
-                )}
-                {step2?.comments && (
-                  <div className="approval-step-notes">
-                    <strong>Reviewer Notes:</strong>
-                    <p>{step2.comments}</p>
-                  </div>
-                )}
-                {isAwaiting && (
-                  <p className="approval-step-waiting-hint">
-                    Awaiting completion of Step 1 (Faculty Review)
-                  </p>
-                )}
-              </div>
-            );
-          })()}
-        </div>
-      </div>
-
-      {/* STUDENT VIEW: Status & Feedback Banner */}
-      {!isReviewer && (
-        <>
-          {isSubmissionRejected ? (
-            <div className="student-alert-card student-alert-rejected">
-              <div className="student-alert-header">
-                <span className="student-alert-icon">⚠️</span>
-                <div>
-                  <h3>Action Required: Changes Requested</h3>
-                  <p>
-                    A faculty reviewer has inspected this form and returned it
-                    with requested corrections. Please review the notes on each
-                    question below, make the necessary updates, and resubmit.
-                  </p>
-                </div>
-              </div>
-
-              {generalFeedbackMessage && (
-                <div className="student-feedback-box">
-                  <strong>Reviewer Message:</strong>
-                  <pre>{generalFeedbackMessage}</pre>
-                </div>
-              )}
-
-              <div className="student-alert-actions">
-                <Link to={`/forms/${submission.form?.id}`} className="btn">
-                  ✏️ Edit & Resubmit Form
-                </Link>
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="btn btn-secondary"
-                >
-                  Back to Dashboard
+      {/* ---------------- Reviewer view ---------------- */}
+      {isReviewer && (
+        <section className="card">
+          <div className="card-head">
+            <div className="view-tabs" role="tablist" aria-label="How to show the answers">
+              {hasCheckList && (
+                <button type="button" role="tab" aria-selected={activeView === 'check'} className={`view-tab ${activeView === 'check' ? 'is-active' : ''}`} onClick={() => setView('check')}>
+                  Needs review <span className="view-tab-count">{toCheck.length}</span>
                 </button>
-              </div>
+              )}
+              <button type="button" role="tab" aria-selected={activeView === 'all'} className={`view-tab ${activeView === 'all' ? 'is-active' : ''}`} onClick={() => setView('all')}>
+                All answers
+              </button>
+              <button type="button" role="tab" aria-selected={activeView === 'layout'} className={`view-tab ${activeView === 'layout' ? 'is-active' : ''}`} onClick={() => setView('layout')}>
+                Form layout
+              </button>
             </div>
-          ) : submission.status === "Pending" ? (
-            <div className="student-alert-card student-alert-pending">
-              <div className="student-alert-header">
-                <span className="student-alert-icon">⏳</span>
-                <div>
-                  <h3>Submission Under Review</h3>
-                  <p>
-                    Your submission has been received and is currently being
-                    reviewed by faculty. You will be notified once an approval
-                    decision is recorded.
-                  </p>
-                </div>
-              </div>
-            </div>
+          </div>
+
+          {!schema ? (
+            <p className="help-text">This form's definition couldn't be loaded.</p>
+          ) : activeView === 'layout' ? (
+            <FormLayoutReview
+              pages={pages}
+              answers={answers}
+              needsCheck={(q) => Boolean(q.reviewRequired)}
+              stateOf={(q) => reviews[q.id]?.mark}
+              renderControls={(q) => (isMyTurn ? controls(q) : <span className="verify-box-tag">Verify</span>)}
+            />
           ) : (
-            <div className="student-alert-card student-alert-approved">
-              <div className="student-alert-header">
-                <span className="student-alert-icon">✓</span>
-                <div>
-                  <h3>Submission Approved</h3>
-                  <p>Your submission has completed the approval process.</p>
-                </div>
-              </div>
+            <AnswerSummary
+              pages={shownPages}
+              answers={answers}
+              answerClassName={(q) => (reviews[q.id]?.mark ? `is-${reviews[q.id]!.mark}` : q.reviewRequired && activeView === 'all' ? 'is-required' : '')}
+              renderExtra={(q) => (isMyTurn && (activeView === 'check' || q.reviewRequired || reviews[q.id]) ? controls(q) : null)}
+            />
+          )}
+
+          {isMyTurn && unmarked.length > 0 && (
+            <div className="review-bottom">
+              <span className="help-inline">
+                {checkedCount} of {toCheck.length} checked
+              </span>
+              <button type="button" className="btn btn-secondary btn-small" onClick={approveAllRemaining}>
+                Approve the {unmarked.length} remaining
+              </button>
             </div>
           )}
-        </>
+        </section>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="review-nav-tabs">
-        <button
-          type="button"
-          className={`review-tab-btn ${activeTab === "questions" ? "active" : ""}`}
-          onClick={() => setActiveTab("questions")}
-        >
-          {isReviewer ? "Question-by-Question Review" : "Submitted Responses"}
-        </button>
-        <button
-          type="button"
-          className={`review-tab-btn ${activeTab === "form" ? "active" : ""}`}
-          onClick={() => setActiveTab("form")}
-        >
-          Original Form Layout
+      {/* Everything this reviewer has said so far, in one place, before they decide. */}
+      {isMyTurn && (approvedCount > 0 || flagged.length > 0 || noted.length > 0) && (
+        <section className="card card-tight feedback-summary">
+          <h2 className="card-title">Your feedback so far</h2>
+          <p className="review-tally">
+            <span className="badge badge-success">{approvedCount} approved</span>
+            <span className="badge badge-danger">{flagged.length} need changes</span>
+            <span className="badge badge-warning">{noted.length} notes</span>
+            {unmarked.length > 0 && <span className="badge badge-neutral">{unmarked.length} not checked</span>}
+          </p>
+          {flagged.length + noted.length > 0 && (
+            <ul className="fix-list">
+              {[...flagged, ...noted].map((q) => (
+                <li key={q.id} className={reviews[q.id]?.mark === 'flag' ? '' : 'is-note'}>
+                  <span className="fix-label">{q.label}</span>
+                  <span className="fix-note">
+                    {reviews[q.id]?.comment.trim() || (reviews[q.id]?.mark === 'flag' ? 'No reason given yet.' : '')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {submission.auditLogs && submission.auditLogs.length > 0 && (
+        <section className="card">
+          <h2 className="card-title">History</h2>
+          <ol className="timeline">
+            {[...submission.auditLogs]
+              .sort((a, b) => a.actionTimestamp.localeCompare(b.actionTimestamp))
+              .map((log) => (
+                <li key={log.id} className="timeline-item">
+                  <div className="timeline-head">
+                    <StatusBadge
+                      status={log.action === 'Approved' ? 'Completed' : log.action === 'Rejected' ? 'Rejected' : 'Draft'}
+                      label={log.action === 'Rejected' ? 'Sent back' : log.action}
+                    />
+                    <span className="timeline-who">{log.reviewer?.fullName ?? 'Reviewer'}</span>
+                    <span className="timeline-when">{new Date(log.actionTimestamp).toLocaleString()}</span>
+                  </div>
+                  {log.comments && <pre className="timeline-comments">{log.comments}</pre>}
+                </li>
+              ))}
+          </ol>
+        </section>
+      )}
+
+      {isReviewer && !isMyTurn && (
+        <p className="help-text">
+          {status === 'Completed' && 'This submission is fully approved.'}
+          {status === 'Rejected' && 'This submission is back with the student for changes.'}
+          {status === 'Pending' && (isWithEmployer ? 'This submission is waiting on the employer.' : `Waiting on: ${submission.currentStep?.actionName ?? 'another reviewer'}.`)}
+        </p>
+      )}
+
+      <div className="button-row">
+        <button type="button" className="btn btn-secondary" onClick={() => navigate('/dashboard')}>
+          Back to dashboard
         </button>
       </div>
 
-      {activeTab === "form" ? (
-        <div className="card">
-          <h2>Original Form Layout</h2>
-          <div className="review-form">{renderForm()}</div>
-        </div>
-      ) : (
-        <div>
-          {/* Reviewer Toolbar (Only visible to faculty/reviewers) */}
-          {isReviewer && (
-            <div className="review-summary-toolbar">
-              <div className="review-stats-chips">
-                <span className="review-chip chip-total">
-                  {answered.length} Questions
-                </span>
-                <span className="review-chip chip-approved">
-                  ✓ {approvedCount} Approved
-                </span>
-                {rejectedCount > 0 && (
-                  <span className="review-chip chip-rejected">
-                    ✗ {rejectedCount} Rejected
-                  </span>
-                )}
-                {noteCount > 0 && (
-                  <span className="review-chip chip-note">
-                    … {noteCount} Noted
-                  </span>
-                )}
-              </div>
-
-              {!isClosed && answered.length > 0 && (
-                <div className="review-quick-actions">
-                  <button
-                    type="button"
-                    className="btn-quick-approve"
-                    onClick={handleApproveAll}
-                    title="Mark all remaining unreviewed questions as approved"
-                  >
-                    ✓ Mark All Approved
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Question Cards */}
-          {answered.length === 0 ? (
-            <div className="card">
-              <p className="empty-state">
-                This submission contains no responses.
-              </p>
-            </div>
-          ) : (
-            <div>
-              {answered.map(({ field, label, value }) => {
-                const review = questionReviews[field] ?? {
-                  status: isClosed ? "approved" : "unreviewed",
-                  comment: "",
-                  isCommentOpen: false,
-                };
-                const isApproved = review.status === "approved";
-                const isRejected = review.status === "rejected";
-                const isNote = review.status === "note";
-                const showComment =
-                  review.isCommentOpen ||
-                  review.comment.trim().length > 0 ||
-                  isRejected;
-
-                // For students: check if this question has feedback in the audit log
-                const studentNote =
-                  studentQuestionFeedback[label.toLowerCase()] ||
-                  studentQuestionFeedback[field.toLowerCase()];
-
-                return (
-                  <div
-                    key={field}
-                    className={`question-review-card ${
-                      isReviewer
-                        ? isApproved
-                          ? "status-card-approved"
-                          : isRejected
-                            ? "status-card-rejected"
-                            : isNote
-                              ? "status-card-note"
-                              : ""
-                        : studentNote
-                          ? "status-card-rejected"
-                          : ""
-                    }`}
-                  >
-                    <div className="question-card-top">
-                      <div className="question-card-info">
-                        <div className="question-card-header">
-                          <span className="question-title-text">{label}</span>
-
-                          {/* Reviewer status badge */}
-                          {isReviewer && review.status !== "unreviewed" && (
-                            <span
-                              className={`status ${
-                                isApproved
-                                  ? "status-approved"
-                                  : isRejected
-                                    ? "status-rejected"
-                                    : "status-pending"
-                              }`}
-                            >
-                              {isApproved
-                                ? "✓ Approved"
-                                : isRejected
-                                  ? "✗ Rejected"
-                                  : "… Note"}
-                            </span>
-                          )}
-
-                          {/* Student view: Flag indicator if question needs changes */}
-                          {!isReviewer && studentNote && (
-                            <span className="status status-rejected">
-                              ✗ Action Required
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Reviewer Action Buttons: Checkmark (✓), X (✗), and ... (…) */}
-                      {/* CRITICAL: ONLY rendered for reviewers, NEVER for students! */}
-                      {isReviewer && (
-                        <div className="question-action-group">
-                          <button
-                            type="button"
-                            title="Approve this answer"
-                            className={`review-item-btn btn-action-approve ${isApproved ? "active" : ""}`}
-                            onClick={() => handleApproveQuestion(field)}
-                            disabled={isClosed}
-                          >
-                            ✓ Approve
-                          </button>
-                          <button
-                            type="button"
-                            title="Reject this answer and specify what needs changing"
-                            className={`review-item-btn btn-action-reject ${isRejected ? "active" : ""}`}
-                            onClick={() => handleRejectQuestion(field)}
-                            disabled={isClosed}
-                          >
-                            ✗ Reject
-                          </button>
-                          <button
-                            type="button"
-                            title="Leave a note or feedback for this answer"
-                            className={`review-item-btn btn-action-note ${isNote ? "active" : ""}`}
-                            onClick={() => handleNoteQuestion(field)}
-                            disabled={isClosed}
-                          >
-                            … Note
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Submitted Answer Value */}
-                    <div className="question-response-box">
-                      {value || (
-                        <span className="question-response-empty">
-                          (No response provided)
-                        </span>
-                      )}
-                    </div>
-
-                    {/* REVIEWER VIEW: Inline Comment Box */}
-                    {isReviewer && showComment && (
-                      <div
-                        className={`question-inline-comment ${isRejected ? "comment-rejected" : ""}`}
-                      >
-                        <div className="inline-comment-header">
-                          <span className="inline-comment-label">
-                            {isRejected
-                              ? "✗ Rejection Feedback & Correction Instructions:"
-                              : "… Reviewer Note:"}
-                          </span>
-                          {review.comment && !isClosed && (
-                            <button
-                              type="button"
-                              className="inline-comment-btn-clear"
-                              onClick={() => handleClearComment(field)}
-                            >
-                              Clear comment
-                            </button>
-                          )}
-                        </div>
-                        <textarea
-                          className="inline-comment-textarea"
-                          placeholder={
-                            isRejected
-                              ? "Explain what is incorrect and what the student needs to fix..."
-                              : "Leave an optional note or guidance for this response..."
-                          }
-                          value={review.comment}
-                          onChange={(e) =>
-                            handleCommentChange(field, e.target.value)
-                          }
-                          disabled={isClosed}
-                          rows={2}
-                        />
-                        <p className="inline-comment-hint">
-                          This comment appears right underneath this question
-                          when sent back to the student.
-                        </p>
-                      </div>
-                    )}
-
-                    {/* STUDENT VIEW: Reviewer Feedback Box under Question */}
-                    {!isReviewer && studentNote && (
-                      <div className="student-question-feedback">
-                        <div className="student-question-feedback-label">
-                          <span>⚠️ Correction Needed:</span>
-                        </div>
-                        <p className="student-question-feedback-text">
-                          {studentNote}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Review & Revision History Timeline */}
-      {submission.auditLogs && submission.auditLogs.length > 0 && (
-        <div className="card" style={{ marginTop: "1.75rem" }}>
-          <h2
-            style={{
-              fontSize: "1.25rem",
-              marginBottom: "1rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
-          >
-            <span>📜</span> Review & Revision History
-          </h2>
-          <div className="audit-trail-timeline">
-            {submission.auditLogs.map((log) => (
-              <div key={log.id} className="audit-trail-item">
-                <div className="audit-trail-header">
-                  <span
-                    className={`status ${
-                      log.action === "Approved"
-                        ? "status-approved"
-                        : log.action === "Rejected"
-                          ? "status-rejected"
-                          : "status-resubmitted"
-                    }`}
-                  >
-                    {log.action}
-                  </span>
-                  <span className="audit-trail-actor">
-                    {log.reviewer?.fullName ||
-                      (log.action === "Resubmitted"
-                        ? submission.student?.fullName
-                        : "Reviewer")}
-                  </span>
-                  <span className="audit-trail-date">
-                    &middot; {new Date(log.actionTimestamp).toLocaleString()}
-                  </span>
-                </div>
-                {log.comments && (
-                  <div className="audit-trail-comments">
-                    <pre>{log.comments}</pre>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* REVIEWER: Final Decision Deck */}
-      {/* REVIEWER: Final Decision Deck */}
-      {isReviewer ? (
-        <div className="card review-final-card">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              flexWrap: "wrap",
-              gap: "0.5rem",
-              marginBottom: "0.75rem",
-            }}
-          >
-            <div>
-              <h2 style={{ margin: "0 0 0.25rem 0" }}>
-                {isFacultyUser
-                  ? "Faculty Review Decision — Dr. Ghassan Alkadi"
-                  : isDeptHeadUser
-                    ? "Department Head Decision — Dr. Bonnie Achée"
-                    : "Reviewer Decision"}
-              </h2>
-              <p style={{ margin: 0, fontSize: "0.88rem", color: "var(--text-help)" }}>
-                {isFacultyUser && currentStepOrder === 1 && !isClosed && (
-                  "Step 1 of 2: Approving will advance this submission to Department Head Dr. Bonnie Achée for final authorization."
-                )}
-                {isFacultyUser && currentStepOrder === 2 && !isClosed && (
-                  "✓ Step 1 Complete: You approved this submission. It is currently in Department Head Dr. Bonnie Achée's queue."
-                )}
-                {isDeptHeadUser && currentStepOrder === 2 && !isClosed && (
-                  "Step 2 of 2: Pre-approved by Dr. Ghassan Alkadi. Approving will grant final university authorization."
-                )}
-                {isDeptHeadUser && currentStepOrder === 1 && !isClosed && (
-                  "⏳ Awaiting Step 1: This submission is awaiting initial review from Dr. Ghassan Alkadi before departmental authorization."
-                )}
-              </p>
-            </div>
-            {isMyTurnToReview && !isClosed && (
-              <span className="status status-pending" style={{ fontSize: "0.78rem" }}>
-                Your Action Required
+      {/* Decision bar stays at the bottom of the screen while you scroll through answers. */}
+      {isMyTurn && (
+        <div className="decision-bar" role="region" aria-label="Your decision">
+          <div className="decision-bar-inner">
+            <div className="decision-bar-summary">
+              <strong>{submission.currentStep?.actionName}</strong>
+              <span className="help-inline">
+                {hasCheckList ? `${checkedCount} of ${toCheck.length} checked` : 'Nothing to check'}
+                {flagged.length > 0 ? `, ${flagged.length} need changes` : ''}
               </span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="general-comments">
-              Additional Remarks (Optional)
-            </label>
-            <textarea
-              id="general-comments"
-              rows={3}
-              value={generalComments}
-              onChange={(e) => setGeneralComments(e.target.value)}
-              placeholder={
-                isMyTurnToReview
-                  ? "Add any overall remarks or general feedback for the student and subsequent reviewer..."
-                  : "Comments disabled when not in your active review step..."
-              }
-              disabled={isClosed || !isMyTurnToReview}
+            </div>
+            <label className="visually-hidden" htmlFor="remarks">Remarks for the student (optional)</label>
+            <input
+              id="remarks"
+              className="input decision-bar-remarks"
+              placeholder="Remarks for the student (optional)"
+              maxLength={2000}
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
             />
+            <div className="decision-bar-actions">
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={reject}
+                disabled={busy !== null || Boolean(sendBackBlocker)}
+                title={sendBackBlocker || undefined}
+              >
+                {busy === 'reject' ? 'Sending…' : 'Send back'}
+              </button>
+              <button type="button" className="btn btn-primary" onClick={approve} disabled={busy !== null}>
+                {busy === 'approve' ? 'Approving…' : 'Approve'}
+              </button>
+            </div>
           </div>
-
-          {error && (
-            <p className="login-error" role="alert">
-              {error}
+          {(error || notice) ? (
+            <p className={`decision-bar-message ${error ? 'is-error' : ''}`} role={error ? 'alert' : 'status'}>
+              {error || notice}
             </p>
-          )}
-          {notice && (
-            <p className="review-notice" role="status">
-              {notice}
-            </p>
-          )}
-
-          <div className="review-actions">
-            <button
-              onClick={handleApprove}
-              className="btn"
-              disabled={isClosed || busy !== null || !isMyTurnToReview}
-              title={
-                !isMyTurnToReview
-                  ? "Cannot approve while awaiting another reviewer's stage"
-                  : undefined
-              }
-            >
-              {busy === "approve"
-                ? "Approving..."
-                : isFacultyUser && currentStepOrder === 1
-                  ? "✓ Approve Faculty Review (Advance to Dept Head)"
-                  : isDeptHeadUser && currentStepOrder === 2
-                    ? "✓ Grant Department Head Final Approval"
-                    : "Approve Submission"}
-            </button>
-            <button
-              onClick={handleReject}
-              className="btn btn-danger"
-              disabled={isClosed || busy !== null || !isMyTurnToReview}
-              title={
-                !isMyTurnToReview
-                  ? "Cannot request changes while awaiting another reviewer's stage"
-                  : undefined
-              }
-            >
-              {busy === "reject" ? "Sending..." : "Request Changes (Return to Student)"}
-            </button>
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="btn btn-secondary"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-
-          {isClosed && (
-            <p className="help-text" style={{ marginTop: "1rem" }}>
-              This submission is {submission.status.toLowerCase()} and can no
-              longer be modified.
-            </p>
-          )}
-          {!isClosed && !isMyTurnToReview && (
-            <p className="help-text" style={{ marginTop: "1rem", color: "var(--text-help)" }}>
-              {isFacultyUser && currentStepOrder === 2
-                ? "ℹ️ You have completed your faculty review step. Final decision is with Department Head Dr. Bonnie Achée."
-                : isDeptHeadUser && currentStepOrder === 1
-                  ? "ℹ️ This submission must first be reviewed and approved by Faculty member Dr. Ghassan Alkadi before you can grant department approval."
-                  : "This submission is currently assigned to another step in the review process."}
-            </p>
-          )}
+          ) : sendBackBlocker && (flagged.length > 0 || noted.length > 0 || unmarked.length < toCheck.length) ? (
+            <p className="decision-bar-message is-hint">To send it back: {sendBackBlocker.charAt(0).toLowerCase() + sendBackBlocker.slice(1)}</p>
+          ) : null}
         </div>
-      ) : (
-        /* STUDENT: Simple Navigation / Action Footer */
-        <div
-          className="card review-final-card"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}
-        >
-          <div>
-            <h3 style={{ margin: "0 0 0.25rem 0" }}>Form Submission Review</h3>
-            <p
-              style={{
-                margin: 0,
-                color: "var(--text-help)",
-                fontSize: "0.9rem",
-              }}
-            >
-              {isSubmissionRejected
-                ? "Review the feedback above and click below to update your answers."
-                : "Your submission details are preserved above."}
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-            {isSubmissionRejected && (
-              <Link to={`/forms/${submission.form?.id}`} className="btn">
-                ✏️ Edit & Resubmit Form
-              </Link>
-            )}
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="btn btn-secondary"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
+      )}
+    </div>
+  );
+}
+
+function ReviewControls({
+  review,
+  onMark,
+  onComment,
+}: {
+  review?: QuestionReview;
+  onMark: (m: Mark) => void;
+  onComment: (c: string) => void;
+}) {
+  const mark = review?.mark;
+  const showComment = mark === 'flag' || mark === 'note' || Boolean(review?.comment);
+  return (
+    <div className="review-controls">
+      <div className="review-buttons" role="group" aria-label="Review this answer">
+        <button type="button" className={`review-btn review-btn-ok ${mark === 'ok' ? 'is-on' : ''}`} aria-pressed={mark === 'ok'} onClick={() => onMark('ok')}>
+          Approve
+        </button>
+        <button type="button" className={`review-btn review-btn-flag ${mark === 'flag' ? 'is-on' : ''}`} aria-pressed={mark === 'flag'} onClick={() => onMark('flag')}>
+          Needs changes
+        </button>
+        <button type="button" className={`review-btn review-btn-note ${mark === 'note' ? 'is-on' : ''}`} aria-pressed={mark === 'note'} onClick={() => onMark('note')}>
+          Note
+        </button>
+      </div>
+      {showComment && (
+        <textarea
+          className="input input-textarea review-comment"
+          rows={2}
+          maxLength={1000}
+          placeholder={mark === 'flag' ? 'What does the student need to fix?' : 'Note for the student'}
+          value={review?.comment ?? ''}
+          onChange={(e) => onComment(e.target.value)}
+        />
       )}
     </div>
   );
