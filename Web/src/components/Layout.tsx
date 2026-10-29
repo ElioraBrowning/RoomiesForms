@@ -16,29 +16,7 @@ export default function Layout() {
 
   const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [hideBreadcrumbs, setHideBreadcrumbs] = useState(false);
-  const lastScrollY = useRef(0);
   const isReviewer = user?.roles?.some((r) => ['Faculty', 'Department Head'].includes(r));
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY <= 20) {
-        // At the top of the page -> always show breadcrumbs
-        setHideBreadcrumbs(false);
-      } else if (currentScrollY > lastScrollY.current + 5 && currentScrollY > 60) {
-        // Scrolling down past 60px -> hide breadcrumbs to save screen real estate
-        setHideBreadcrumbs(true);
-      } else if (currentScrollY < lastScrollY.current - 12) {
-        // Scrolling up -> reveal breadcrumbs
-        setHideBreadcrumbs(false);
-      }
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -192,14 +170,12 @@ export default function Layout() {
         </div>
       </header>
 
-      {/* Southeastern Page Breadcrumb Trail with Navigation Arrows (Auto-hides on scroll) */}
-      <div className={`breadcrumbs-wrapper ${hideBreadcrumbs ? 'is-hidden' : ''}`}>
-        <Breadcrumbs />
-      </div>
-
-      {/* Thin subtle grey line separating the top hotbar from page content */}
+      {/* Thin subtle grey line separating the sticky hotbar from scrolling content */}
       <div className="navbar-divider" />
     </div>
+
+    {/* Southeastern Page Breadcrumb Trail - flows with scroll, folding behind sticky hotbar */}
+    <Breadcrumbs />
 
     {/* Main Content Area */}
     <main className="main-content">

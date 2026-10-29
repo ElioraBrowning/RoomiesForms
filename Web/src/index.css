@@ -320,34 +320,29 @@ pre {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem max(var(--page-gutter), calc((100% - var(--page-max)) / 2)) 0.35rem;
+  padding: 0.85rem max(var(--page-gutter), calc((100% - var(--page-max)) / 2)) 0.75rem;
+}
+
+/* Thin subtle grey line separating the top hotbar from page content:
+   Inset on the far left and right to match the Southeastern site grid */
+.navbar-divider {
+  height: 1px;
+  background-color: var(--border);
+  margin: 0 max(var(--page-gutter), calc((100% - var(--page-max)) / 2));
 }
 
 /* ------------------------------------------------------------------
    Southeastern Breadcrumbs & Page-to-Page Navigation Arrows
    Reflecting authentic southeastern.edu breadcrumb language:
-   - Nested inside top navigation area
+   - Sits in normal flow below the sticky hotbar
+   - Automatically folds/slides behind the hotbar as the user scrolls
    - Rounded pill link hover states
    - Chevron page-to-page navigation arrows
-   - Auto-collapses smoothly when scrolling down to preserve screen real estate
    ------------------------------------------------------------------ */
 
-.breadcrumbs-wrapper {
-  max-height: 50px;
-  opacity: 1;
-  overflow: hidden;
-  transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, transform 0.28s ease;
-  transform: translateY(0);
-}
-
-.breadcrumbs-wrapper.is-hidden {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-}
-
 .breadcrumbs-bar {
+  position: relative;
+  z-index: 10;
   width: 100%;
   background: transparent;
 }
@@ -355,7 +350,7 @@ pre {
 .breadcrumbs-container {
   max-width: calc(var(--page-max) + 2 * var(--page-gutter));
   margin: 0 auto;
-  padding: 0.2rem var(--page-gutter) 0.65rem;
+  padding: 0.5rem var(--page-gutter) 0.5rem;
 }
 
 .breadcrumbs-list {
@@ -406,7 +401,7 @@ pre {
 
 @media (max-width: 640px) {
   .breadcrumbs-container {
-    padding: 0.15rem var(--page-gutter) 0.5rem;
+    padding: 0.35rem var(--page-gutter) 0.45rem;
   }
   .breadcrumbs-list {
     flex-wrap: nowrap;
@@ -422,14 +417,6 @@ pre {
   .breadcrumbs-current {
     font-size: 0.82rem;
   }
-}
-
-/* Thin subtle grey line separating the top hotbar from page content:
-   Inset on the far left and right to match the Southeastern site grid */
-.navbar-divider {
-  height: 1px;
-  background-color: var(--border);
-  margin: 0 max(var(--page-gutter), calc((100% - var(--page-max)) / 2));
 }
 
 .navbar-pill {
@@ -475,7 +462,7 @@ pre {
 .navbar-app-name {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--brand-gold);
   white-space: nowrap;
   letter-spacing: -0.01em;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -514,9 +501,9 @@ pre {
 }
 
 .navbar-link.active {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 198, 41, 0.22);
+  color: var(--brand-gold);
+  border: 1px solid rgba(255, 198, 41, 0.35);
 }
 
 /* Notification Bell Wrapper inside capsule */
@@ -555,15 +542,15 @@ pre {
 
 .navbar-avatar-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 3px var(--brand-gold);
 }
 
 .navbar-avatar-circle {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: #ffffff;
-  color: var(--brand-green);
+  background: var(--brand-gold);
+  color: #0f172a;
   font-size: 0.82rem;
   font-weight: 800;
   display: grid;
@@ -736,17 +723,17 @@ pre {
 }
 .theme-toggle-sun {
   left: 8px;
-  color: #ffffff;
+  color: var(--primary-text);
 }
 .theme-toggle-moon {
   right: 8px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--brand-mint);
 }
 .theme-toggle-btn.is-dark .theme-toggle-sun {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--brand-gold);
 }
 .theme-toggle-btn.is-dark .theme-toggle-moon {
-  color: var(--brand-green);
+  color: #0f172a;
 }
 .theme-toggle-thumb {
   position: absolute;
@@ -755,7 +742,7 @@ pre {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--brand-gold);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   transition: transform 0.22s ease;
   z-index: 1;
@@ -2302,13 +2289,13 @@ fieldset:disabled .choice {
   height: 17px;
   padding: 0 4px;
   border-radius: 999px;
-  background: #ffffff;
-  color: var(--brand-green);
+  background: var(--brand-gold);
+  color: #0f172a;
   font-size: 0.68rem;
   font-weight: 800;
   line-height: 17px;
   text-align: center;
-  border: 1.5px solid var(--brand-green);
+  border: 2px solid var(--brand-green);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .bell-panel {
