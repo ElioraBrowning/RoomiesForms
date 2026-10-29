@@ -8,10 +8,14 @@ import { AnswerSummary } from '../forms/AnswerSummary';
 import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../hooks/useTheme';
 import { SkeletonForm } from '../components/Skeleton';
+import { submitToGoogleWorkspace } from '../services/googleSheetsService';
 
 interface EmployerView {
+  submissionId?: number;
+  formId?: string;
   formTitle: string;
   studentName: string;
+  studentEmail?: string;
   status: 'Open' | 'Expired' | 'Approved' | 'ChangesRequested' | 'Superseded' | string;
   expiresAt?: string | null;
   signedAt?: string | null;
@@ -46,6 +50,17 @@ export default function EmployerReview() {
   const approve = async (answers: Answers) => {
     try {
       await api.post(`/employer/${token}`, { decision: 'approve', responses: answers });
+      if (view) {
+        const mergedResponses = { ...(view.responses ?? {}), ...answers };
+        await submitToGoogleWorkspace({
+          studentName: view.studentName,
+          studentEmail: view.studentEmail || (view.responses?.email as string) || 'student@selu.edu',
+          submissionId: view.submissionId || token || 'employer-review',
+          formId: view.formId || view.schema.id,
+          summary: view.schema.employer?.mode === 'complete' ? 'Employer evaluation completed' : 'Approved and signed by employer',
+          responses: mergedResponses,
+        }).catch((err) => console.error('Google Sheets write notice:', err));
+      }
       setFinished('approved');
     } catch (err) {
       const { message, errors } = readApiError(err);
@@ -62,6 +77,16 @@ export default function EmployerReview() {
     setBusy(true);
     try {
       await api.post(`/employer/${token}`, { decision: 'requestChanges', comments: returnNote.trim() });
+      if (view) {
+        await submitToGoogleWorkspace({
+          studentName: view.studentName,
+          studentEmail: view.studentEmail || (view.responses?.email as string) || 'student@selu.edu',
+          submissionId: view.submissionId || token || 'employer-review',
+          formId: view.formId || view.schema.id,
+          summary: `Changes requested by employer: ${returnNote.trim()}`,
+          responses: view.responses ?? {},
+        }).catch((err) => console.error('Google Sheets write notice:', err));
+      }
       setFinished('returned');
     } catch (err) {
       setReturnError(readApiError(err).message);

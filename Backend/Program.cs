@@ -6,23 +6,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Data Source=localdev.db";
-
+// Add services to the container (use local SQLite only; disconnected from Supabase/PostgreSQL).
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    if (connectionString.Contains("localdev.db") || connectionString.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
-    {
-        options.UseSqlite(connectionString);
-        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-    }
-    else
-    {
-        options.UseNpgsql(connectionString);
-        // The schema is applied by hand-checked migrations; don't let a snapshot drift stop startup.
-        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-    }
+    options.UseSqlite("Data Source=localdev.db");
+    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
 // Register centralized Mock Data Service

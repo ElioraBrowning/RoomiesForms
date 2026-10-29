@@ -149,11 +149,15 @@ export default function FormView() {
 
       // Append record to Google Sheet via Google Apps Script
       await submitToGoogleWorkspace({
-        studentName: user?.fullName || '',
-        studentEmail: user?.email || '',
-        submissionId: res.data?.id || form.id,
+        studentName: schema.anonymous ? 'Anonymous' : (user?.fullName || (answers.studentName as string) || (answers.name as string) || ''),
+        studentEmail: schema.anonymous ? 'anonymous@selu.edu' : (user?.email || (answers.email as string) || ''),
+        submissionId: res.data?.id || `${form.googleFormId}-${Date.now()}`,
         formId: form.googleFormId,
-        summary: isRevision ? 'Resubmission after changes requested' : 'Initial submission',
+        summary: schema.anonymous
+          ? 'Anonymous survey submission'
+          : isRevision
+            ? 'Resubmission after changes requested'
+            : 'Initial submission',
         responses: answers,
       }).catch((err) => console.error('Google Sheets write notice:', err));
 

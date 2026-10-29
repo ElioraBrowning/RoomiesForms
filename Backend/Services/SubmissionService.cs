@@ -522,8 +522,11 @@ public class SubmissionService : ISubmissionService
 
         return new EmployerReviewView
         {
+            SubmissionId = submission.Id,
+            FormId = submission.Form?.GoogleFormId ?? schema.Id,
             FormTitle = submission.Form?.Title ?? schema.Title,
             StudentName = submission.Student?.FullName ?? "the student",
+            StudentEmail = submission.Student?.Email ?? string.Empty,
             Status = expired ? "Expired" : isOpen ? "Open" : approval.Status,
             ExpiresAt = approval.ExpiresAt,
             SignedAt = approval.SignedAt,
@@ -881,8 +884,11 @@ public class SubmissionService : ISubmissionService
 /// <summary>What the employer's link page needs. Answers are only included while the review is open.</summary>
 public class EmployerReviewView
 {
+    public int SubmissionId { get; set; }
+    public string FormId { get; set; } = string.Empty;
     public string FormTitle { get; set; } = string.Empty;
     public string StudentName { get; set; } = string.Empty;
+    public string StudentEmail { get; set; } = string.Empty;
 
     /// <summary>"Open", "Expired", "Approved", "ChangesRequested" or "Superseded".</summary>
     public string Status { get; set; } = string.Empty;

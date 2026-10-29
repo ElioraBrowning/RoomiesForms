@@ -12,6 +12,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { CopyLink } from '../components/CopyLink';
 import { SkeletonForm } from '../components/Skeleton';
 import { employerLink } from '../utils/links';
+import { submitToGoogleWorkspace } from '../services/googleSheetsService';
 
 type Mark = 'ok' | 'flag' | 'note';
 interface QuestionReview {
@@ -159,6 +160,14 @@ export default function SubmissionReview() {
     setBusy('approve');
     try {
       await api.post(`/submissions/${id}/approve`, { comments: remarks.trim() || null });
+      await submitToGoogleWorkspace({
+        studentName: submission.student?.fullName || (answers.studentName as string) || (answers.name as string) || '',
+        studentEmail: submission.student?.email || (answers.email as string) || '',
+        submissionId: submission.id,
+        formId: submission.form?.googleFormId || submission.form?.id || '',
+        summary: `Approved (${submission.currentStep?.actionName || requiredRole || 'Review'}) by ${user?.fullName || 'Reviewer'}${remarks.trim() ? `: ${remarks.trim()}` : ''}`,
+        responses: answers,
+      }).catch((err) => console.error('Google Sheets write notice:', err));
       setNotice('Approved. Returning to the dashboard…');
       window.setTimeout(() => navigate('/dashboard'), 900);
     } catch (err) {
@@ -185,6 +194,14 @@ export default function SubmissionReview() {
     setBusy('reject');
     try {
       await api.post(`/submissions/${id}/reject`, { comments });
+      await submitToGoogleWorkspace({
+        studentName: submission.student?.fullName || (answers.studentName as string) || (answers.name as string) || '',
+        studentEmail: submission.student?.email || (answers.email as string) || '',
+        submissionId: submission.id,
+        formId: submission.form?.googleFormId || submission.form?.id || '',
+        summary: `Changes requested (${submission.currentStep?.actionName || requiredRole || 'Review'}) by ${user?.fullName || 'Reviewer'}: ${comments}`,
+        responses: answers,
+      }).catch((err) => console.error('Google Sheets write notice:', err));
       setNotice('Sent back to the student. Returning to the dashboard…');
       window.setTimeout(() => navigate('/dashboard'), 900);
     } catch (err) {
