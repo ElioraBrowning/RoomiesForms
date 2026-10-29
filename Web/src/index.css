@@ -1,6 +1,7 @@
 /* Official Southeastern Louisiana University Brand Standards */
 :root {
-  --brand-green: #1a5632;
+  --brand-green: #006039;
+  --brand-green-pantone: #1a5632;
   --brand-gold: #ffc629;
   --brand-mint: #6cca98;
   --brand-dark-gold: #cb9700;
@@ -306,17 +307,114 @@ pre {
    - Green pill capsule enclosing actions, notifications, and menu on the right
    ------------------------------------------------------------------ */
 
-.navbar-floating {
+.navbar-floating-wrapper {
   position: sticky;
   top: 0;
   z-index: 90;
+  background: var(--bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.navbar-floating {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding: 0.85rem max(var(--page-gutter), calc((100% - var(--page-max)) / 2));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Thin subtle grey line separating the top hotbar from page content */
+.navbar-divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--border);
+}
+
+/* ------------------------------------------------------------------
+   Southeastern Breadcrumbs & Page-to-Page Navigation Arrows
+   Reflecting authentic southeastern.edu breadcrumb language:
+   - Subtle top/bottom framing
+   - Rounded pill link hover states
+   - Chevron page-to-page navigation arrows
+   ------------------------------------------------------------------ */
+
+.breadcrumbs-bar {
+  width: 100%;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.breadcrumbs-container {
+  max-width: calc(var(--page-max) + 2 * var(--page-gutter));
+  margin: 0 auto;
+  padding: 0.55rem var(--page-gutter);
+}
+
+.breadcrumbs-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.86rem;
+}
+
+.breadcrumbs-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.breadcrumbs-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.breadcrumbs-link:hover {
+  color: var(--brand-green);
+  background-color: var(--surface-2);
+}
+
+.breadcrumbs-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  opacity: 0.65;
+  flex-shrink: 0;
+}
+
+.breadcrumbs-current {
+  color: var(--text-heading);
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+}
+
+@media (max-width: 640px) {
+  .breadcrumbs-container {
+    padding: 0.45rem var(--page-gutter);
+  }
+  .breadcrumbs-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .breadcrumbs-list::-webkit-scrollbar {
+    display: none;
+  }
+  .breadcrumbs-link,
+  .breadcrumbs-current {
+    font-size: 0.82rem;
+  }
 }
 
 .navbar-pill {
@@ -2689,11 +2787,6 @@ fieldset:disabled .choice {
   margin: 0;
 }
 
-/* Active tab in the navbar */
-.navbar-link.active {
-  background: color-mix(in srgb, black 22%, var(--brand-green));
-  box-shadow: inset 0 -3px 0 var(--brand-gold);
-}
 
 .form-department {
   margin-top: 0.75rem;

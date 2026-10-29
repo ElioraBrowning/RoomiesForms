@@ -7,6 +7,7 @@ import { getInitials } from '../utils/user';
 import { useTheme } from '../hooks/useTheme';
 import { BrandImage } from './BrandImage';
 import { brand } from '../brand';
+import Breadcrumbs from './Breadcrumbs';
 
 export default function Layout() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -40,10 +41,11 @@ export default function Layout() {
 
   return (
     <div className="layout-container">
-      {/* Modern Southeastern Floating Capsule Header */}
-      <header className="navbar-floating" role="banner">
-        {/* Left Pill (Green Oval) - University Seal & App Branding */}
-        <div className="navbar-pill navbar-pill-brand">
+      {/* Modern Southeastern Floating Capsule Header & Divider */}
+      <div className="navbar-floating-wrapper">
+        <header className="navbar-floating" role="banner">
+          {/* Left Pill (Green Oval) - University Seal & App Branding */}
+          <div className="navbar-pill navbar-pill-brand">
           <Link to="/dashboard" className="navbar-brand-link" aria-label="Roomie's Forms — Home">
             <BrandImage
               className="navbar-seal"
@@ -168,7 +170,14 @@ export default function Layout() {
         </div>
       </header>
 
-      {/* Main Content Area - Free of top and bottom stripes */}
+        {/* Thin subtle grey line separating the top hotbar from page content */}
+        <div className="navbar-divider" />
+      </div>
+
+      {/* Southeastern Page Breadcrumb Trail with Navigation Arrows */}
+      <Breadcrumbs />
+
+      {/* Main Content Area */}
       <main className="main-content">
         <Outlet />
       </main>
