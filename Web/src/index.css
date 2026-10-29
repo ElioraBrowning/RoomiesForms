@@ -1,7 +1,6 @@
 /* Official Southeastern Louisiana University Brand Standards */
 :root {
-  --brand-green: #006039;
-  --brand-green-pantone: #1a5632;
+  --brand-green: #1a5632;
   --brand-gold: #ffc629;
   --brand-mint: #6cca98;
   --brand-dark-gold: #cb9700;
@@ -14,8 +13,8 @@
   --focus-ring: 0 0 0 3px var(--focus);
   --measure: 760px;
 
-  --page-max: 1200px;
-  --page-gutter: clamp(1rem, 4vw, 2.5rem);
+  --page-max: 1400px;
+  --page-gutter: clamp(1.25rem, 3vw, 2.5rem);
 
   /* Legacy brand aliases for backward compatibility */
   --slu-green: var(--brand-green);
@@ -35,8 +34,8 @@
   --surface: #ffffff;
   --surface-2: #f1f5f9;
   --surface-3: #e2e8f0;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --border: #e8e8e8;
+  --border-strong: #d1d5db;
 
   --text: #1e293b;
   --text-heading: #0f172a;
@@ -421,8 +420,8 @@ pre {
   background: var(--brand-green);
   color: #ffffff;
   border-radius: 9999px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+  border: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -433,7 +432,7 @@ pre {
   align-items: center;
 }
 .navbar-pill-brand:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 0 14px 0 rgba(0, 0, 0, 0.35);
 }
 
 .navbar-brand-link {
@@ -527,15 +526,15 @@ pre {
   gap: 0.35rem;
   padding: 2px 7px 2px 2px;
   border-radius: 9999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.12);
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
 
 .navbar-avatar-btn:hover {
   background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .navbar-avatar-btn:focus-visible {
@@ -702,14 +701,14 @@ pre {
   height: 32px;
   padding: 0;
   border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.18);
   cursor: pointer;
   flex-shrink: 0;
   transition: border-color 0.2s, background 0.2s;
 }
 .theme-toggle-btn:hover {
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 .theme-toggle-icon {
   position: absolute;
@@ -2270,14 +2269,14 @@ fieldset:disabled .choice {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.12);
   color: #ffffff;
   cursor: pointer;
   transition: background 0.18s ease, transform 0.15s ease;
 }
 .bell-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.2);
 }
 .bell-count {
   position: absolute;
