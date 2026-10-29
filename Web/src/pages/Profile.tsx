@@ -6,8 +6,9 @@ export default function Profile() {
 
   return (
     <div className="profile">
-      <h1 style={{ marginBottom: '1.5rem', color: 'var(--text-heading)' }}>My Profile</h1>
-      
+      <div className="page-head">
+        <h1>My profile</h1>
+      </div>
       <div className="card profile-card">
         <div className="profile-head">
           <div className="avatar-lg" aria-hidden="true">

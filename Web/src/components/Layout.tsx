@@ -1,24 +1,21 @@
-import { Outlet, Link, useNavigate, Navigate } from 'react-router-dom';
+import { Outlet, Link, NavLink, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState, useRef } from 'react';
 import ThemeToggle from './ThemeToggle';
+import NotificationBell from './NotificationBell';
 import { getInitials } from '../utils/user';
-import '../index.css';
+import { useTheme } from '../hooks/useTheme';
+import { BrandImage } from './BrandImage';
+import { brand } from '../brand';
 
 export default function Layout() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'dark';
-  });
+  const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  const isReviewer = user?.roles?.some(r => ['Faculty', 'Department Head'].includes(r));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -29,10 +26,6 @@ export default function Layout() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
 
   const handleLogout = () => {
     logout();
@@ -48,10 +41,11 @@ export default function Layout() {
       <div className="stripes" />
       <header className="navbar">
         <div className="navbar-brand">
-          <Link to="/dashboard" className="navbar-brand-link" aria-label="Roomie's Forms — go to dashboard">
-            <img
+          <Link to="/dashboard" className="navbar-brand-link" aria-label="Roomie's Forms home">
+            <BrandImage
               className="navbar-seal"
-              src="/brand/selu-logo-white.png"
+              light={brand.universityLogoOnGreen}
+              dark={brand.universityLogoOnGreen}
               alt="Southeastern Louisiana University"
               width={900}
               height={218}
@@ -62,13 +56,16 @@ export default function Layout() {
         </div>
 
         <nav className="navbar-nav">
-          <div className="navbar-links">
-            <Link to="/dashboard" className="navbar-link">Dashboard</Link>
-            {user?.roles?.some(r => ['Faculty', 'External', 'Department Head'].includes(r)) && (
-              <Link to="/forms/builder" className="navbar-link">Form Builder</Link>
-            )}
-          </div>
+          {/* Students only have one page, which the logo already links to, so they get no tabs. */}
+          {isReviewer && (
+            <div className="navbar-links">
+              <NavLink to="/dashboard" className="navbar-link">Review queue</NavLink>
+              <NavLink to="/assignments" className="navbar-link">Assign forms</NavLink>
+              <NavLink to="/forms/builder" className="navbar-link">Form builder</NavLink>
+            </div>
+          )}
           <div className="navbar-actions">
+            <NotificationBell />
             <div className="navbar-theme-toggle">
               <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
             </div>
@@ -122,7 +119,7 @@ export default function Layout() {
       <main className="main-content">
         <Outlet />
       </main>
-      <div className="stripe" />
+      <div className="stripe stripe-thin" />
     </div>
   );
 }
