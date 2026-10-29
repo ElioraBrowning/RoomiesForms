@@ -4,6 +4,8 @@ import {
   MOCK_FORMS,
   MOCK_SUBMISSIONS,
   MOCK_SUBMISSION_DETAILS,
+  MOCK_ASSIGNMENTS,
+  MOCK_NOTIFICATIONS,
   getMockUser,
 } from './mockData';
 
@@ -67,6 +69,28 @@ api.interceptors.response.use(
       });
     }
 
+    // GET /assignments or /assignments/mine or /assignments/students
+    if (cleanUrl.startsWith('assignments') && method === 'get') {
+      if (cleanUrl.includes('students')) {
+        return Promise.resolve({
+          data: [
+            { id: 1, fullName: 'Cade Sholar', email: 'cade.sholar@selu.edu' },
+            { id: 2, fullName: 'Eliora Browning', email: 'eliora.browning@selu.edu' },
+          ],
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config: error.config,
+        });
+      }
+      return Promise.resolve({ data: MOCK_ASSIGNMENTS, status: 200, statusText: 'OK', headers: {}, config: error.config });
+    }
+
+    // GET /notifications
+    if (cleanUrl.startsWith('notifications') && method === 'get') {
+      return Promise.resolve({ data: MOCK_NOTIFICATIONS, status: 200, statusText: 'OK', headers: {}, config: error.config });
+    }
+
     // GET /forms or /forms/:id
     if (cleanUrl.startsWith('forms') && method === 'get') {
       const parts = cleanUrl.split('/');
@@ -78,6 +102,17 @@ api.interceptors.response.use(
         return Promise.resolve({ data: form, status: 200, statusText: 'OK', headers: {}, config: error.config });
       }
       return Promise.resolve({ data: MOCK_FORMS, status: 200, statusText: 'OK', headers: {}, config: error.config });
+    }
+
+    // GET /submissions/reviewed
+    if (cleanUrl.includes('submissions/reviewed') && method === 'get') {
+      const reviewed = MOCK_SUBMISSIONS.filter((s) => s.status === 'Completed' || s.status === 'Approved');
+      return Promise.resolve({ data: reviewed, status: 200, statusText: 'OK', headers: {}, config: error.config });
+    }
+
+    // GET /submissions/awaiting-employer
+    if (cleanUrl.includes('submissions/awaiting-employer') && method === 'get') {
+      return Promise.resolve({ data: [], status: 200, statusText: 'OK', headers: {}, config: error.config });
     }
 
     // GET /submissions/drafts/:id

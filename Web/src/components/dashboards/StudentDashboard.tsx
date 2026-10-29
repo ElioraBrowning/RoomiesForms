@@ -69,8 +69,8 @@ export default function StudentDashboard() {
   useEffect(() => {
     Promise.all([api.get<Assignment[]>('/assignments/mine'), api.get<SubmissionSummary[]>('/submissions')])
       .then(([a, s]) => {
-        setAssignments(a.data);
-        setSubmissions(s.data);
+        setAssignments(Array.isArray(a.data) ? a.data : []);
+        setSubmissions(Array.isArray(s.data) ? s.data : []);
       })
       .catch((err) => setError(readApiError(err, "Couldn't load your forms.").message))
       .finally(() => setLoading(false));
@@ -79,7 +79,7 @@ export default function StudentDashboard() {
   // Needs-changes first, then by due date (soonest first), then by form number.
   const sorted = useMemo(
     () =>
-      [...assignments].sort((a, b) => {
+      [...(Array.isArray(assignments) ? assignments : [])].sort((a, b) => {
         const g = GROUP_ORDER.indexOf(groupOf(a)) - GROUP_ORDER.indexOf(groupOf(b));
         if (g !== 0) return g;
         const da = a.dueDate ? Date.parse(a.dueDate) : Infinity;
@@ -90,7 +90,9 @@ export default function StudentDashboard() {
     [assignments],
   );
 
-  const counts = Object.fromEntries(GROUPS.map((g) => [g.key, assignments.filter((a) => groupOf(a) === g.key).length])) as Record<Group, number>;
+  const counts = Object.fromEntries(
+    GROUPS.map((g) => [g.key, (Array.isArray(assignments) ? assignments : []).filter((a) => groupOf(a) === g.key).length])
+  ) as Record<Group, number>;
   const shown = filter ? sorted.filter((a) => groupOf(a) === filter) : sorted;
   const departments = groupByDepartment(shown);
   const firstName = user?.fullName?.split(' ')[0];
