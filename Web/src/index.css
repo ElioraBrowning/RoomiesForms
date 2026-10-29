@@ -1,136 +1,134 @@
 :root {
   /* Type */
-  --font-ui: "Archivo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  --font-display: "Archivo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-ui: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /* Neutrals are tinted toward the SELU green rather than generic cool grey,
-     so the neutrals harmonize with the brand. High-contrast & WCAG AA/AAA compliant. */
-  --bg-body: #eff4f1;
-  --bg-sunken: #e3ede7;
-  --text-main: #192e22;
-  --text-heading: #0a1f14;
-  --bg-card: #ffffff;
-  --border-card: #b8cebf;
-  --bg-card-nested: #f4f8f5;
-  --border-card-nested: #cadcd1;
-  --bg-form-section: #ffffff;
-  --border-form-section: #1a5632;
-  --text-form-section-h3: #1a5632;
-  --bg-input: #ffffff;
-  --border-input: #668574;
-  --border-input-focus: #1a5632;
-  --text-input: #0a1f14;
-  --text-label: #0c2417;
-  --text-help: #334e3f;
-  --text-placeholder: #577363;
-  --bg-dynamic-row: #f8faf8;
-  --progress-track-bg: #c9d9ce;
-  --shadow-card: 0 4px 14px rgba(10, 31, 20, 0.08), 0 1px 3px rgba(10, 31, 20, 0.04);
-
-  /* Official SELU brand colors, from the university brand guide:
-     Green = Pantone 357 / #1A5632, Gold = Pantone 123 / #FFC629. */
+  /* Official Southeastern Louisiana University Brand Standards:
+     SLU Green: Pantone 357 C / #1A5632
+     SLU Gold:  Pantone 123 C / #FFC629
+     Secondary Accents: Mint (#6CCA98), Dark Gold (#CB9700), Salmon (#EA6852) */
   --slu-green: #1a5632;
   --slu-green-band: #226c40;
   --slu-green-hover: #144327;
   --slu-gold: #ffc629;
   --slu-gold-hover: #e5b225;
 
-  /* Official secondary accents, tuned for light mode text readability */
   --slu-mint: #237b4e;
   --slu-dark-gold: #b47800;
   --slu-salmon: #c53030;
   --slu-orange: #b85e00;
 
-  /* Secondary button - clear visible border & readable text */
-  --btn-secondary-bg: #ffffff;
-  --btn-secondary-border: #668574;
-  --btn-secondary-hover: #eaf2ed;
-  --btn-secondary-border-hover: #1a5632;
-  --btn-secondary-text: #0a1f14;
-  --login-title-color: #144327;
+  /* LIGHT MODE (Official SELU Enterprise Standards - Clean, High Contrast, WCAG AAA compliant) */
+  --bg-body: #f8fafc;
+  --bg-sunken: #f1f5f9;
+  --text-main: #1e293b;
+  --text-heading: #0f172a;
+  --bg-card: #ffffff;
+  --border-card: #e2e8f0;
+  --bg-card-nested: #f8fafc;
+  --border-card-nested: #e2e8f0;
+  --bg-form-section: #ffffff;
+  --border-form-section: #1a5632;
+  --text-form-section-h3: #1a5632;
+  --bg-input: #ffffff;
+  --border-input: #cbd5e1;
+  --border-input-focus: #1a5632;
+  --text-input: #0f172a;
+  --text-label: #1e293b;
+  --text-help: #64748b;
+  --text-placeholder: #94a3b8;
+  --bg-dynamic-row: #f8fafc;
+  --progress-track-bg: #e2e8f0;
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 
-  /* Theme Toggle in light mode */
+  /* Buttons */
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-border: #cbd5e1;
+  --btn-secondary-hover: #f1f5f9;
+  --btn-secondary-border-hover: #1a5632;
+  --btn-secondary-text: #1e293b;
+  --login-title-color: #1a5632;
+
+  /* Theme Toggle */
   --theme-toggle-bg: #0d3822;
   --theme-toggle-border: #276b45;
 
-  /* Status Badges - High contrast with crisp borders */
+  /* Status Badges - High contrast, accessible */
   --status-pending-bg: #fef3c7;
-  --status-pending-text: #78350f;
+  --status-pending-text: #92400e;
   --status-pending-border: #fcd34d;
   --status-approved-bg: #dcfce7;
-  --status-approved-text: #14532d;
+  --status-approved-text: #166534;
   --status-approved-border: #86efac;
   --status-rejected-bg: #fee2e2;
-  --status-rejected-text: #7f1d1d;
+  --status-rejected-text: #991b1b;
   --status-rejected-border: #fca5a5;
   --status-todo-bg: #f1f5f9;
-  --status-todo-text: #334155;
+  --status-todo-text: #475569;
   --status-todo-border: #cbd5e1;
-  --status-draft-bg: #e6ede8;
-  --status-draft-text: #193828;
-  --status-draft-border: #b8ccbe;
+  --status-draft-bg: #f1f5f9;
+  --status-draft-text: #334155;
+  --status-draft-border: #cbd5e1;
 }
 
 [data-theme="dark"] {
-  /* The page and the cards need a real gap between them, otherwise every
-     surface reads as one flat sheet of green. */
-  --bg-body: #05140d;
-  --bg-sunken: #092015;
-  --text-main: #d3ebe1;
-  --text-heading: #f0fcf6;
-  --bg-card: #0d271c;
-  --border-card: #1f563d;
-  --bg-card-nested: #123727;
-  --border-card-nested: #1e593e;
-  --bg-form-section: #081d13;
-  --border-form-section: #6cca98; /* Official SELU mint */
+  /* DARK MODE (Developer / Testing Mode - Clean Dark Slate/Charcoal neutrals, NOT Swamp Green) */
+  --bg-body: #0b1118;
+  --bg-sunken: #070c12;
+  --text-main: #e2e8f0;
+  --text-heading: #f8fafc;
+  --bg-card: #131b26;
+  --border-card: #243247;
+  --bg-card-nested: #182230;
+  --border-card-nested: #2a3b54;
+  --bg-form-section: #0f1722;
+  --border-form-section: #1a5632;
   --text-form-section-h3: #6cca98;
-  --bg-input: #071c13;
-  --border-input: #276f4e;
+  --bg-input: #0e1520;
+  --border-input: #2f425c;
   --border-input-focus: #ffc629;
-  --text-input: #f0fcf6;
-  --text-label: #e2f4ec;
-  --text-help: #92caa9;
-  --text-placeholder: #64997c;
-  --bg-dynamic-row: #0a2d1f;
-  --progress-track-bg: #16432f;
-  --shadow-card: 0 10px 24px rgba(0, 0, 0, 0.45), 0 4px 8px rgba(0, 0, 0, 0.25);
+  --text-input: #f8fafc;
+  --text-label: #e2e8f0;
+  --text-help: #94a3b8;
+  --text-placeholder: #64748b;
+  --bg-dynamic-row: #141f2e;
+  --progress-track-bg: #1e293b;
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
 
-  /* Dark mode drops the official green nearly to black for the nav so it
-     recedes; the stripe keeps a true green so gold still reads against it. */
-  --slu-green: #081b10;
-  --slu-green-band: #15452a;
-  --slu-green-hover: #05120a;
+  /* In dark mode, preserve rich SLU Green and Gold branding */
+  --slu-green: #1a5632;
+  --slu-green-band: #164f2e;
+  --slu-green-hover: #226c40;
   --slu-mint: #6cca98;
   --slu-dark-gold: #cb9700;
   --slu-salmon: #ea6852;
   --slu-orange: #e07c00;
 
-  --btn-secondary-bg: #113f2c;
-  --btn-secondary-border: #236c4d;
-  --btn-secondary-hover: #19583d;
+  --btn-secondary-bg: #182230;
+  --btn-secondary-border: #2f425c;
+  --btn-secondary-hover: #223044;
   --btn-secondary-border-hover: #6cca98;
-  --btn-secondary-text: #f0fcf6;
+  --btn-secondary-text: #f8fafc;
   --login-title-color: var(--slu-gold);
 
-  --theme-toggle-bg: #04140c;
-  --theme-toggle-border: #1e553a;
+  --theme-toggle-bg: #131b26;
+  --theme-toggle-border: #243247;
 
-  --status-pending-bg: #3a1a04;
-  --status-pending-text: #fed7aa;
-  --status-pending-border: #9a3412;
+  --status-pending-bg: #422006;
+  --status-pending-text: #fde047;
+  --status-pending-border: #854d0e;
   --status-approved-bg: #052e16;
-  --status-approved-text: #a7f3d0;
-  --status-approved-border: #15803d;
+  --status-approved-text: #86efac;
+  --status-approved-border: #166534;
   --status-rejected-bg: #450a0a;
-  --status-rejected-text: #fecaca;
+  --status-rejected-text: #fca5a5;
   --status-rejected-border: #991b1b;
   --status-todo-bg: #1e293b;
   --status-todo-text: #94a3b8;
   --status-todo-border: #334155;
-  --status-draft-bg: #133324;
-  --status-draft-text: #a7d9c0;
-  --status-draft-border: #21593e;
+  --status-draft-bg: #182230;
+  --status-draft-text: #cbd5e1;
+  --status-draft-border: #2a3b54;
 }
 
 body {

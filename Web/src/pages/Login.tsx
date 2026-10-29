@@ -24,6 +24,19 @@ export default function Login() {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
+  const handleQuickLogin = async (targetEmail: string) => {
+    setError("");
+    setLoading(true);
+    try {
+      await login(targetEmail);
+      navigate("/dashboard");
+    } catch {
+      setError("Failed to sign in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -122,16 +135,28 @@ export default function Login() {
             </button>
           </form>
 
+          {/* ========================================================================= */}
+          {/* DEMO / TESTING MODE: Quick Demo Logins                                    */}
+          {/* (Comment or remove this entire block before final university production handoff) */}
+          {/* ========================================================================= */}
           <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid var(--border-card)" }}>
             <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.82rem", color: "var(--text-help)", fontWeight: 600 }}>
-              Quick test accounts:
+              ⚡ One-Click Demo Logins:
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <button
                 type="button"
                 className="btn btn-secondary"
                 style={{ fontSize: "0.82rem", padding: "6px 10px", textAlign: "left", display: "block", width: "100%" }}
-                onClick={() => setEmail("eliora.browning@selu.edu")}
+                onClick={() => handleQuickLogin("cade.sholar@selu.edu")}
+              >
+                🎓 Student: <strong>Cade Sholar</strong> (cade.sholar@selu.edu)
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: "0.82rem", padding: "6px 10px", textAlign: "left", display: "block", width: "100%" }}
+                onClick={() => handleQuickLogin("eliora.browning@selu.edu")}
               >
                 🎓 Student: <strong>Eliora Browning</strong> (eliora.browning@selu.edu)
               </button>
@@ -139,7 +164,7 @@ export default function Login() {
                 type="button"
                 className="btn btn-secondary"
                 style={{ fontSize: "0.82rem", padding: "6px 10px", textAlign: "left", display: "block", width: "100%" }}
-                onClick={() => setEmail("galkadi@selu.edu")}
+                onClick={() => handleQuickLogin("galkadi@selu.edu")}
               >
                 👨‍🏫 Faculty: <strong>Dr. Ghassan Alkadi</strong> (galkadi@selu.edu)
               </button>
@@ -147,12 +172,13 @@ export default function Login() {
                 type="button"
                 className="btn btn-secondary"
                 style={{ fontSize: "0.82rem", padding: "6px 10px", textAlign: "left", display: "block", width: "100%" }}
-                onClick={() => setEmail("bonnie.achee@southeastern.edu")}
+                onClick={() => handleQuickLogin("bonnie.achee@southeastern.edu")}
               >
                 🏛️ Dept Head: <strong>Dr. Bonnie Achée</strong> (bonnie.achee@southeastern.edu)
               </button>
             </div>
           </div>
+          {/* ========================================================================= */}
         </div>
       </div>
     </div>
