@@ -14,17 +14,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    if (!localStorage.getItem('token')) return null;
+    try {
+      const saved = localStorage.getItem('user');
+      return saved && saved !== 'undefined' ? (JSON.parse(saved) as User) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
   useEffect(() => {
-    if (token) {
+    if (token && !user) {
       const savedUser = localStorage.getItem('user');
       if (savedUser && savedUser !== 'undefined') {
         try {
           setUser(JSON.parse(savedUser));
           return;
-        } catch (e) {
+        } catch {
           console.error('Failed to parse user from local storage');
         }
       }

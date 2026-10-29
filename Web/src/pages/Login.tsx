@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "../components/ThemeToggle";
-import "../index.css";
+import { useTheme } from "../hooks/useTheme";
+import { BrandImage } from "../components/BrandImage";
+import { brand } from "../brand";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -11,18 +13,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "dark";
-  });
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
+  const { theme, toggleTheme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,9 +49,10 @@ export default function Login() {
 
         <div className="login-panel">
           <div className="login-hero">
-            <img
+            <BrandImage
               className="login-hero-seal"
-              src="/brand/selu-logo-white.png"
+              light={brand.universityLogoOnGreen}
+              dark={brand.universityLogoOnGreen}
               alt="Southeastern Louisiana University"
               width={900}
               height={218}
@@ -68,16 +60,16 @@ export default function Login() {
             <div className="login-mascot-wrapper">
               <img
                 className="login-mascot"
-                src="/brand/lion-192.webp"
-                srcSet="/brand/lion-192.webp 1x, /brand/lion-420.webp 2x"
-                alt="Roomie the Lion Mascot"
+                src={brand.mascot}
+                srcSet={brand.mascotSrcSet}
+                alt="Roomie the lion"
                 width={192}
                 height={224}
               />
             </div>
             <p className="login-hero-copy">
-              Every form in one place. Draft and submit responses, then watch them
-              move through the review process.
+              Fill out your department forms, save your progress as you go, and
+              follow each one through review.
             </p>
           </div>
 
@@ -122,34 +114,29 @@ export default function Login() {
             </button>
           </form>
 
-          <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid var(--border-card)" }}>
-            <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.82rem", color: "var(--text-help)", fontWeight: 600 }}>
-              Quick test accounts:
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div className="login-quick">
+            <p className="login-quick-title">Test accounts</p>
+            <div className="login-quick-list">
               <button
                 type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: "0.82rem", padding: "6px 10px", textAlign: "left", display: "block", width: "100%" }}
+                className="login-quick-btn"
                 onClick={() => setEmail("eliora.browning@selu.edu")}
               >
-                🎓 Student: <strong>Eliora Browning</strong> (eliora.browning@selu.edu)
+                <span className="login-quick-role">Student</span> <strong>Eliora Browning</strong>
               </button>
               <button
                 type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: "0.82rem", padding: "6px 10px", textAlign: "left", display: "block", width: "100%" }}
+                className="login-quick-btn"
                 onClick={() => setEmail("galkadi@selu.edu")}
               >
-                👨‍🏫 Faculty: <strong>Dr. Ghassan Alkadi</strong> (galkadi@selu.edu)
+                <span className="login-quick-role">Faculty</span> <strong>Dr. Ghassan Alkadi</strong>
               </button>
               <button
                 type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: "0.82rem", padding: "6px 10px", textAlign: "left", display: "block", width: "100%" }}
+                className="login-quick-btn"
                 onClick={() => setEmail("bonnie.achee@southeastern.edu")}
               >
-                🏛️ Dept Head: <strong>Dr. Bonnie Achée</strong> (bonnie.achee@southeastern.edu)
+                <span className="login-quick-role">Dept head</span> <strong>Dr. Bonnie Achée</strong>
               </button>
             </div>
           </div>

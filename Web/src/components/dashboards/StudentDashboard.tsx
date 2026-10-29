@@ -1,435 +1,330 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import api from "../../services/api";
-import type { FormMeta, SubmissionSummary } from "../../types";
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import api, { readApiError } from '../../services/api';
+import type { Assignment, EmployerReview, SubmissionSummary } from '../../types';
+import { useAuth } from '../../context/AuthContext';
+import { SkeletonCards } from '../Skeleton';
+import { StatusBadge } from '../StatusBadge';
+import { ApprovalPopover } from '../ApprovalPopover';
+import { CopyLink } from '../CopyLink';
+import { employerLink } from '../../utils/links';
+
+type Group = 'fix' | 'todo' | 'review' | 'done';
+
+const GROUPS: { key: Group; label: string; statuses: string[] }[] = [
+  { key: 'fix', label: 'Needs changes', statuses: ['Rejected'] },
+  { key: 'todo', label: 'To do', statuses: ['Not started', 'Draft'] },
+  { key: 'review', label: 'In review', statuses: ['Pending'] },
+  { key: 'done', label: 'Done', statuses: ['Completed', 'Submitted'] },
+];
+const GROUP_ORDER: Group[] = ['fix', 'todo', 'review', 'done'];
+
+/** After this many days at one step, students get a nudge to follow up. */
+const FOLLOW_UP_DAYS = 7;
+
+const groupOf = (a: Assignment): Group => GROUPS.find((g) => g.statuses.includes(a.status))?.key ?? 'todo';
+
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+const daysSince = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+
+function formatDue(due?: string | null) {
+  if (!due) return null;
+  const d = new Date(due);
+  const days = Math.ceil((d.getTime() - Date.now()) / 86_400_000);
+  const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  if (days < 0) return { text: `Overdue, was due ${date}`, late: true };
+  if (days <= 3) return { text: `Due ${date}`, late: true };
+  return { text: `Due ${date}`, late: false };
+}
+
+/** Department, then purpose (Internship, Program feedback...), each sorted by what needs doing first. */
+function groupByDepartment(list: Assignment[]) {
+  const departments = new Map<string, Map<string, Assignment[]>>();
+  for (const a of list) {
+    const dept = a.department || 'Other';
+    const cat = a.category || 'Other';
+    if (!departments.has(dept)) departments.set(dept, new Map());
+    const cats = departments.get(dept)!;
+    cats.set(cat, [...(cats.get(cat) ?? []), a]);
+  }
+  return [...departments.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([dept, cats]) => ({
+      dept,
+      categories: [...cats.entries()]
+        // Internship forms first: they're the ones with deadlines.
+        .sort(([a], [b]) => (a === 'Internship' ? -1 : b === 'Internship' ? 1 : a.localeCompare(b)))
+        .map(([category, items]) => ({ category, items })),
+    }));
+}
 
 export default function StudentDashboard() {
-  const [forms, setForms] = useState<FormMeta[]>([]);
+  const { user } = useAuth();
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [submissions, setSubmissions] = useState<SubmissionSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState<Group | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [formsRes, subRes] = await Promise.allSettled([
-          api.get("/forms"),
-          api.get("/submissions"),
-        ]);
-
-        if (formsRes.status === "fulfilled") setForms(formsRes.value.data);
-        if (subRes.status === "fulfilled") setSubmissions(subRes.value.data);
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    Promise.all([api.get<Assignment[]>('/assignments/mine'), api.get<SubmissionSummary[]>('/submissions')])
+      .then(([a, s]) => {
+        setAssignments(a.data);
+        setSubmissions(s.data);
+      })
+      .catch((err) => setError(readApiError(err, "Couldn't load your forms.").message))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div>
-        <h1 style={{ marginBottom: "1.5rem", color: "var(--text-heading)" }}>
-          Student Dashboard
-        </h1>
-        <div
-          className="card"
-          style={{ textAlign: "center", padding: "4rem 2rem" }}
-        >
-          <h2 style={{ marginBottom: "0.5rem" }}>Loading Dashboard...</h2>
-          <p style={{ color: "var(--text-help)" }}>
-            Please wait while we fetch your records.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Needs-changes first, then by due date (soonest first), then by form number.
+  const sorted = useMemo(
+    () =>
+      [...assignments].sort((a, b) => {
+        const g = GROUP_ORDER.indexOf(groupOf(a)) - GROUP_ORDER.indexOf(groupOf(b));
+        if (g !== 0) return g;
+        const da = a.dueDate ? Date.parse(a.dueDate) : Infinity;
+        const db = b.dueDate ? Date.parse(b.dueDate) : Infinity;
+        if (da !== db) return da - db;
+        return a.formKey.localeCompare(b.formKey);
+      }),
+    [assignments],
+  );
+
+  const counts = Object.fromEntries(GROUPS.map((g) => [g.key, assignments.filter((a) => groupOf(a) === g.key).length])) as Record<Group, number>;
+  const shown = filter ? sorted.filter((a) => groupOf(a) === filter) : sorted;
+  const departments = groupByDepartment(shown);
+  const firstName = user?.fullName?.split(' ')[0];
+
+  const replaceEmployerReview = (submissionId: number, review: EmployerReview) =>
+    setSubmissions((list) => list.map((s) => (s.id === submissionId ? { ...s, employerReview: review } : s)));
 
   return (
-    <div>
-      <h1 style={{ marginBottom: "1rem", color: "var(--text-heading)" }}>
-        Student Dashboard
-      </h1>
+    <div className="dashboard">
+      <h1 className="dashboard-title">{firstName ? `Hi, ${firstName}` : 'Your forms'}</h1>
 
-      <div className="card">
-        <h2>Available Forms & Drafts</h2>
-        {forms.length === 0 ? (
-          <p>No forms available.</p>
-        ) : (
-          <div className="grid" style={{ marginBottom: "1rem" }}>
-            {forms.map((f) => {
-              const draft = submissions.find(
-                (s) =>
-                  (s.formId === f.id || s.formTitle === f.title) &&
-                  s.status === "Draft",
-              );
-              const rejected = submissions.find(
-                (s) =>
-                  (s.formId === f.id || s.formTitle === f.title) &&
-                  s.status === "Rejected",
-              );
-              const pending = submissions.find(
-                (s) =>
-                  (s.formId === f.id || s.formTitle === f.title) &&
-                  s.status === "Pending",
-              );
-              const completed = submissions.find(
-                (s) =>
-                  (s.formId === f.id || s.formTitle === f.title) &&
-                  s.status === "Completed",
-              );
-              const progress = draft?.progress || 0;
+      {error && <div className="alert alert-danger">{error}</div>}
 
-              return (
-                <div
-                  key={f.id}
-                  className="nested-card"
-                  style={{
-                    marginBottom: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      gap: "0.5rem",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <h3 style={{ margin: 0, color: "var(--text-heading)" }}>
-                      {f.title}
-                    </h3>
-                    {rejected && (
-                      <span
-                        className="status status-rejected"
-                        style={{ fontSize: "0.75rem" }}
-                      >
-                        Changes Requested
-                      </span>
-                    )}
-                    {!rejected && pending && (
-                      <span
-                        className="status status-pending"
-                        style={{ fontSize: "0.75rem" }}
-                      >
-                        Under Review
-                      </span>
-                    )}
-                    {!rejected && !pending && completed && (
-                      <span
-                        className="status status-approved"
-                        style={{ fontSize: "0.75rem" }}
-                      >
-                        Approved
-                      </span>
-                    )}
-                  </div>
+      {!loading && assignments.length > 0 && (
+        <div className="summary-strip" role="group" aria-label="Filter forms">
+          {GROUPS.map((g) => (
+            <button
+              key={g.key}
+              type="button"
+              className={`summary-tile tile-${g.key} ${filter === g.key ? 'is-active' : ''}`}
+              aria-pressed={filter === g.key}
+              onClick={() => setFilter(filter === g.key ? null : g.key)}
+              disabled={counts[g.key] === 0}
+            >
+              <span className="summary-count">{counts[g.key]}</span>
+              <span className="summary-label">{g.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
-                  {rejected && (
-                    <p
-                      style={{
-                        fontSize: "0.88rem",
-                        color: "var(--text-help)",
-                        marginBottom: "0.75rem",
-                      }}
-                    >
-                      Revisions requested by reviewer. Click below to review
-                      feedback and edit your answers.
-                    </p>
-                  )}
+      {loading && <SkeletonCards />}
 
-                  {/* Two-Stage Approval Pipeline in Card */}
-                  {(rejected || pending || completed) && (rejected || pending || completed)?.approvals && (
-                    <div style={{ marginBottom: "1rem" }}>
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                          color: "var(--text-heading)",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        Approval Pipeline:
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                        {(rejected || pending || completed)!.approvals!.map((app) => {
-                          const isAppApproved = app.status === "Approved";
-                          const isAppRejected = app.status === "Changes Requested";
-                          const isAppPending = app.status === "Pending Review";
-                          return (
-                            <div
-                              key={app.stepOrder}
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                fontSize: "0.75rem",
-                                padding: "4px 8px",
-                                borderRadius: "4px",
-                                background: "var(--bg-main)",
-                                border: "1px solid var(--border-card)",
-                              }}
-                            >
-                              <span style={{ color: "var(--text-main)" }}>
-                                {app.stepOrder}. {app.roleName} ({app.reviewerName.replace("Dr. ", "")})
-                              </span>
-                              <span
-                                className={`status ${
-                                  isAppApproved
-                                    ? "status-approved"
-                                    : isAppRejected
-                                      ? "status-rejected"
-                                      : isAppPending
-                                        ? "status-pending"
-                                        : "status-draft"
-                                }`}
-                                style={{ fontSize: "0.68rem", padding: "1px 6px" }}
-                              >
-                                {isAppApproved
-                                  ? "✓ Approved"
-                                  : isAppRejected
-                                    ? "⚠️ Changes"
-                                    : isAppPending
-                                      ? "⏳ In Review"
-                                      : "⏸ Awaiting"}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+      {!loading && !error && assignments.length === 0 && (
+        <div className="card empty-card">
+          <h2>No forms yet</h2>
+          <p>When your faculty advisor assigns you a form, it will show up here.</p>
+        </div>
+      )}
 
-                  {!rejected && progress > 0 && (
-                    <div style={{ marginBottom: "1.5rem" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          fontSize: "0.85rem",
-                          color: "var(--text-help)",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        <span>Draft in progress</span>
-                        <span>{progress}%</span>
-                      </div>
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "6px",
-                          backgroundColor:
-                            "var(--progress-track-bg, var(--border-card))",
-                          borderRadius: "3px",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: `${progress}%`,
-                            height: "100%",
-                            backgroundColor: "var(--slu-gold)",
-                            transition: "width 0.3s ease",
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
+      {filter && (
+        <p className="help-text">
+          Showing {GROUPS.find((g) => g.key === filter)?.label.toLowerCase()}.{' '}
+          <button type="button" className="btn-link" onClick={() => setFilter(null)}>Show all</button>
+        </p>
+      )}
 
-                  <div
-                    style={{
-                      marginTop: "auto",
-                      paddingTop: !rejected && progress === 0 ? "1rem" : 0,
-                    }}
-                  >
-                    {rejected ? (
-                      <Link
-                        to={`/forms/${f.id}`}
-                        className="btn"
-                        style={{ width: "100%", textAlign: "center" }}
-                      >
-                        ✏️ Edit & Resubmit Form
-                      </Link>
-                    ) : pending || completed ? (
-                      <Link
-                        to={`/submissions/${(pending || completed)?.id}`}
-                        className="btn btn-secondary"
-                        style={{ width: "100%", textAlign: "center" }}
-                      >
-                        View Submission
-                      </Link>
-                    ) : (
-                      <Link
-                        to={`/forms/${f.id}`}
-                        className="btn"
-                        style={{ width: "100%", textAlign: "center" }}
-                      >
-                        {progress > 0 ? "Continue Draft" : "Start Form"}
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      {departments.map(({ dept, categories }) => (
+        <section key={dept} className="form-department" aria-label={dept}>
+          <h2 className="form-department-title">{dept}</h2>
+          {categories.map(({ category, items }) => (
+            <div key={category} className="form-category">
+              <h3 className="form-category-title">{category}</h3>
+              <div className="form-cards">
+                {items.map((a) => (
+                  <AssignmentCard
+                    key={a.id}
+                    assignment={a}
+                    submission={submissions.find((s) => s.formId === a.formId && s.status !== 'Draft')}
+                    onNewEmployerLink={replaceEmployerReview}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+/** One form: name, summary, where it stands, and one main button. Never grows to match its neighbours. */
+function AssignmentCard({
+  assignment: a,
+  submission,
+  onNewEmployerLink,
+}: {
+  assignment: Assignment;
+  submission?: SubmissionSummary;
+  onNewEmployerLink: (submissionId: number, review: EmployerReview) => void;
+}) {
+  const group = groupOf(a);
+  const due = group === 'todo' || group === 'fix' ? formatDue(a.dueDate) : null;
+  const [showNeeds, setShowNeeds] = useState(false);
+
+  const steps = submission?.approvals ?? [];
+  const current = steps.find((s) => s.status === 'Pending Review');
+  const sentBack = steps.find((s) => s.status === 'Changes Requested');
+  const waitingDays = submission && group === 'review' ? daysSince(submission.updatedAt) : 0;
+  const atEmployer = current?.roleName === 'Employer';
+
+  const action =
+    a.status === 'Not started'
+      ? { to: `/forms/${a.formId}`, label: 'Start', primary: true }
+      : a.status === 'Draft'
+        ? { to: `/forms/${a.formId}`, label: `Continue${typeof a.progress === 'number' ? ` (${a.progress}%)` : ''}`, primary: true }
+        : a.status === 'Rejected'
+          ? { to: a.submissionId ? `/submissions/${a.submissionId}` : `/forms/${a.formId}`, label: 'See what to fix', primary: true }
+          : a.submissionId
+            ? { to: `/submissions/${a.submissionId}`, label: 'View', primary: false }
+            : null;
+
+  return (
+    <article className={`form-card group-${group}`}>
+      <div className="form-card-tab">{a.formKey === 'ExitSurvey' ? 'Survey' : a.formKey.replace('CS', 'CS ')}</div>
+      <div className="form-card-head">
+        <h4 className="form-card-title">{a.formTitle.replace(/^CS \d+: /, '')}</h4>
+        <StatusBadge status={a.status} />
+      </div>
+
+      {a.description && <p className="form-card-summary">{a.description}</p>}
+
+      {a.needs && a.needs.length > 0 && group === 'todo' && (
+        <div className="form-card-needs">
+          <button type="button" className="btn-link" aria-expanded={showNeeds} onClick={() => setShowNeeds(!showNeeds)}>
+            {showNeeds ? 'Less info' : 'More info'}
+          </button>
+          {showNeeds && (
+            <>
+              <p className="form-card-needs-title">Have these ready:</p>
+              <ul className="form-card-needs-list">
+                {a.needs.map((n) => <li key={n}>{n}</li>)}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="form-card-meta">
+        {due && <span className={due.late ? 'text-danger' : ''}>{due.text}</span>}
+        {a.anonymous && <span className="tag">Anonymous</span>}
+        {submission && group !== 'todo' && (
+          <span>
+            Started {shortDate(submission.createdAt)} · Updated {shortDate(submission.updatedAt)}
+          </span>
         )}
       </div>
 
-      <div className="card">
-        <h2>Submitted Forms</h2>
-        {submissions.filter((s) => s.status !== "Draft").length === 0 ? (
-          <p>You have not submitted any forms yet.</p>
-        ) : (
-          <div className="dashboard-table-container">
-            <table className="dashboard-table">
-              <thead>
-                <tr>
-                  <th>Form</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Approvals</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {submissions
-                  .filter((s) => s.status !== "Draft")
-                  .map((s) => {
-                    const isRejected = s.status === "Rejected";
-                    return (
-                      <tr key={s.id}>
-                        <td className="table-cell-title">
-                          {s.formTitle}
-                          {s.isResubmission && (
-                            <span
-                              className="status status-resubmitted"
-                              style={{
-                                marginLeft: "0.5rem",
-                                fontSize: "0.72rem",
-                              }}
-                            >
-                              Revised
-                            </span>
-                          )}
-                        </td>
-                        <td>{new Date(s.createdAt).toLocaleDateString()}</td>
-                        <td>
-                          <span
-                            className={`status ${
-                              s.status === "Completed" ||
-                              s.status === "Approved"
-                                ? "status-approved"
-                                : isRejected
-                                  ? "status-rejected"
-                                  : "status-pending"
-                            }`}
-                          >
-                            {isRejected ? "Changes Requested" : s.status}
-                          </span>
-                        </td>
-                        <td style={{ minWidth: "230px" }}>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                            {s.approvals && s.approvals.length > 0 ? (
-                              s.approvals.map((app) => {
-                                const isAppApproved = app.status === "Approved";
-                                const isAppRejected = app.status === "Changes Requested";
-                                const isAppPending = app.status === "Pending Review";
-                                return (
-                                  <div
-                                    key={app.stepOrder}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "space-between",
-                                      gap: "8px",
-                                      fontSize: "0.75rem",
-                                    }}
-                                  >
-                                    <span style={{ color: "var(--text-help)", whiteSpace: "nowrap" }}>
-                                      {app.roleName === "Faculty" ? "Faculty (Alkadi):" : "Dept Head (Achée):"}
-                                    </span>
-                                    <span
-                                      className={`status ${
-                                        isAppApproved
-                                          ? "status-approved"
-                                          : isAppRejected
-                                            ? "status-rejected"
-                                            : isAppPending
-                                              ? "status-pending"
-                                              : "status-draft"
-                                      }`}
-                                      style={{ fontSize: "0.68rem", padding: "1px 6px", whiteSpace: "nowrap" }}
-                                    >
-                                      {isAppApproved
-                                        ? "✓ Approved"
-                                        : isAppRejected
-                                          ? "⚠️ Changes"
-                                          : isAppPending
-                                            ? "⏳ In Review"
-                                            : "⏸ Awaiting"}
-                                    </span>
-                                  </div>
-                                );
-                              })
-                            ) : (
-                              <span style={{ fontSize: "0.75rem", color: "var(--text-help)" }}>
-                                1. Faculty &middot; 2. Dept Head
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td>
-                          <div
-                            style={{
-                              display: "inline-flex",
-                              gap: "0.4rem",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Link
-                              to={`/submissions/${s.id}`}
-                              className="btn-view"
-                            >
-                              <svg
-                                width="15"
-                                height="15"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                aria-hidden="true"
-                                style={{ flexShrink: 0 }}
-                              >
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                <circle cx="12" cy="12" r="3" />
-                              </svg>
-                              <span>{isRejected ? "Requested Changes" : "View"}</span>
-                            </Link>
-                            {isRejected && s.formId && (
-                              <Link
-                                to={`/forms/${s.formId}`}
-                                className="btn-view btn-view-secondary"
-                              >
-                                ✏️ Edit
-                              </Link>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {a.status === 'Draft' && typeof a.progress === 'number' && (
+        <div className="progress-track" aria-label={`${a.progress}% answered`}>
+          <div className="progress-fill" style={{ width: `${a.progress}%` }} />
+        </div>
+      )}
+
+      {group === 'fix' && sentBack && (
+        <p className="form-card-feedback">
+          Changes requested by {sentBack.approvedBy ?? sentBack.reviewerName}
+          {sentBack.actionDate ? ` on ${shortDate(sentBack.actionDate)}` : ''}.
+        </p>
+      )}
+
+      {group === 'review' && current && (
+        <div className="form-card-status">
+          <span>
+            With {atEmployer ? 'your supervisor' : current.reviewerName}
+            {waitingDays > 0 ? ` for ${waitingDays} day${waitingDays === 1 ? '' : 's'}` : ''}
+          </span>
+          <ApprovalPopover steps={steps} />
+        </div>
+      )}
+
+      {group === 'review' && current && waitingDays >= FOLLOW_UP_DAYS && (
+        <p className="form-card-nudge">
+          {atEmployer
+            ? 'It has been over a week. Check in with your supervisor, or send them the link again.'
+            : `It has been over a week. Consider emailing ${current.reviewerName} to follow up.`}
+        </p>
+      )}
+
+      {a.status === 'Submitted' && <p className="form-card-note">Submitted anonymously. Thank you.</p>}
+
+      {submission && atEmployer && submission.employerReview && (
+        <EmployerLink submissionId={submission.id} review={submission.employerReview} onNewLink={onNewEmployerLink} />
+      )}
+
+      {action && (
+        <div className="form-card-actions">
+          <Link to={action.to} className={`btn ${action.primary ? 'btn-primary' : 'btn-secondary'}`}>
+            {action.label}
+          </Link>
+        </div>
+      )}
+    </article>
+  );
+}
+
+/** The supervisor's link: hidden until asked for, with a way to replace an expired or lost one. */
+function EmployerLink({
+  submissionId,
+  review,
+  onNewLink,
+}: {
+  submissionId: number;
+  review: EmployerReview;
+  onNewLink: (submissionId: number, review: EmployerReview) => void;
+}) {
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const renew = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const res = await api.post<EmployerReview>(`/submissions/${submissionId}/employer-link`);
+      onNewLink(submissionId, res.data);
+      setShow(true);
+    } catch (err) {
+      setError(readApiError(err, "Couldn't make a new link.").message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="form-card-employer">
+      {review.expired || !review.accessToken ? (
+        <p>
+          The link for your supervisor has expired.{' '}
+          <button type="button" className="btn-link" onClick={renew} disabled={busy}>
+            {busy ? 'Making a new link…' : 'Get a new link'}
+          </button>
+        </p>
+      ) : show ? (
+        <>
+          <CopyLink url={employerLink(review.accessToken)} />
+          {review.expiresAt && <p>Works until {shortDate(review.expiresAt)}.</p>}
+        </>
+      ) : (
+        <button type="button" className="btn-link" onClick={() => setShow(true)}>
+          Get the link for your supervisor
+        </button>
+      )}
+      {error && <p className="text-danger">{error}</p>}
     </div>
   );
 }

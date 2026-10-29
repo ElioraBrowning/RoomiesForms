@@ -1,170 +1,237 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import type { FormMeta } from '../types';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import api, { readApiError } from '../services/api';
+import type { AuditLogEntry, FormDetail, SubmissionDetail, SubmissionSummary } from '../types';
+import type { Answers, FieldErrors } from '../forms/types';
+import { questionsFor } from '../forms/types';
+import { FormRunner } from '../forms/FormRunner';
+import { latestSentBack, sentBackLine } from '../forms/feedback';
 import { useAuth } from '../context/AuthContext';
-import '../index.css';
+import { SkeletonForm } from '../components/Skeleton';
+import { CopyLink } from '../components/CopyLink';
+import { employerLink } from '../utils/links';
 
-import CS401 from '../components/forms/CS401';
-import CS402 from '../components/forms/CS402';
-import CS403 from '../components/forms/CS403';
-import CS404 from '../components/forms/CS404';
-import CS405 from '../components/forms/CS405';
-import CS410 from '../components/forms/CS410';
-import CS420 from '../components/forms/CS420';
-import ExitSurvey from '../components/forms/ExitSurvey';
+type Done =
+  | { kind: 'submitted' }
+  | { kind: 'anonymous' }
+  | { kind: 'employer'; email: string; token: string; mode: 'signoff' | 'complete' };
 
 export default function FormView() {
   const { formId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const [formMeta, setFormMeta] = useState<FormMeta | null>(null);
+
+  const [form, setForm] = useState<FormDetail | null>(null);
+  const [draft, setDraft] = useState<{ responses: Answers; status: string; auditLogs?: AuditLogEntry[] } | null>(null);
+  const [alreadySubmitted, setAlreadySubmitted] = useState<SubmissionSummary | null>(null);
+  const [loadError, setLoadError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [draftData, setDraftData] = useState<any>(null);
-  const [isRevision, setIsRevision] = useState(false);
-  const [revisionFeedback, setRevisionFeedback] = useState<string | null>(null);
+  const [serverErrors, setServerErrors] = useState<FieldErrors>();
+  const [done, setDone] = useState<Done | null>(null);
 
   useEffect(() => {
-    const fetchFormAndDraft = async () => {
+    let cancelled = false;
+    (async () => {
       try {
-        const res = await api.get(`/forms/${formId}`);
-        const meta = res.data;
-        setFormMeta(meta);
-        
-        try {
-          const draftRes = await api.get(`/submissions/drafts/${meta.id}`);
-          if (draftRes.data && draftRes.data.responses) {
-            setDraftData(draftRes.data.responses);
+        const res = await api.get<FormDetail>(`/forms/${formId}`);
+        if (cancelled) return;
+        setForm(res.data);
 
-            if (draftRes.data.status === 'Rejected') {
-              setIsRevision(true);
-              // Extract latest reviewer comment from audit logs if present
-              const logs = draftRes.data.auditLogs as Array<{ comments?: string; action?: string }> | undefined;
-              if (logs && logs.length > 0) {
-                const latestReject = [...logs].reverse().find(l => l.action === 'Rejected' && l.comments);
-                if (latestReject?.comments) {
-                  setRevisionFeedback(latestReject.comments);
-                }
-              }
-            }
-          }
-        } catch (draftErr) {
-          // No draft or rejected submission exists, start fresh
+        const [draftRes, subsRes] = await Promise.allSettled([
+          api.get(`/submissions/drafts/${res.data.id}`),
+          api.get<SubmissionSummary[]>('/submissions'),
+        ]);
+        if (cancelled) return;
+        if (draftRes.status === 'fulfilled' && draftRes.value.data?.responses) {
+          setDraft(draftRes.value.data);
+        }
+        if (subsRes.status === 'fulfilled') {
+          const live = subsRes.value.data.find(
+            (s) => s.formId === res.data.id && (s.status === 'Pending' || s.status === 'Completed'),
+          );
+          setAlreadySubmitted(live ?? null);
         }
       } catch (err) {
-        console.error(err);
+        const { message, status } = readApiError(err, "Couldn't load this form.");
+        if (!cancelled) setLoadError(status === 403 ? "This form hasn't been assigned to you yet." : message);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
+    })();
+    return () => {
+      cancelled = true;
     };
-    fetchFormAndDraft();
   }, [formId]);
 
-  const onSubmit = async (data: any) => {
-    try {
-      const resolvedFormId = formMeta?.id ?? (isNaN(Number(formId)) ? 0 : Number(formId));
-      await api.post('/submissions', {
-        formId: resolvedFormId,
-        formSlug: formMeta?.googleFormId || (isNaN(Number(formId)) ? formId : undefined),
-        responses: data
-      });
-      alert(
-        isRevision
-          ? 'Revised form submitted successfully! Your submission is now pending faculty review.'
-          : 'Form submitted successfully! Your submission is now pending faculty review.'
-      );
-      navigate('/dashboard');
-    } catch (err) {
-      console.error(err);
-      alert('Error submitting form. Is the backend workflow configured?');
-    }
-  };
+  const schema = form?.schema ?? null;
+  const isRevision = draft?.status === 'Rejected';
 
-  const onSaveDraft = async (data: any) => {
-    try {
-      const resolvedFormId = formMeta?.id ?? (isNaN(Number(formId)) ? 0 : Number(formId));
-      await api.post('/submissions/drafts', {
-        formId: resolvedFormId,
-        formSlug: formMeta?.googleFormId || (isNaN(Number(formId)) ? formId : undefined),
-        responses: data
-      });
-    } catch (err) {
-      console.error('Failed to save draft', err);
+  const initialAnswers = useMemo<Answers>(() => {
+    if (!schema) return {};
+    if (draft) {
+      const { __progress: _ignored, ...rest } = draft.responses as Answers & { __progress?: unknown };
+      return rest;
     }
-  };
+    if (schema.anonymous) return {};
+    // Fill in what we already know about the student, only for questions this form asks.
+    const known: Answers = {
+      name: user?.fullName,
+      studentName: user?.fullName,
+      email: user?.email,
+      wNumber: user?.wNumber || undefined,
+    };
+    const ids = new Set(questionsFor(schema, 'student').map((q) => q.id));
+    return Object.fromEntries(Object.entries(known).filter(([k, v]) => ids.has(k) && v));
+  }, [schema, draft, user]);
 
-  if (loading) {
+  const sentBack = useMemo(
+    () => (isRevision && schema ? latestSentBack(draft?.auditLogs, questionsFor(schema, 'student')) : null),
+    [isRevision, schema, draft],
+  );
+
+  if (loading) return <div className="form-page"><SkeletonForm /></div>;
+
+  if (loadError || !form) {
     return (
-      <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
-        <p>Loading form...</p>
+      <div className="card page-message">
+        <h1>Can't open this form</h1>
+        <p>{loadError || 'Form not found.'}</p>
+        <Link to="/dashboard" className="btn btn-secondary">Back to dashboard</Link>
       </div>
     );
   }
-  if (!formMeta) return <div className="card"><p>Form not found.</p></div>;
 
-  const isEliora = user?.email?.trim().toLowerCase() === 'eliora.browning@selu.edu';
+  if (!schema) {
+    return (
+      <div className="card page-message">
+        <h1>{form.title}</h1>
+        <p>This form doesn't have a definition yet, so it can't be filled in online.</p>
+        <Link to="/dashboard" className="btn btn-secondary">Back to dashboard</Link>
+      </div>
+    );
+  }
 
-  const defaultValues = draftData
-    ? {
-        ...draftData,
-        // Make sure forms do not autofill with fake W numbers other than for Eliora Browning
-        wNumber: isEliora
-          ? (draftData.wNumber || user?.wNumber || 'W0712345')
-          : (draftData.wNumber || ''),
+  if (done) return <DoneScreen done={done} title={form.title} />;
+
+  if (schema.anonymous && form.assignment?.completedOn) {
+    return (
+      <div className="card page-message">
+        <h1>{form.title}</h1>
+        <p>You've already submitted this survey. Thank you for the feedback.</p>
+        <Link to="/dashboard" className="btn btn-secondary">Back to dashboard</Link>
+      </div>
+    );
+  }
+
+  if (alreadySubmitted) {
+    return (
+      <div className="card page-message">
+        <h1>{form.title}</h1>
+        <p>You've already submitted this form. You can follow its review from the submission page.</p>
+        <div className="button-row">
+          <Link to={`/submissions/${alreadySubmitted.id}`} className="btn btn-primary">View submission</Link>
+          <Link to="/dashboard" className="btn btn-secondary">Back to dashboard</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const payloadBase = { formId: form.id, formSlug: form.googleFormId };
+
+  const saveDraft = async (answers: Answers, percent: number) => {
+    await api.post('/submissions/drafts', { ...payloadBase, responses: { ...answers, __progress: percent } });
+  };
+
+  const submit = async (answers: Answers) => {
+    try {
+      const res = await api.post('/submissions', { ...payloadBase, responses: answers });
+      if (res.data?.anonymous) {
+        setDone({ kind: 'anonymous' });
+        return;
       }
-    : {
-        name: user?.fullName || '',
-        wNumber: isEliora ? (user?.wNumber || 'W0712345') : '',
-        email: user?.email || '',
-        studentName: user?.fullName || '',
-      };
-
-  const renderForm = () => {
-    const props = { onSubmit, onSaveDraft, defaultValues };
-    switch (formMeta.googleFormId) {
-      case 'CS401': return <CS401 {...props} />;
-      case 'CS402': return <CS402 {...props} />;
-      case 'CS403': return <CS403 {...props} />;
-      case 'CS404': return <CS404 {...props} />;
-      case 'CS405': return <CS405 {...props} />;
-      case 'CS410': return <CS410 {...props} />;
-      case 'CS420': return <CS420 {...props} />;
-      case 'ExitSurvey': return <ExitSurvey {...props} />;
-      default: return <div>Generic form renderer goes here...</div>;
+      const sub = res.data as SubmissionDetail;
+      if (sub.employerReview?.accessToken && schema.employer) {
+        setDone({ kind: 'employer', email: sub.employerReview.employerEmail, token: sub.employerReview.accessToken, mode: schema.employer.mode });
+        return;
+      }
+      setDone({ kind: 'submitted' });
+    } catch (err) {
+      const { message, errors } = readApiError(err, "Couldn't submit the form.");
+      if (errors) setServerErrors(errors);
+      throw new Error(message);
     }
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ margin: '0 0 0.5rem 0' }}>{formMeta.title}</h1>
-        {isRevision && (
-          <span className="status status-rejected">Editing Resubmission</span>
+    <div className="form-page">
+      <div className="page-head">
+        <p className="page-eyebrow">{schema.anonymous ? 'Anonymous survey' : isRevision ? 'Revising your submission' : 'Form'}</p>
+        <h1>{form.title}</h1>
+        {schema.description && <p className="page-lede">{schema.description}</p>}
+        {form.assignment?.dueDate && (
+          <p className="page-meta">Due {new Date(form.assignment.dueDate).toLocaleDateString(undefined, { timeZone: 'UTC' })}</p>
         )}
       </div>
 
-      {isRevision && (
-        <div className="student-alert-card student-alert-rejected" style={{ marginBottom: '1.75rem' }}>
-          <div className="student-alert-header">
-            <span className="student-alert-icon">⚠️</span>
-            <div>
-              <h3>Editing Form: Revisions Requested</h3>
-              <p>
-                Your previous responses have been loaded below. Please make the requested updates and submit your revised form.
-              </p>
-            </div>
-          </div>
-          {revisionFeedback && (
-            <div className="student-feedback-box">
-              <strong>Reviewer Feedback:</strong>
-              <pre>{revisionFeedback}</pre>
-            </div>
-          )}
+      {isRevision && sentBack && (
+        <div className="alert alert-danger">
+          <h2 className="alert-title">{sentBackLine(sentBack)}</h2>
+          <p>
+            {Object.keys(sentBack.byQuestion).length > 0
+              ? Object.keys(sentBack.byQuestion).length === 1
+                ? 'The answer to fix is marked in red below. Use Edit to change it, then submit again.'
+                : `The ${Object.keys(sentBack.byQuestion).length} answers to fix are marked in red below. Use Edit to change them, then submit again.`
+              : 'Your answers are loaded below. Use Edit to change what the reviewer asked for, then submit again.'}
+          </p>
+          {sentBack.general && <pre className="alert-quote">{sentBack.general}</pre>}
         </div>
       )}
 
-      {renderForm()}
+      <FormRunner
+        schema={schema}
+        respondent="student"
+        initialAnswers={initialAnswers}
+        serverErrors={serverErrors}
+        onSaveDraft={saveDraft}
+        onExit={() => navigate('/dashboard')}
+        onSubmit={submit}
+        submitLabel={schema.submitLabel}
+        startOnReview={isRevision}
+        feedback={sentBack?.byQuestion}
+      />
+    </div>
+  );
+}
+
+function DoneScreen({ done, title }: { done: Done; title: string }) {
+  return (
+    <div className="card page-message done-screen">
+      {done.kind === 'anonymous' && (
+        <>
+          <h1>Thank you</h1>
+          <p>Your survey was submitted anonymously. Nothing in it is linked to your name.</p>
+        </>
+      )}
+      {done.kind === 'submitted' && (
+        <>
+          <h1>Submitted</h1>
+          <p>{title} is now with the faculty reviewer. You'll see its progress on your dashboard.</p>
+        </>
+      )}
+      {done.kind === 'employer' && (
+        <>
+          <h1>Now send this to your supervisor</h1>
+          <p>
+            {done.mode === 'complete'
+              ? 'Your supervisor completes the rest of this form.'
+              : 'Your supervisor needs to review and sign this form.'}{' '}
+            Send this link to <strong>{done.email}</strong>. It works for 14 days and goes to faculty review once they're done.
+          </p>
+          <CopyLink url={employerLink(done.token)} />
+          <p className="help-text">You can find this link again on your dashboard, and get a new one there if it expires.</p>
+        </>
+      )}
+      <Link to="/dashboard" className="btn btn-primary">Back to dashboard</Link>
     </div>
   );
 }
