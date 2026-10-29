@@ -170,17 +170,17 @@ export default function Layout() {
         </div>
       </header>
 
-        {/* Thin subtle grey line separating the top hotbar from page content */}
-        <div className="navbar-divider" />
-      </div>
-
       {/* Southeastern Page Breadcrumb Trail with Navigation Arrows */}
       <Breadcrumbs />
 
-      {/* Main Content Area */}
-      <main className="main-content">
-        <Outlet />
-      </main>
+      {/* Thin subtle grey line separating the top hotbar from page content */}
+      <div className="navbar-divider" />
     </div>
-  );
+
+    {/* Main Content Area */}
+    <main className="main-content">
+      <Outlet />
+    </main>
+  </div>
+);
 }

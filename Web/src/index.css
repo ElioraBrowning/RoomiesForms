@@ -321,34 +321,26 @@ pre {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem max(var(--page-gutter), calc((100% - var(--page-max)) / 2));
-}
-
-/* Thin subtle grey line separating the top hotbar from page content */
-.navbar-divider {
-  width: 100%;
-  height: 1px;
-  background-color: var(--border);
+  padding: 0.85rem max(var(--page-gutter), calc((100% - var(--page-max)) / 2)) 0.35rem;
 }
 
 /* ------------------------------------------------------------------
    Southeastern Breadcrumbs & Page-to-Page Navigation Arrows
    Reflecting authentic southeastern.edu breadcrumb language:
-   - Subtle top/bottom framing
+   - Nested inside top navigation area
    - Rounded pill link hover states
    - Chevron page-to-page navigation arrows
    ------------------------------------------------------------------ */
 
 .breadcrumbs-bar {
   width: 100%;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  background: transparent;
 }
 
 .breadcrumbs-container {
   max-width: calc(var(--page-max) + 2 * var(--page-gutter));
   margin: 0 auto;
-  padding: 0.55rem var(--page-gutter);
+  padding: 0.2rem var(--page-gutter) 0.65rem;
 }
 
 .breadcrumbs-list {
@@ -399,7 +391,7 @@ pre {
 
 @media (max-width: 640px) {
   .breadcrumbs-container {
-    padding: 0.45rem var(--page-gutter);
+    padding: 0.15rem var(--page-gutter) 0.5rem;
   }
   .breadcrumbs-list {
     flex-wrap: nowrap;
@@ -415,6 +407,14 @@ pre {
   .breadcrumbs-current {
     font-size: 0.82rem;
   }
+}
+
+/* Thin subtle grey line separating the top hotbar from page content:
+   Inset on the far left and right to match the Southeastern site grid */
+.navbar-divider {
+  height: 1px;
+  background-color: var(--border);
+  margin: 0 max(var(--page-gutter), calc((100% - var(--page-max)) / 2));
 }
 
 .navbar-pill {
