@@ -132,7 +132,7 @@ export default function Login() {
             {/* (Comment or remove this entire block before final university production handoff) */}
             {/* ========================================================================= */}
             <div className="login-quick">
-              <p className="login-quick-title">⚡ One-Click Demo Logins</p>
+              <p className="login-quick-title">One-Click Demo Logins</p>
               <div className="login-quick-list">
                 <button
                   type="button"
