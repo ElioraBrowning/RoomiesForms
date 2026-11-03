@@ -36,7 +36,7 @@ public class AuthController : ControllerBase
             return BadRequest(new { Message = "Email is required." });
         }
 
-        return await AuthenticateUserByEmailAsync(request.Email.Trim());
+        return await AuthenticateUserByEmailAsync(request.Email.Trim().ToLowerInvariant());
     }
 
     [HttpPost("google")]
@@ -96,9 +96,9 @@ public class AuthController : ControllerBase
             return Unauthorized(new { Message = "Invalid Google ID token.", Details = ex.Message });
         }
 
-        var email = payload.Email.ToLowerInvariant();
+        var email = payload.Email.Trim().ToLowerInvariant();
 
-        // 3. Optional: Southeastern domain validation
+        // 3. Southeastern domain validation (accepts both @selu.edu and @southeastern.edu)
         if (!email.EndsWith("@selu.edu") && !email.EndsWith("@southeastern.edu"))
         {
             return StatusCode(403, new { Message = "Access restricted. Please sign in with your Southeastern Google account." });
@@ -109,17 +109,39 @@ public class AuthController : ControllerBase
 
     private async Task<IActionResult> AuthenticateUserByEmailAsync(string email, string? fallbackFullName = null)
     {
-        // Find user by email
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+
+        // Find user by normalized email
         var user = await _context.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Email == email);
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+        // Determine roles across aliases
+        var isFaculty = normalizedEmail.Equals("galkadi@selu.edu", StringComparison.OrdinalIgnoreCase)
+                     || normalizedEmail.Equals("ghassan.alkadi@selu.edu", StringComparison.OrdinalIgnoreCase)
+                     || normalizedEmail.Equals("galkadi@southeastern.edu", StringComparison.OrdinalIgnoreCase)
+                     || normalizedEmail.Equals("ghassan.alkadi@southeastern.edu", StringComparison.OrdinalIgnoreCase);
+
+        var isDeptHead = normalizedEmail.Equals("bonnie.achee@southeastern.edu", StringComparison.OrdinalIgnoreCase)
+                      || normalizedEmail.Equals("bonnie.achee@selu.edu", StringComparison.OrdinalIgnoreCase)
+                      || normalizedEmail.Equals("bachee@selu.edu", StringComparison.OrdinalIgnoreCase)
+                      || normalizedEmail.Equals("bachee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
 
         if (user == null)
         {
-            user = await _mockDataService.GetMockUserAsync(email);
+            user = await _mockDataService.GetMockUserAsync(normalizedEmail);
 
-            if (!string.IsNullOrWhiteSpace(fallbackFullName) && (user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)))
+            // Set appropriate fallback display names for faculty/dept head or student
+            if (isFaculty && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Ghassan Alkadi";
+            }
+            else if (isDeptHead && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Bonnie Achée";
+            }
+            else if (!string.IsNullOrWhiteSpace(fallbackFullName) && (user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)))
             {
                 user.FullName = fallbackFullName;
             }
@@ -148,19 +170,24 @@ public class AuthController : ControllerBase
         }
         else
         {
-            var mockUser = await _mockDataService.GetMockUserAsync(email);
+            var mockUser = await _mockDataService.GetMockUserAsync(normalizedEmail);
             if ((user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)) && mockUser.FullName != "Test User")
             {
                 user.FullName = mockUser.FullName;
+            }
+            else if (isFaculty && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Ghassan Alkadi";
+            }
+            else if (isDeptHead && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Bonnie Achée";
             }
             else if ((user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)) && !string.IsNullOrWhiteSpace(fallbackFullName))
             {
                 user.FullName = fallbackFullName;
             }
         }
-
-        var isFaculty = email.Equals("galkadi@selu.edu", StringComparison.OrdinalIgnoreCase);
-        var isDeptHead = email.Equals("bonnie.achee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
 
         var facultyRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Faculty");
         if (facultyRole == null)
