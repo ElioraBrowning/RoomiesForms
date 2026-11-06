@@ -4,12 +4,42 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+// Load environment variables from .env files for local development if present
+void LoadDotEnv(string filePath)
+{
+    if (!File.Exists(filePath)) return;
+    foreach (var line in File.ReadAllLines(filePath))
+    {
+        var trimmed = line.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("#")) continue;
+        var eqIndex = trimmed.IndexOf('=');
+        if (eqIndex > 0)
+        {
+            var key = trimmed.Substring(0, eqIndex).Trim();
+            var val = trimmed.Substring(eqIndex + 1).Trim();
+            if ((val.StartsWith("\"") && val.EndsWith("\"")) || (val.StartsWith("'") && val.EndsWith("'")))
+            {
+                val = val.Substring(1, val.Length - 2);
+            }
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+            {
+                Environment.SetEnvironmentVariable(key, val);
+            }
+        }
+    }
+}
+
+LoadDotEnv(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+LoadDotEnv(Path.Combine(Directory.GetCurrentDirectory(), "..", ".env"));
+LoadDotEnv(Path.Combine(AppContext.BaseDirectory, ".env"));
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container (use local SQLite only; disconnected from Supabase/PostgreSQL).
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=localdev.db";
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlite("Data Source=localdev.db");
+    options.UseSqlite(connectionString);
     options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
@@ -38,7 +68,10 @@ builder.Services.AddCors(options =>
 });
 
 // Configure simple JWT authentication (Placeholder)
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "super_secret_key_for_development_purposes_only_12345!";
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? builder.Configuration["Jwt__Key"]
+    ?? builder.Configuration["JWT_KEY"]
+    ?? "super_secret_key_for_development_purposes_only_12345!";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

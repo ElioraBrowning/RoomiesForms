@@ -44,7 +44,7 @@ export default function Login() {
       navigate("/dashboard");
     } catch {
       setError(
-        "Couldn't reach the server. Make sure the backend is running on port 5000."
+        "Couldn't reach Google Apps Script backend. Please check your network connection and try again."
       );
     } finally {
       setLoading(false);

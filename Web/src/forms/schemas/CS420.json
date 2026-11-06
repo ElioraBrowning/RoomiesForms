@@ -1,0 +1,129 @@
+{
+  "id": "CS420",
+  "title": "CS 420: Employer's Evaluation of Student",
+  "department": "Computer Science",
+  "category": "Internship",
+  "description": "Your supervisor's evaluation of your work. You tell us who your supervisor is, then they complete it through a link. You won't see their answers.",
+  "needs": [
+    "The semester",
+    "The employer's name and your job title",
+    "Your supervisor's name, title and email"
+  ],
+  "submitLabel": "Send to employer",
+  "employer": {
+    "emailField": "supervisorEmail",
+    "nameField": "supervisorName",
+    "mode": "complete",
+    "confidentialFromStudent": true,
+    "instructions": "Please evaluate this intern objectively and thoroughly. Your answers go to the Computer Science department, not to the student."
+  },
+  "pages": [
+    {
+      "id": "intern",
+      "title": "Your internship",
+      "questions": [
+        { "id": "studentName", "type": "text", "label": "Student full name", "minLength": 2, "maxLength": 100 },
+        { "id": "semester", "type": "text", "label": "Semester", "placeholder": "Fall 2026", "pattern": "^(Fall|Spring|Summer) \\d{4}$", "patternMessage": "Write the semester like Fall 2026." }
+      ]
+    },
+    {
+      "id": "position",
+      "title": "Where did you intern?",
+      "questions": [
+        { "id": "employerName", "type": "text", "label": "Employer name", "placeholder": "Acme Corp", "maxLength": 120 },
+        { "id": "jobTitle", "type": "text", "label": "Job title", "placeholder": "Software Engineering Intern", "maxLength": 120 }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "title": "Who will evaluate you?",
+      "description": "Your supervisor will get a link to complete this evaluation after you submit. You will see when it is done, but not their answers.",
+      "questions": [
+        { "id": "supervisorName", "type": "text", "label": "Supervisor name and title", "placeholder": "John Smith, Senior Developer", "maxLength": 120 },
+        { "id": "supervisorEmail", "type": "email", "label": "Supervisor email", "placeholder": "john.smith@acme.com" }
+      ]
+    },
+    {
+      "id": "relations",
+      "respondent": "employer",
+      "title": "Relations with others",
+      "questions": [
+        { "id": "relations", "type": "choice", "label": "How does the intern work with others?", "options": ["Exceptionally well accepted", "Works well with others", "Gets along satisfactorily", "Has some difficulty working with others", "Works very poorly with others"] }
+      ]
+    },
+    {
+      "id": "attitude",
+      "respondent": "employer",
+      "title": "Attitude",
+      "questions": [
+        { "id": "attitude", "type": "choice", "label": "How does the intern apply themselves to the work?", "options": ["Outstanding in enthusiasm", "Very interested and industrious", "Average in diligence and interest", "Somewhat indifferent", "Definitely not interested"] }
+      ]
+    },
+    {
+      "id": "judgement",
+      "respondent": "employer",
+      "title": "Judgement",
+      "questions": [
+        { "id": "judgement", "type": "choice", "label": "How sound is the intern's judgement?", "options": ["Exceptionally mature", "Above average in making decisions", "Usually makes the right decision", "Often uses poor judgement", "Consistently uses bad judgement"] }
+      ]
+    },
+    {
+      "id": "dependability",
+      "respondent": "employer",
+      "title": "Dependability",
+      "questions": [
+        { "id": "dependability", "type": "choice", "label": "How dependable is the intern?", "options": ["Completely dependable", "Above average in dependability", "Usually dependable", "Sometimes neglectful or careless", "Unreliable"] }
+      ]
+    },
+    {
+      "id": "learning",
+      "respondent": "employer",
+      "title": "Ability to learn",
+      "questions": [
+        { "id": "abilityToLearn", "type": "choice", "label": "How quickly does the intern learn?", "options": ["Learns very quickly", "Learns readily", "Average in learning", "Rather slow to learn", "Very slow to learn"] }
+      ]
+    },
+    {
+      "id": "quality",
+      "respondent": "employer",
+      "title": "Quality of work",
+      "questions": [
+        { "id": "qualityOfWork", "type": "choice", "label": "How good is the intern's work?", "options": ["Excellent", "Very good", "Average", "Below average", "Very poor"] }
+      ]
+    },
+    {
+      "id": "attendance",
+      "respondent": "employer",
+      "title": "Attendance and punctuality",
+      "questions": [
+        { "id": "attendance", "type": "choice", "label": "Attendance", "options": ["Regular", "Irregular"] },
+        { "id": "punctuality", "type": "choice", "label": "Punctuality", "options": ["Regular", "Irregular"] }
+      ]
+    },
+    {
+      "id": "overall",
+      "respondent": "employer",
+      "title": "Overall performance",
+      "questions": [
+        { "id": "overall", "reviewRequired": true, "type": "choice", "label": "How would you rate the intern overall?", "options": ["Outstanding", "Very Good", "Average", "Marginal", "Unsatisfactory"] }
+      ]
+    },
+    {
+      "id": "remarks",
+      "respondent": "employer",
+      "title": "Remarks",
+      "questions": [
+        { "id": "remarks", "type": "longText", "label": "Strengths and areas for improvement", "required": false, "maxLength": 2000 }
+      ]
+    },
+    {
+      "id": "signoff",
+      "respondent": "employer",
+      "title": "Sign the evaluation",
+      "questions": [
+        { "id": "discussedWithStudent", "reviewRequired": true, "type": "choice", "label": "Have you discussed this evaluation with the intern?", "options": ["Yes", "No"] },
+        { "id": "supervisorSignature", "reviewRequired": true, "type": "signature", "label": "Type your full name to sign", "statement": "I certify that this evaluation is accurate and objective." }
+      ]
+    }
+  ]
+}

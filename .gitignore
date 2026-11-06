@@ -4,6 +4,9 @@ Backend/obj/
 Backend/*.db
 Backend/*.db-shm
 Backend/*.db-wal
+Backend/.env
+Backend/.env.local
+Backend/.env.*.local
 
 # React / Node
 Web/node_modules/
@@ -13,6 +16,15 @@ Web/.env.*.local
 Web/npm-debug.log*
 Web/yarn-debug.log*
 Web/yarn-error.log*
+
+# Environment files
+.env.local
+*.env.local
+
+# Agent and temporary scripts
+.agents/
+AppsScript/
+GoogleAppsScript/
 
 # OS Files
 .DS_Store
