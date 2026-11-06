@@ -13,12 +13,12 @@ This repository serves as the starting point for a 5-person group project, imple
 *   **Forms:** React Hook Form
 *   **Styling:** Custom CSS (SELU Green & Gold theme)
 
-### Backend (`/Backend`)
-*   **Framework:** .NET 10 (ASP.NET Core Web API)
-*   **Language:** C#
-*   **Database:** SQLite (for local prototyping)
-*   **ORM:** Entity Framework Core
-*   **Architecture:** Repository Design Pattern & Unit of Work
+### Backend (`Google Apps Script` & `Google Sheets`)
+*   **Architecture:** Serverless Web App (Google Apps Script) backed by Google Sheets
+*   **Target Spreadsheet:** `RoomiesForms_Submissions_Test`
+*   **API Protocol:** HTTP POST (JSON over `text/plain` to bypass CORS)
+*   **Data Stores (9 Sheets):** `Submissions`, `Forms`, `Users`, `ReviewSteps`, `Assignments`, `Reviews`, `ExternalApprovals`, `AnonymousResponses`, `Notifications`
+*   **Legacy Backend (`/Backend`):** Original .NET 10 Web API and SQLite schema (preserved for reference)
 
 ---
 
@@ -75,17 +75,23 @@ RoomiesForms/
 
 ### Prerequisites
 *   [Node.js](https://nodejs.org/) (v18+)
-*   [.NET 10 SDK](https://dotnet.microsoft.com/)
 
 ### Running Locally
-To launch both the React frontend and the .NET backend simultaneously, run the included PowerShell script from the root directory:
+To launch the React frontend development server, run:
 
 ```powershell
 .\start.ps1
 ```
 
+Or run directly within `Web/`:
+```bash
+cd Web
+npm install
+npm run dev
+```
+
 *   **Frontend URL:** `http://localhost:5173`
-*   **Backend API:** `http://localhost:5000`
+*   **Backend:** Powered live by Google Apps Script and Google Sheets (configured via `Web/.env`)
 
 ### Testing Accounts
 The application uses a `MockDataService` to automatically seed realistic SELU structure (Colleges, Departments, Review Processes) and handles specific emails to test different roles. 

@@ -37,30 +37,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const roles = payload.role
-          ? (Array.isArray(payload.role) ? payload.role : [payload.role])
-          : [];
-        const isEliora = (payload.email || '').trim().toLowerCase() === 'eliora.browning@selu.edu';
-        const restoredUser: User = {
-          email: payload.email || '',
-          fullName: payload.name || payload.unique_name || 'User',
-          wNumber: isEliora ? (payload.wNumber || 'W0712345') : '',
-          roles
-        };
-        setUser(restoredUser);
-        localStorage.setItem('user', JSON.stringify(restoredUser));
-      } catch (e) {
-        console.error('Failed to decode token on mount', e);
+      if (token && token.includes('.')) {
+        try {
+          const parts = token.split('.');
+          if (parts[1]) {
+            const payload = JSON.parse(atob(parts[1]));
+            const roles = payload.role
+              ? (Array.isArray(payload.role) ? payload.role : [payload.role])
+              : [];
+            const isEliora = (payload.email || '').trim().toLowerCase() === 'eliora.browning@selu.edu';
+            const restoredUser: User = {
+              email: payload.email || '',
+              fullName: payload.name || payload.unique_name || 'User',
+              wNumber: isEliora ? (payload.wNumber || 'W0712345') : '',
+              roles
+            };
+            setUser(restoredUser);
+            localStorage.setItem('user', JSON.stringify(restoredUser));
+          }
+        } catch (e) {
+          console.error('Failed to decode token on mount', e);
+        }
       }
     }
   }, [token]);
 
   const login = async (email: string) => {
     try {
-      const res = await api.post('/auth/login', { email });
-      const { token, user: apiUser } = res.data;
+      const res = await api.login(email);
+      const { token, user: apiUser } = res;
       setToken(token);
       localStorage.setItem('token', token);
       
@@ -70,20 +75,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userData = {
           email: apiUser.email || email,
           fullName: apiUser.fullName || 'User',
-          wNumber: isEliora ? (apiUser.wNumber || 'W0712345') : '',
+          wNumber: isEliora ? (apiUser.wNumber || 'W0712345') : (apiUser.wNumber || ''),
           roles: Array.isArray(apiUser.roles) ? apiUser.roles : []
         };
       } else {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const roles = payload.role
-          ? (Array.isArray(payload.role) ? payload.role : [payload.role])
-          : [];
-        const isEliora = (payload.email || email).trim().toLowerCase() === 'eliora.browning@selu.edu';
         userData = {
-          email: payload.email || email,
-          fullName: payload.name || payload.unique_name || 'User',
-          wNumber: isEliora ? (payload.wNumber || 'W0712345') : '',
-          roles
+          email,
+          fullName: 'User',
+          wNumber: '',
+          roles: ['Student']
         };
       }
 

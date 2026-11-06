@@ -34,14 +34,14 @@ export default function FacultyDashboard() {
 
   useEffect(() => {
     Promise.all([
-      api.get<SubmissionSummary[]>('/submissions'),
-      api.get<SubmissionSummary[]>('/submissions/reviewed'),
-      api.get<SubmissionSummary[]>('/submissions/awaiting-employer'),
+      api.getSubmissions(),
+      api.getReviewedSubmissions(),
+      api.getAwaitingEmployerSubmissions(),
     ])
       .then(([q, r, e]) => {
-        setQueue(q.data);
-        setReviewed(r.data);
-        setWithEmployer(e.data);
+        setQueue(q);
+        setReviewed(r);
+        setWithEmployer(e);
       })
       .catch((err) => setError(readApiError(err, "Couldn't load the review queue.").message))
       .finally(() => setLoading(false));
@@ -226,8 +226,8 @@ function EmployerItem({ submission: s, onNewLink }: { submission: SubmissionSumm
     setBusy(true);
     setError('');
     try {
-      const res = await api.post<EmployerReview>(`/submissions/${s.id}/employer-link`);
-      onNewLink(s.id, res.data);
+      const res = await api.renewEmployerLink(s.id);
+      onNewLink(s.id, res);
     } catch (err) {
       setError(readApiError(err, "Couldn't make a new link.").message);
     } finally {

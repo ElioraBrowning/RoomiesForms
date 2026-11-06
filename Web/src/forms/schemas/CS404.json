@@ -1,0 +1,47 @@
+{
+  "id": "CS404",
+  "title": "CS 404: Time and Wage Report",
+  "department": "Computer Science",
+  "category": "Internship",
+  "description": "Your total hours and pay for the semester.",
+  "needs": [
+    "Total hours worked this semester and your average hours per week",
+    "Your hourly wage and total wages before taxes (pay stubs help)",
+    "Enter 0 for an unpaid internship"
+  ],
+  "submitLabel": "Submit report",
+  "pages": [
+    {
+      "id": "who",
+      "title": "Who and where?",
+      "questions": [
+        { "id": "studentName", "type": "text", "label": "Student full name", "minLength": 2, "maxLength": 100 },
+        { "id": "employerName", "type": "text", "label": "Employer name", "placeholder": "Acme Corp", "maxLength": 120 }
+      ]
+    },
+    {
+      "id": "hours",
+      "title": "How many hours did you work?",
+      "questions": [
+        { "id": "totalHours", "reviewRequired": true, "type": "number", "label": "Total hours this semester", "placeholder": "300", "min": 0, "max": 1000, "step": 0.5 },
+        { "id": "hoursPerWeek", "reviewRequired": true, "type": "number", "label": "Average hours per week", "placeholder": "20", "min": 1, "max": 60, "step": 0.5 }
+      ]
+    },
+    {
+      "id": "pay",
+      "title": "What were you paid?",
+      "description": "Use your pay before taxes and deductions. Enter 0 for an unpaid internship.",
+      "questions": [
+        { "id": "hourlyWage", "reviewRequired": true, "type": "currency", "label": "Hourly wage", "placeholder": "15.00", "min": 0, "max": 500 },
+        { "id": "totalWages", "reviewRequired": true, "type": "currency", "label": "Total wages this semester", "placeholder": "4500.00", "min": 0, "max": 100000 }
+      ]
+    },
+    {
+      "id": "signature",
+      "title": "Certify your report",
+      "questions": [
+        { "id": "studentSignature", "type": "signature", "label": "Type your full name to sign", "statement": "I certify that these hours and wages are accurate.", "matchField": "studentName" }
+      ]
+    }
+  ]
+}

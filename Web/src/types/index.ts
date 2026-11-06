@@ -130,3 +130,35 @@ export interface Student {
   fullName: string;
   email: string;
 }
+
+export interface AppNotification {
+  id: number;
+  type: string;
+  title: string;
+  body?: string | null;
+  link?: string | null;
+  createdAt: string;
+  read: boolean;
+}
+
+export interface EmployerView {
+  studentName: string;
+  studentEmail?: string;
+  submissionId: number;
+  formId: string;
+  formTitle: string;
+  status: string;
+  schema: FormSchema;
+  responses: Record<string, unknown>;
+  instructions?: string;
+  expired?: boolean;
+}
+
+export interface ResultsResponse {
+  formId: number;
+  formKey: string;
+  title: string;
+  assigned: number;
+  schema: FormSchema | null;
+  responses: { responses: Record<string, unknown> }[];
+}

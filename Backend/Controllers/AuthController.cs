@@ -48,8 +48,12 @@ public class AuthController : ControllerBase
             return BadRequest(new { Message = "Authorization code and redirect URI are required." });
         }
 
-        var clientId = _configuration["Google:ClientId"];
-        var clientSecret = _configuration["Google:ClientSecret"];
+        var clientId = _configuration["Google:ClientId"]
+            ?? _configuration["Google__ClientId"]
+            ?? _configuration["GOOGLE_CLIENT_ID"];
+        var clientSecret = _configuration["Google:ClientSecret"]
+            ?? _configuration["Google__ClientSecret"]
+            ?? _configuration["GOOGLE_CLIENT_SECRET"];
 
         if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
         {
@@ -267,7 +271,11 @@ public class AuthController : ControllerBase
         }
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "super_secret_key_for_development_purposes_only_12345!");
+        var jwtKey = _configuration["Jwt:Key"]
+            ?? _configuration["Jwt__Key"]
+            ?? _configuration["JWT_KEY"]
+            ?? "super_secret_key_for_development_purposes_only_12345!";
+        var key = Encoding.UTF8.GetBytes(jwtKey);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
