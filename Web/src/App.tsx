@@ -11,8 +11,9 @@ import Profile from './pages/Profile';
 import Assignments from './pages/Assignments.tsx';
 import SurveyResults from './pages/SurveyResults';
 import EmployerReview from './pages/EmployerReview';
+import Analytics from './pages/Analytics';
 
-const REVIEWER_ROLES = ['Faculty', 'Department Head', 'Dean'];
+const REVIEWER_ROLES = ['Faculty', 'Department Head'];
 
 const ReviewerRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -35,6 +36,7 @@ function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="analytics" element={<ReviewerRoute><Analytics /></ReviewerRoute>} />
             <Route path="assignments" element={<ReviewerRoute><Assignments /></ReviewerRoute>} />
             <Route path="forms/builder" element={<ReviewerRoute><FormBuilder /></ReviewerRoute>} />
             <Route path="forms/:formId/results" element={<ReviewerRoute><SurveyResults /></ReviewerRoute>} />

@@ -22,7 +22,7 @@ export function getInitials(name?: string, email?: string): string {
   if (!cleanName) return 'U';
 
   // Strip common titles/honorifics
-  const titles = ['dr.', 'dr', 'prof.', 'prof', 'mr.', 'mr', 'mrs.', 'mrs', 'ms.', 'ms', 'dean'];
+  const titles = ['dr.', 'dr', 'prof.', 'prof', 'mr.', 'mr', 'mrs.', 'mrs', 'ms.', 'ms'];
   const words = cleanName.split(/\s+/).filter(w => !titles.includes(w.toLowerCase().trim()));
 
   if (words.length >= 2) {

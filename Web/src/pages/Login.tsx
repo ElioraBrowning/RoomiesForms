@@ -202,14 +202,6 @@ export default function Login() {
                 <button
                   type="button"
                   className="login-quick-btn"
-                  onClick={() => handleQuickLogin("cade.sholar@selu.edu")}
-                >
-                  <span className="login-quick-role">Student</span>{" "}
-                  <strong>Cade Sholar</strong>
-                </button>
-                <button
-                  type="button"
-                  className="login-quick-btn"
                   onClick={() => handleQuickLogin("eliora.browning@selu.edu")}
                 >
                   <span className="login-quick-role">Student</span>{" "}
@@ -218,17 +210,17 @@ export default function Login() {
                 <button
                   type="button"
                   className="login-quick-btn"
-                  onClick={() => handleQuickLogin("galkadi@selu.edu")}
+                  onClick={() => handleQuickLogin("alkadi@selu.edu")}
                 >
-                  <span className="login-quick-role">Faculty / GDoc</span>{" "}
+                  <span className="login-quick-role">Faculty</span>{" "}
                   <strong>Dr. Ghassan Alkadi</strong>
                 </button>
                 <button
                   type="button"
                   className="login-quick-btn"
-                  onClick={() => handleQuickLogin("bonnie.achee@southeastern.edu")}
+                  onClick={() => handleQuickLogin("bonnie.achee@selu.edu")}
                 >
-                  <span className="login-quick-role">Dean</span>{" "}
+                  <span className="login-quick-role">Department Head</span>{" "}
                   <strong>Dr. Bonnie Achée</strong>
                 </button>
               </div>

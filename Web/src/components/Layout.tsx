@@ -16,7 +16,7 @@ export default function Layout() {
 
   const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const isReviewer = user?.roles?.some((r) => ['Faculty', 'Department Head', 'Dean'].includes(r));
+  const isReviewer = user?.roles?.some((r) => ['Faculty', 'Department Head'].includes(r));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -70,6 +70,9 @@ export default function Layout() {
               </NavLink>
               <NavLink to="/assignments" className="navbar-link">
                 Assign Forms
+              </NavLink>
+              <NavLink to="/analytics" className="navbar-link">
+                Analytics
               </NavLink>
               <NavLink to="/forms/builder" className="navbar-link">
                 Form Builder
@@ -133,6 +136,14 @@ export default function Layout() {
                       role="menuitem"
                     >
                       Assign Forms
+                    </Link>
+                    <Link
+                      to="/analytics"
+                      onClick={() => setDropdownOpen(false)}
+                      className="navbar-dropdown-item"
+                      role="menuitem"
+                    >
+                      Analytics
                     </Link>
                     <Link
                       to="/forms/builder"

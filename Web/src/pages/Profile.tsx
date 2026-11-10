@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { getInitials } from '../utils/user';
 
 const NOTIF_KEY = 'selu_reviewer_notification_pref';
-const DEFAULT_VIEW_KEY = 'selu_dean_default_view';
+const DEFAULT_VIEW_KEY = 'selu_dept_head_default_view';
 type NotifPref = 'daily' | 'realtime' | 'off';
 
 export default function Profile() {
@@ -19,7 +19,8 @@ export default function Profile() {
 
   const [defaultToTasks, setDefaultToTasks] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(DEFAULT_VIEW_KEY) === 'tasks';
+      const val = localStorage.getItem(DEFAULT_VIEW_KEY);
+      return val === 'tasks';
     } catch {
       return false;
     }
@@ -44,7 +45,7 @@ export default function Profile() {
   };
 
   const isReviewer = user?.roles?.some((r) =>
-    ['Faculty', 'Department Head', 'Dean'].includes(r)
+    ['Faculty', 'Department Head'].includes(r)
   );
 
   return (

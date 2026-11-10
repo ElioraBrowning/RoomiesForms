@@ -23,6 +23,19 @@ type View = 'check' | 'all' | 'layout';
 
 const REVIEWER_ROLES = ['Faculty', 'Department Head'];
 
+function matchesRole(requiredRole?: string, userRoles?: string[]): boolean {
+  if (!requiredRole || !userRoles) return false;
+  if (userRoles.includes(requiredRole)) return true;
+  if (requiredRole === 'Faculty Evaluator' && userRoles.includes('Faculty')) return true;
+  if (
+    (requiredRole === 'Department Head Authorization' || requiredRole === 'Departmental Authorization') &&
+    userRoles.includes('Department Head')
+  ) {
+    return true;
+  }
+  return false;
+}
+
 /** Feedback lines look like "[Changes Needed] Label: what to fix". */
 function parseQuestionFeedback(comments?: string | null): Record<string, string> {
   const map: Record<string, string> = {};
@@ -81,8 +94,15 @@ export default function SubmissionReview() {
     })();
   }, [id]);
 
-  const requiredRole = submission?.currentStep?.requiredRole?.name;
-  const isMyTurn = Boolean(isReviewer && submission?.status === 'Pending' && requiredRole && user?.roles?.includes(requiredRole));
+  const activeStep =
+    submission?.currentStep ||
+    submission?.approvals?.find(
+      (a) => a.status === 'Pending Review' || (a.status !== 'Approved' && !a.actionDate && !a.approvedBy)
+    );
+  const requiredRole = submission?.currentStep?.requiredRole?.name || (activeStep as any)?.roleName;
+  const isMyTurn = Boolean(
+    isReviewer && submission?.status === 'Pending' && matchesRole(requiredRole, user?.roles)
+  );
   const isWithEmployer = submission?.status === 'Pending' && requiredRole === 'Employer';
 
   const latestFeedback = useMemo(() => {
@@ -159,12 +179,12 @@ export default function SubmissionReview() {
     setError('');
     setBusy('approve');
     try {
-      await api.post(`/submissions/${id}/approve`, { comments: remarks.trim() || null });
+      await api.approveSubmission(submission.id, remarks.trim() || null, user?.email, user?.roles);
       await submitToGoogleWorkspace({
         studentName: submission.student?.fullName || (answers.studentName as string) || (answers.name as string) || '',
         studentEmail: submission.student?.email || (answers.email as string) || '',
         submissionId: submission.id,
-        formId: submission.form?.googleFormId || submission.form?.id || '',
+        formId: submission.form?.googleFormId || String(submission.form?.id || ''),
         summary: `Approved (${submission.currentStep?.actionName || requiredRole || 'Review'}) by ${user?.fullName || 'Reviewer'}${remarks.trim() ? `: ${remarks.trim()}` : ''}`,
         responses: answers,
       }).catch((err) => console.error('Google Sheets write notice:', err));
@@ -193,12 +213,12 @@ export default function SubmissionReview() {
     setError('');
     setBusy('reject');
     try {
-      await api.post(`/submissions/${id}/reject`, { comments });
+      await api.rejectSubmission(submission.id, comments, user?.email, user?.roles);
       await submitToGoogleWorkspace({
         studentName: submission.student?.fullName || (answers.studentName as string) || (answers.name as string) || '',
         studentEmail: submission.student?.email || (answers.email as string) || '',
         submissionId: submission.id,
-        formId: submission.form?.googleFormId || submission.form?.id || '',
+        formId: submission.form?.googleFormId || String(submission.form?.id || ''),
         summary: `Changes requested (${submission.currentStep?.actionName || requiredRole || 'Review'}) by ${user?.fullName || 'Reviewer'}: ${comments}`,
         responses: answers,
       }).catch((err) => console.error('Google Sheets write notice:', err));
@@ -268,7 +288,12 @@ export default function SubmissionReview() {
                 </li>
               ))}
           </ul>
-          <Link to={`/forms/${submission.form?.id}`} className="btn btn-primary">Edit and resubmit</Link>
+          <Link
+            to={`/forms/${(submission as any).formKey || (submission as any).formId || submission.form?.googleFormId || submission.form?.id}`}
+            className="btn btn-primary"
+          >
+            Edit and resubmit
+          </Link>
         </section>
       )}
       {!isReviewer && status === 'Pending' && !isWithEmployer && (

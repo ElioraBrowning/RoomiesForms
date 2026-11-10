@@ -1,4 +1,4 @@
-import type { FormMeta, SubmissionSummary, SubmissionDetail, User, Assignment } from '../types';
+import type { FormMeta, SubmissionSummary, SubmissionDetail, User, Assignment, ResultsResponse } from '../types';
 
 export const MOCK_FORMS: FormMeta[] = [
   {
@@ -654,20 +654,42 @@ export const MOCK_SUBMISSION_DETAILS: Record<number, SubmissionDetail> = {
 
 export function getMockUser(email: string): User {
   const clean = email.trim().toLowerCase();
-  if (clean === 'galkadi@selu.edu') {
+  if (
+    clean === 'alkadi@selu.edu' ||
+    clean === 'alkadi@southeastern.edu' ||
+    clean === 'galkadi@selu.edu' ||
+    clean === 'ghassan.alkadi@selu.edu' ||
+    clean === 'galkadi@southeastern.edu' ||
+    clean === 'ghassan.alkadi@southeastern.edu'
+  ) {
     return {
-      email: 'galkadi@selu.edu',
+      email: clean,
       fullName: 'Dr. Ghassan Alkadi',
       wNumber: 'W0234567',
       roles: ['Faculty'],
+      isDesignated: true,
     };
   }
-  if (clean === 'bonnie.achee@southeastern.edu') {
+  if (
+    clean === 'bonnie.achee@selu.edu' ||
+    clean === 'bonnie.achee@southeastern.edu' ||
+    clean === 'bachee@selu.edu' ||
+    clean === 'bachee@southeastern.edu'
+  ) {
     return {
-      email: 'bonnie.achee@southeastern.edu',
+      email: clean,
       fullName: 'Dr. Bonnie Achée',
       wNumber: 'W0345678',
-      roles: ['Dean', 'Department Head', 'Faculty'],
+      roles: ['Department Head', 'Faculty'],
+      isDesignated: true,
+    };
+  }
+  if (clean === 'cobi.smith@selu.edu') {
+    return {
+      email: 'cobi.smith@selu.edu',
+      fullName: 'Cobi Smith',
+      wNumber: 'W0456789',
+      roles: ['Student'],
     };
   }
   if (clean === 'eliora.browning@selu.edu') {
@@ -698,3 +720,301 @@ export function getMockUser(email: string): User {
     roles: ['Student'],
   };
 }
+
+export const MOCK_SURVEY_RESPONSES: Record<string, ResultsResponse> = {
+  ExitSurvey: {
+    formId: 8,
+    formKey: 'ExitSurvey',
+    title: 'Department of Computer Science Exit Survey',
+    assigned: 18,
+    assignedCount: 18,
+    responseCount: 14,
+    schema: null,
+    byQuestion: {
+      overallSatisfaction: {
+        questionId: 'overallSatisfaction',
+        label: 'Overall Program Satisfaction',
+        type: 'choice',
+        totalAnswers: 14,
+        distribution: [
+          { label: 'Very Satisfied', count: 9, percentage: 64.3 },
+          { label: 'Satisfied', count: 4, percentage: 28.6 },
+          { label: 'Neutral', count: 1, percentage: 7.1 },
+          { label: 'Dissatisfied', count: 0, percentage: 0 },
+        ],
+      },
+      postGradPlans: {
+        questionId: 'postGradPlans',
+        label: 'Post-Graduation Plans',
+        type: 'choice',
+        totalAnswers: 14,
+        distribution: [
+          { label: 'Employed Full-Time', count: 11, percentage: 78.6 },
+          { label: 'Graduate School', count: 2, percentage: 14.3 },
+          { label: 'Seeking Employment', count: 1, percentage: 7.1 },
+        ],
+      },
+      programComments: {
+        questionId: 'programComments',
+        label: 'Qualitative Program Feedback',
+        type: 'textarea',
+        quotes: [
+          'The hands-on capstone project prepared me exceptionally well for industry work.',
+          'Great mentorship from Dr. Alkadi and Dr. Achée during my internship search.',
+          'More elective courses in cloud infrastructure would be fantastic.',
+        ],
+      },
+      preparationLevel: {
+        questionId: 'preparationLevel',
+        label: 'How well prepared did you feel for the project in this course?',
+        type: 'choice',
+        totalAnswers: 14,
+        distribution: [
+          { label: 'Extremely well prepared', count: 6, percentage: 42.9 },
+          { label: 'More than adequately prepared', count: 5, percentage: 35.7 },
+          { label: 'Adequately prepared', count: 2, percentage: 14.3 },
+          { label: 'Somewhat prepared', count: 1, percentage: 7.1 },
+          { label: 'Not prepared at all', count: 0, percentage: 0 },
+        ],
+      },
+      improvementAreas: {
+        questionId: 'improvementAreas',
+        label: 'Concepts, tools or skills your coursework did not cover well enough',
+        type: 'textarea',
+        quotes: [
+          'Cloud infrastructure tooling (AWS, Terraform, Docker containers) should be introduced earlier in the curriculum.',
+          'More modern TypeScript and full-stack web framework architecture in required courses.',
+          'Continuous integration and automated delivery pipelines would be great additions to software engineering coursework.',
+          'Microservice design patterns and event-driven architectures.',
+        ],
+      },
+      strengthAreas: {
+        questionId: 'strengthAreas',
+        label: 'Concepts, tools or skills your coursework prepared you well for',
+        type: 'textarea',
+        quotes: [
+          'Core data structures, algorithms, and systems programming fundamentals were world-class.',
+          'Database normalization, complex SQL querying, and relational schema modeling.',
+          'Agile team collaboration and version control discipline in Senior Capstone.',
+          'Strong problem-solving foundations and faculty availability during office hours.',
+        ],
+      },
+      additionalComments: {
+        questionId: 'additionalComments',
+        label: 'Other suggestions for the program',
+        type: 'textarea',
+        quotes: [
+          'The CMPS 400 internship requirement is arguably the best requirement in the degree; it landed me my first full-time role.',
+          'Dr. Alkadi and Dr. Achée have built an outstanding culture of student support in Computer Science.',
+          'Offer more sections of advanced electives like Cloud Computing and Machine Learning.',
+        ],
+      },
+    },
+    responses: [
+      {
+        submittedOn: '2026-11-01T14:22:00Z',
+        responses: {
+          preparationLevel: 'Extremely well prepared',
+          improvementAreas: 'More AWS and cloud deployment architectures in core labs.',
+          strengthAreas: 'Data structures, algorithms, and SQL database design.',
+          additionalComments: 'CMPS 400 internship gave me an immediate industry advantage.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'The hands-on capstone project prepared me exceptionally well for industry work.',
+        },
+      },
+      {
+        submittedOn: '2026-11-02T09:15:00Z',
+        responses: {
+          preparationLevel: 'Extremely well prepared',
+          improvementAreas: 'Docker and Kubernetes containerization tooling.',
+          strengthAreas: 'Object-oriented programming, design patterns, and unit testing.',
+          additionalComments: 'Faculty mentorship from Dr. Alkadi and Dr. Achée was invaluable.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'Great mentorship from Dr. Alkadi and Dr. Achée during my internship search.',
+        },
+      },
+      {
+        submittedOn: '2026-11-03T11:40:00Z',
+        responses: {
+          preparationLevel: 'More than adequately prepared',
+          improvementAreas: 'CI/CD pipeline automation with GitHub Actions.',
+          strengthAreas: 'Algorithms, complexity analysis, and systems programming.',
+          additionalComments: 'More elective options for cloud infrastructure would be fantastic.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'More elective courses in cloud infrastructure would be fantastic.',
+        },
+      },
+      {
+        submittedOn: '2026-11-03T16:05:00Z',
+        responses: {
+          preparationLevel: 'More than adequately prepared',
+          improvementAreas: 'React state management and modern web frontend workflows.',
+          strengthAreas: 'Relational databases and RESTful API backend development.',
+          additionalComments: 'Great department culture and excellent student collaboration.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'The faculty genuinely care about student career placement.',
+        },
+      },
+      {
+        submittedOn: '2026-11-04T10:30:00Z',
+        responses: {
+          preparationLevel: 'Extremely well prepared',
+          improvementAreas: 'Microservices architecture and distributed caching.',
+          strengthAreas: 'C++ systems programming and computer architecture.',
+          additionalComments: 'Internship requirement directly led to a return offer from my employer.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'Industry internship placement process was smooth and well structured.',
+        },
+      },
+      {
+        submittedOn: '2026-11-05T13:45:00Z',
+        responses: {
+          preparationLevel: 'More than adequately prepared',
+          improvementAreas: 'Cloud cost estimation and DevOps monitoring.',
+          strengthAreas: 'Python scripting, data pipelines, and database query optimization.',
+          additionalComments: 'The department head and faculty advisors are extremely responsive.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'Superb balance of theory and practical engineering.',
+        },
+      },
+      {
+        submittedOn: '2026-11-06T15:10:00Z',
+        responses: {
+          preparationLevel: 'Extremely well prepared',
+          improvementAreas: 'NoSQL databases and GraphQL query interfaces.',
+          strengthAreas: 'Software engineering lifecycle, code reviews, and Git workflow.',
+          additionalComments: 'Senior capstone was the highlight of my undergraduate degree.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'Team-based software engineering simulated real corporate development.',
+        },
+      },
+      {
+        submittedOn: '2026-11-07T08:50:00Z',
+        responses: {
+          preparationLevel: 'More than adequately prepared',
+          improvementAreas: 'Mobile application development frameworks.',
+          strengthAreas: 'Operating systems, concurrency, and network socket programming.',
+          additionalComments: 'Keep strengthening the partnership with local tech employers.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'Employers in Baton Rouge and New Orleans respect Southeastern graduates.',
+        },
+      },
+      {
+        submittedOn: '2026-11-07T12:00:00Z',
+        responses: {
+          preparationLevel: 'Extremely well prepared',
+          improvementAreas: 'Applied cybersecurity defense and authentication protocols.',
+          strengthAreas: 'Mathematical foundations, cryptography concepts, and discrete math.',
+          additionalComments: 'Preparing to pursue a Master’s degree thanks to faculty guidance.',
+          overallSatisfaction: 'Very Satisfied',
+          postGradPlans: 'Graduate School',
+          programComments: 'Research opportunities in the department are very strong.',
+        },
+      },
+      {
+        submittedOn: '2026-11-08T09:30:00Z',
+        responses: {
+          preparationLevel: 'Adequately prepared',
+          improvementAreas: 'More advanced machine learning and deep neural networks coursework.',
+          strengthAreas: 'Statistical methods, linear algebra applications, and Python data science.',
+          additionalComments: 'Excited to attend graduate school next semester.',
+          overallSatisfaction: 'Satisfied',
+          postGradPlans: 'Graduate School',
+          programComments: 'Solid academic foundation for graduate studies in computing.',
+        },
+      },
+      {
+        submittedOn: '2026-11-08T14:15:00Z',
+        responses: {
+          preparationLevel: 'More than adequately prepared',
+          improvementAreas: 'Automated integration testing and mock service setup.',
+          strengthAreas: 'Web development basics, REST APIs, and client-server architecture.',
+          additionalComments: 'The faculty are very committed to helping students succeed.',
+          overallSatisfaction: 'Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'Very pleased with the education and support received.',
+        },
+      },
+      {
+        submittedOn: '2026-11-09T10:00:00Z',
+        responses: {
+          preparationLevel: 'Extremely well prepared',
+          improvementAreas: 'Serverless compute architectures (AWS Lambda / Google Cloud Functions).',
+          strengthAreas: 'Full-stack software engineering and database management.',
+          additionalComments: 'Great experience overall.',
+          overallSatisfaction: 'Satisfied',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'Capstone project gave me concrete portfolio samples for interviews.',
+        },
+      },
+      {
+        submittedOn: '2026-11-09T16:20:00Z',
+        responses: {
+          preparationLevel: 'Adequately prepared',
+          improvementAreas: 'More hands-on coding interview preparation in career workshops.',
+          strengthAreas: 'Problem decomposition, data modeling, and documentation.',
+          additionalComments: 'Currently interviewing for software roles in Louisiana.',
+          overallSatisfaction: 'Satisfied',
+          postGradPlans: 'Seeking Employment',
+          programComments: 'Helpful career advising from faculty and department staff.',
+        },
+      },
+      {
+        submittedOn: '2026-11-10T11:05:00Z',
+        responses: {
+          preparationLevel: 'Somewhat prepared',
+          improvementAreas: 'Pace in early programming classes moved quickly; more lab assistance needed.',
+          strengthAreas: 'Individual tutoring and faculty availability during office hours.',
+          additionalComments: 'Graduating this term and grateful for faculty encouragement.',
+          overallSatisfaction: 'Neutral',
+          postGradPlans: 'Employed Full-Time',
+          programComments: 'Challenging curriculum that ultimately paid off.',
+        },
+      },
+    ],
+  },
+};
+
+export function getMockSurveyResponses(formKeyOrId: string | number, schemaOverride: any = null): ResultsResponse {
+  const normalizedKey = String(formKeyOrId).toLowerCase().trim();
+
+  if (normalizedKey === 'exitsurvey' || normalizedKey === '8' || normalizedKey === '4') {
+    return {
+      ...MOCK_SURVEY_RESPONSES.ExitSurvey,
+      schema: schemaOverride || MOCK_SURVEY_RESPONSES.ExitSurvey.schema || null,
+    };
+  }
+
+  // Fallback for nonexistent or empty surveys (TC-E2E-F5-06, TC-E2E-F5-07)
+  return {
+    formId: typeof formKeyOrId === 'number' ? formKeyOrId : 99,
+    formKey: String(formKeyOrId),
+    title: schemaOverride?.title || `Survey Results (${formKeyOrId})`,
+    assigned: 0,
+    assignedCount: 0,
+    responseCount: 0,
+    schema: schemaOverride || null,
+    responses: [],
+    byQuestion: {
+      q1: {
+        questionId: 'q1',
+        label: 'Sample Question',
+        type: 'choice',
+        totalAnswers: 0,
+        distribution: [
+          { label: 'Option A', count: 0, percentage: 0 },
+          { label: 'Option B', count: 0, percentage: 0 },
+        ],
+      },
+    },
+  };
+}
+
