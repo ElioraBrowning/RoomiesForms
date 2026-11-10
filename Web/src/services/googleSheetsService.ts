@@ -16,6 +16,14 @@ const API_KEY = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_KEY as string | undefine
  * that blocks cross-origin fetch requests.
  */
 function resolveAppsScriptUrl(rawUrl?: string, apiKey?: string): string | null {
+  const useLocalMock =
+    import.meta.env.VITE_USE_LOCAL_MOCK === 'true' ||
+    import.meta.env.VITE_USE_LOCAL_MOCK === true;
+
+  if (useLocalMock) {
+    return 'http://localhost:5001';
+  }
+
   if (!rawUrl || !rawUrl.trim()) return null;
   let normalized = rawUrl.trim().replace(/\/a\/macros\/[^/]+\/s\//, '/macros/s/');
   if (apiKey && apiKey.trim()) {

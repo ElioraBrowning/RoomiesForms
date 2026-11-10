@@ -146,8 +146,7 @@ public class MockDataService : IMockDataService
         await EnsureUserAsync(context, "galkadi@selu.edu", roleFaculty, deptCS.Id);
         await EnsureUserAsync(context, "bonnie.achee@southeastern.edu", roleDeptHead, deptCS.Id);
         await EnsureUserAsync(context, "eliora.browning@selu.edu", roleStudent, deptCS.Id);
-        await EnsureUserAsync(context, "marcus.thibodeaux@selu.edu", roleStudent, deptCS.Id);
-        await EnsureUserAsync(context, "ava.landry@selu.edu", roleStudent, deptCS.Id);
+
 
         // 9. Submissions made before assignments existed keep working: give each one an assignment.
         var pairs = await context.Submissions

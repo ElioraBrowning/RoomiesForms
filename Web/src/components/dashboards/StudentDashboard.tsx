@@ -67,10 +67,10 @@ export default function StudentDashboard() {
   const [filter, setFilter] = useState<Group | null>(null);
 
   useEffect(() => {
-    Promise.all([api.get<Assignment[]>('/assignments/mine'), api.get<SubmissionSummary[]>('/submissions')])
+    Promise.all([api.getMyAssignments(), api.getSubmissions()])
       .then(([a, s]) => {
-        setAssignments(Array.isArray(a.data) ? a.data : []);
-        setSubmissions(Array.isArray(s.data) ? s.data : []);
+        setAssignments(Array.isArray(a) ? a : ((a as unknown as { data?: Assignment[] })?.data ?? []));
+        setSubmissions(Array.isArray(s) ? s : ((s as unknown as { data?: SubmissionSummary[] })?.data ?? []));
       })
       .catch((err) => setError(readApiError(err, "Couldn't load your forms.").message))
       .finally(() => setLoading(false));
@@ -297,8 +297,8 @@ function EmployerLink({
     setBusy(true);
     setError('');
     try {
-      const res = await api.post<EmployerReview>(`/submissions/${submissionId}/employer-link`);
-      onNewLink(submissionId, res.data);
+      const res = await api.renewEmployerLink(submissionId);
+      onNewLink(submissionId, res);
       setShow(true);
     } catch (err) {
       setError(readApiError(err, "Couldn't make a new link.").message);

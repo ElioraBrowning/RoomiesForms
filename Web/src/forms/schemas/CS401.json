@@ -1,0 +1,92 @@
+{
+  "id": "CS401",
+  "title": "CS 401: Internship Application",
+  "department": "Computer Science",
+  "category": "Internship",
+  "description": "Apply for course credit for your computer science internship. This is the first form in the internship process.",
+  "needs": [
+    "Your W# and Southeastern email",
+    "Your present and permanent addresses",
+    "Your degree, major GPA and expected graduation date",
+    "The employer's name and address",
+    "Your supervisor's name, title, email and phone number",
+    "The internship's start and end dates",
+    "Your job title and a short description of what you'll be doing"
+  ],
+  "submitLabel": "Submit application",
+  "pages": [
+    {
+      "id": "identity",
+      "title": "Who are you?",
+      "questions": [
+        { "id": "name", "type": "text", "label": "Full name", "placeholder": "Jane Doe", "minLength": 2, "maxLength": 100 },
+        { "id": "wNumber", "reviewRequired": true, "type": "wNumber", "label": "W#", "help": "Your university ID, like W0123456." }
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "How can we reach you?",
+      "questions": [
+        { "id": "email", "type": "email", "label": "University email", "placeholder": "jane.doe@selu.edu", "domains": ["selu.edu", "southeastern.edu"] },
+        { "id": "cellPhone", "type": "phone", "label": "Cell phone", "placeholder": "(985) 555-0123" }
+      ]
+    },
+    {
+      "id": "addresses",
+      "title": "Where do you live?",
+      "questions": [
+        { "id": "presentAddress", "type": "address", "label": "Present address", "help": "Where you live during the semester." },
+        { "id": "permanentAddress", "type": "address", "label": "Permanent address", "help": "Your home address. Repeat your present address if they are the same." }
+      ]
+    },
+    {
+      "id": "academics",
+      "title": "Your degree",
+      "questions": [
+        { "id": "degree", "type": "text", "label": "Degree and concentration", "placeholder": "B.S. Computer Science, Cybersecurity", "maxLength": 120 },
+        { "id": "gpa", "reviewRequired": true, "type": "number", "label": "Major GPA", "placeholder": "3.25", "min": 0, "max": 4, "step": 0.01 },
+        { "id": "graduationDate", "reviewRequired": true, "type": "date", "label": "Expected graduation date" }
+      ]
+    },
+    {
+      "id": "employer",
+      "title": "Where are you interning?",
+      "questions": [
+        { "id": "employerName", "reviewRequired": true, "type": "text", "label": "Employer name", "placeholder": "Acme Corp", "maxLength": 120 },
+        { "id": "employerAddress", "type": "address", "label": "Employer address", "help": "The office you will report to." }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "title": "Who is your supervisor?",
+      "questions": [
+        { "id": "supervisorName", "type": "text", "label": "Supervisor name and title", "placeholder": "John Smith, Senior Developer", "maxLength": 120 },
+        { "id": "supervisorEmail", "reviewRequired": true, "type": "email", "label": "Supervisor email", "placeholder": "john.smith@acme.com" },
+        { "id": "supervisorPhone", "type": "phone", "label": "Supervisor phone", "placeholder": "(985) 555-0123" }
+      ]
+    },
+    {
+      "id": "dates",
+      "title": "When is the internship?",
+      "questions": [
+        { "id": "startDate", "reviewRequired": true, "type": "date", "label": "Start date" },
+        { "id": "endDate", "reviewRequired": true, "type": "date", "label": "End date", "after": "startDate" }
+      ]
+    },
+    {
+      "id": "position",
+      "title": "What is the position?",
+      "questions": [
+        { "id": "jobTitle", "type": "text", "label": "Job title", "placeholder": "Software Engineering Intern", "maxLength": 120 },
+        { "id": "employmentType", "reviewRequired": true, "type": "choice", "label": "Employment type", "options": ["Part-Time", "Full-Time"] }
+      ]
+    },
+    {
+      "id": "responsibilities",
+      "title": "What will you be doing?",
+      "questions": [
+        { "id": "jobResponsibilities", "reviewRequired": true, "type": "longText", "label": "Job responsibilities", "help": "The main tasks and technologies you will work with.", "minLength": 20, "maxLength": 2000 }
+      ]
+    }
+  ]
+}

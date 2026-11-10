@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
+using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using Google.Apis.Auth;
 
 namespace Backend.Controllers;
 
@@ -24,17 +28,127 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        // Find user by email
+        if (string.IsNullOrWhiteSpace(request.Email))
+        {
+            return BadRequest(new { Message = "Email is required." });
+        }
+
+        return await AuthenticateUserByEmailAsync(request.Email.Trim().ToLowerInvariant());
+    }
+
+    [HttpPost("google")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleAuthRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Code) || string.IsNullOrWhiteSpace(request.RedirectUri))
+        {
+            return BadRequest(new { Message = "Authorization code and redirect URI are required." });
+        }
+
+        var clientId = _configuration["Google:ClientId"]
+            ?? _configuration["Google__ClientId"]
+            ?? _configuration["GOOGLE_CLIENT_ID"];
+        var clientSecret = _configuration["Google:ClientSecret"]
+            ?? _configuration["Google__ClientSecret"]
+            ?? _configuration["GOOGLE_CLIENT_SECRET"];
+
+        if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+        {
+            return StatusCode(500, new { Message = "Google OAuth credentials are not configured on the server." });
+        }
+
+        // 1. Exchange the authorization code for Google tokens
+        using var httpClient = new HttpClient();
+        var tokenRequestParameters = new Dictionary<string, string>
+        {
+            { "code", request.Code },
+            { "client_id", clientId },
+            { "client_secret", clientSecret },
+            { "redirect_uri", request.RedirectUri },
+            { "grant_type", "authorization_code" }
+        };
+
+        var tokenResponse = await httpClient.PostAsync("https://oauth2.googleapis.com/token", new FormUrlEncodedContent(tokenRequestParameters));
+        if (!tokenResponse.IsSuccessStatusCode)
+        {
+            var errContent = await tokenResponse.Content.ReadAsStringAsync();
+            return BadRequest(new { Message = "Failed to exchange authorization code with Google.", Details = errContent });
+        }
+
+        var tokenData = await tokenResponse.Content.ReadFromJsonAsync<JsonElement>();
+        if (!tokenData.TryGetProperty("id_token", out var idTokenElement))
+        {
+            return BadRequest(new { Message = "No ID token returned by Google." });
+        }
+
+        var idToken = idTokenElement.GetString();
+
+        // 2. Cryptographically validate the Google ID token
+        GoogleJsonWebSignature.Payload payload;
+        try
+        {
+            payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[] { clientId }
+            });
+        }
+        catch (InvalidJwtException ex)
+        {
+            return Unauthorized(new { Message = "Invalid Google ID token.", Details = ex.Message });
+        }
+
+        var email = payload.Email.Trim().ToLowerInvariant();
+
+        // 3. Southeastern domain validation (accepts both @selu.edu and @southeastern.edu)
+        if (!email.EndsWith("@selu.edu") && !email.EndsWith("@southeastern.edu"))
+        {
+            return StatusCode(403, new { Message = "Access restricted. Please sign in with your Southeastern Google account." });
+        }
+
+        return await AuthenticateUserByEmailAsync(email, payload.Name);
+    }
+
+    private async Task<IActionResult> AuthenticateUserByEmailAsync(string email, string? fallbackFullName = null)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+
+        // Find user by normalized email
         var user = await _context.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
-        
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+        // Determine roles across aliases
+        var isFaculty = normalizedEmail.Equals("galkadi@selu.edu", StringComparison.OrdinalIgnoreCase)
+                     || normalizedEmail.Equals("ghassan.alkadi@selu.edu", StringComparison.OrdinalIgnoreCase)
+                     || normalizedEmail.Equals("galkadi@southeastern.edu", StringComparison.OrdinalIgnoreCase)
+                     || normalizedEmail.Equals("ghassan.alkadi@southeastern.edu", StringComparison.OrdinalIgnoreCase);
+
+        var isDeptHead = normalizedEmail.Equals("bonnie.achee@southeastern.edu", StringComparison.OrdinalIgnoreCase)
+                      || normalizedEmail.Equals("bonnie.achee@selu.edu", StringComparison.OrdinalIgnoreCase)
+                      || normalizedEmail.Equals("bachee@selu.edu", StringComparison.OrdinalIgnoreCase)
+                      || normalizedEmail.Equals("bachee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
+
         if (user == null)
         {
-            user = await _mockDataService.GetMockUserAsync(request.Email);
+            user = await _mockDataService.GetMockUserAsync(normalizedEmail);
+
+            // Set appropriate fallback display names for faculty/dept head or student
+            if (isFaculty && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Ghassan Alkadi";
+            }
+            else if (isDeptHead && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Bonnie Achée";
+            }
+            else if (!string.IsNullOrWhiteSpace(fallbackFullName) && (user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)))
+            {
+                user.FullName = fallbackFullName;
+            }
 
             var dept = await _context.Departments.FirstOrDefaultAsync(d => d.Code == "CS")
                        ?? await _context.Departments.FirstOrDefaultAsync();
@@ -60,15 +174,24 @@ public class AuthController : ControllerBase
         }
         else
         {
-            var mockUser = await _mockDataService.GetMockUserAsync(request.Email);
+            var mockUser = await _mockDataService.GetMockUserAsync(normalizedEmail);
             if ((user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)) && mockUser.FullName != "Test User")
             {
                 user.FullName = mockUser.FullName;
             }
+            else if (isFaculty && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Ghassan Alkadi";
+            }
+            else if (isDeptHead && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Bonnie Achée";
+            }
+            else if ((user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)) && !string.IsNullOrWhiteSpace(fallbackFullName))
+            {
+                user.FullName = fallbackFullName;
+            }
         }
-
-        var isFaculty = request.Email.Equals("galkadi@selu.edu", StringComparison.OrdinalIgnoreCase);
-        var isDeptHead = request.Email.Equals("bonnie.achee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
 
         var facultyRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Faculty");
         if (facultyRole == null)
@@ -148,7 +271,11 @@ public class AuthController : ControllerBase
         }
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "super_secret_key_for_development_purposes_only_12345!");
+        var jwtKey = _configuration["Jwt:Key"]
+            ?? _configuration["Jwt__Key"]
+            ?? _configuration["JWT_KEY"]
+            ?? "super_secret_key_for_development_purposes_only_12345!";
+        var key = Encoding.UTF8.GetBytes(jwtKey);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
@@ -170,4 +297,10 @@ public class AuthController : ControllerBase
 public class LoginRequest
 {
     public string Email { get; set; } = string.Empty;
+}
+
+public class GoogleAuthRequest
+{
+    public string Code { get; set; } = string.Empty;
+    public string RedirectUri { get; set; } = string.Empty;
 }

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
 import FormBuilder from './pages/FormBuilder';
 import FormView from './pages/FormView';
@@ -27,6 +28,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           {/* Employers open this from a link; they don't have accounts. */}
           <Route path="/employer/:token" element={<EmployerReview />} />
           <Route path="/" element={<Layout />}>

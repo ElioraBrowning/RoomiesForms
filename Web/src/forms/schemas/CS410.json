@@ -1,0 +1,75 @@
+{
+  "id": "CS410",
+  "title": "CS 410: Student's Evaluation of Employer",
+  "department": "Computer Science",
+  "category": "Internship",
+  "description": "Your evaluation of the employer and the internship, to help the department advise future interns.",
+  "needs": [
+    "The employer's name and your job title",
+    "A few minutes to rate the experience and suggest curriculum changes"
+  ],
+  "submitLabel": "Submit evaluation",
+  "pages": [
+    {
+      "id": "position",
+      "title": "Where did you intern?",
+      "questions": [
+        { "id": "employerName", "type": "text", "label": "Employer name", "placeholder": "Acme Corp", "maxLength": 120 },
+        { "id": "jobTitle", "type": "text", "label": "Job title", "placeholder": "Software Engineering Intern", "maxLength": 120 }
+      ]
+    },
+    {
+      "id": "overall",
+      "title": "Overall ratings",
+      "questions": [
+        { "id": "ratingEmployer", "reviewRequired": true, "type": "choice", "label": "How would you rate the employer?", "options": ["Excellent", "Good", "Fair", "Poor"] },
+        { "id": "ratingExperience", "reviewRequired": true, "type": "choice", "label": "How would you rate the work experience?", "options": ["Excellent", "Good", "Fair", "Poor"] }
+      ]
+    },
+    {
+      "id": "learning",
+      "title": "What you learned",
+      "questions": [
+        { "id": "relatedAmount", "type": "choice", "label": "How much of your work was related to your computer science studies?", "options": ["100%", "75%", "50%", "25%"] },
+        { "id": "ratingLearning", "type": "choice", "label": "How would you rate what you learned?", "options": ["Excellent", "Good", "Fair", "Poor"] }
+      ]
+    },
+    {
+      "id": "repeat",
+      "title": "Would you go back?",
+      "questions": [
+        { "id": "repeatExperience", "type": "choice", "label": "Would you work for this employer again?", "options": ["Yes", "No"] },
+        { "id": "repeatExplain", "reviewRequired": true, "type": "longText", "label": "Why not?", "showWhen": { "field": "repeatExperience", "equals": "No" }, "minLength": 5, "maxLength": 1000 }
+      ]
+    },
+    {
+      "id": "recommend",
+      "title": "Would you recommend them?",
+      "questions": [
+        { "id": "recommendEmployer", "type": "choice", "label": "Would you recommend this employer to other interns?", "options": ["Yes", "No"] },
+        { "id": "recommendExplain", "reviewRequired": true, "type": "longText", "label": "Why not?", "showWhen": { "field": "recommendEmployer", "equals": "No" }, "minLength": 5, "maxLength": 1000 }
+      ]
+    },
+    {
+      "id": "curriculum",
+      "title": "What should we teach?",
+      "questions": [
+        { "id": "curriculumRevisions", "type": "longText", "label": "Based on your internship, what topics or courses should the curriculum add or change?", "required": false, "maxLength": 2000 }
+      ]
+    },
+    {
+      "id": "comments",
+      "title": "Anything else?",
+      "questions": [
+        { "id": "additionalComments", "type": "longText", "label": "Additional comments", "required": false, "maxLength": 2000 }
+      ]
+    },
+    {
+      "id": "signature",
+      "title": "Sign your evaluation",
+      "questions": [
+        { "id": "studentSignature", "type": "signature", "label": "Type your full name to sign", "statement": "I certify that this evaluation is accurate." }
+      ]
+    }
+  ]
+}
