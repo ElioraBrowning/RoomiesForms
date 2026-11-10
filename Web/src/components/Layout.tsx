@@ -16,7 +16,7 @@ export default function Layout() {
 
   const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const isReviewer = user?.roles?.some((r) => ['Faculty', 'Department Head'].includes(r));
+  const isReviewer = user?.roles?.some((r) => ['Faculty', 'Department Head', 'Dean'].includes(r));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -124,7 +124,7 @@ export default function Layout() {
                       className="navbar-dropdown-item"
                       role="menuitem"
                     >
-                      📋 Review Queue
+                      Review Queue
                     </Link>
                     <Link
                       to="/assignments"
@@ -132,7 +132,7 @@ export default function Layout() {
                       className="navbar-dropdown-item"
                       role="menuitem"
                     >
-                      ✍️ Assign Forms
+                      Assign Forms
                     </Link>
                     <Link
                       to="/forms/builder"
@@ -140,7 +140,7 @@ export default function Layout() {
                       className="navbar-dropdown-item"
                       role="menuitem"
                     >
-                      🛠️ Form Builder
+                      Form Builder
                     </Link>
                     <div className="navbar-dropdown-divider" />
                   </div>
@@ -152,7 +152,7 @@ export default function Layout() {
                   className="navbar-dropdown-item"
                   role="menuitem"
                 >
-                  👤 My Profile
+                  My Profile
                 </Link>
 
                 <div className="navbar-dropdown-divider" />
@@ -162,7 +162,7 @@ export default function Layout() {
                   className="navbar-dropdown-item navbar-dropdown-logout"
                   role="menuitem"
                 >
-                  🚪 Sign out
+                  Sign out
                 </button>
               </div>
             )}

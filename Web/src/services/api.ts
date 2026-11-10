@@ -112,7 +112,8 @@ api.interceptors.response.use(
 
     // GET /submissions/awaiting-employer
     if (cleanUrl.includes('submissions/awaiting-employer') && method === 'get') {
-      return Promise.resolve({ data: [], status: 200, statusText: 'OK', headers: {}, config: error.config });
+      const awaiting = MOCK_SUBMISSIONS.filter((s) => s.status === 'Awaiting Employer');
+      return Promise.resolve({ data: awaiting, status: 200, statusText: 'OK', headers: {}, config: error.config });
     }
 
     // GET /submissions/drafts/:id

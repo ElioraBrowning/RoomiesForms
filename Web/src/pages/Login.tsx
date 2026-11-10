@@ -153,14 +153,14 @@ export default function Login() {
                   className="login-quick-btn"
                   onClick={() => handleQuickLogin("galkadi@selu.edu")}
                 >
-                  <span className="login-quick-role">Faculty</span> <strong>Dr. Ghassan Alkadi</strong>
+                  <span className="login-quick-role">Faculty / GDoc</span> <strong>Dr. Ghassan Alkadi</strong>
                 </button>
                 <button
                   type="button"
                   className="login-quick-btn"
                   onClick={() => handleQuickLogin("bonnie.achee@southeastern.edu")}
                 >
-                  <span className="login-quick-role">Dept head</span> <strong>Dr. Bonnie Achée</strong>
+                  <span className="login-quick-role">Dean</span> <strong>Dr. Bonnie Achée</strong>
                 </button>
               </div>
             </div>

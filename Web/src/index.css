@@ -3010,3 +3010,2074 @@ fieldset:disabled .choice {
     transform: translateX(28px);
   }
 }
+
+
+/* ==========================================================================
+   SOUTHEASTERN LOUISIANA UNIVERSITY — DEAN'S OVERVIEW (CALM & MINIMAL)
+   ========================================================================== */
+
+.dean-simple-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 3rem;
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+/* Header */
+.dean-simple-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dean-simple-kicker {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand-green);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.dean-simple-title {
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.2rem;
+  line-height: 1.2;
+}
+
+.dean-simple-sub {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.dean-simple-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Quiet Alert */
+.dean-quiet-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3.5px solid var(--brand-gold);
+  border-radius: var(--radius-small);
+  font-size: 0.88rem;
+  color: var(--text-heading);
+}
+
+.dean-quiet-link {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Stat Row */
+.dean-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.dean-stat-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dean-stat-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.dean-stat-num {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  line-height: 1.15;
+}
+
+.dean-stat-unit {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.dean-stat-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+/* Two Column Summary */
+.dean-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.dean-clean-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1.25rem 1.4rem;
+}
+
+.dean-card-heading {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.2rem;
+}
+
+.dean-card-subtext {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+}
+
+.dean-simple-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dean-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.dean-list-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.dean-row-name {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.dean-row-meta {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dean-dot {
+  color: var(--border-strong);
+}
+
+/* Roster Section (Hidden/Collapsed by default) */
+.dean-roster-section {
+  margin-top: 0.5rem;
+}
+
+.dean-roster-trigger-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dean-trigger-text h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.25rem;
+}
+
+.dean-trigger-text p {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 650px;
+}
+
+.dean-roster-expanded {
+  margin-top: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dean-roster-search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dean-roster-search-bar input {
+  max-width: 400px;
+}
+
+.dean-roster-count {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Modals */
+.dean-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.dean-modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.dean-modal-header {
+  padding: 1.15rem 1.35rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.dean-modal-header h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0 0 0.2rem;
+}
+
+.dean-modal-header p {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.dean-modal-body {
+  padding: 1.25rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dean-modal-footer {
+  padding: 0.9rem 1.35rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Print Only */
+.dean-print-only {
+  display: none;
+}
+
+@media print {
+  .navbar-floating-wrapper,
+  .navbar-divider,
+  .breadcrumbs-bar,
+  .dean-simple-actions,
+  .dean-quiet-bar,
+  .dean-roster-section,
+  .btn {
+    display: none !important;
+  }
+
+  body, .dean-simple-page {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .dean-print-only {
+    display: block !important;
+    margin-bottom: 1.5rem;
+  }
+
+  .dean-print-title-block h2 {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #1a5632 !important;
+    margin: 0;
+  }
+
+  .dean-print-title-block h3 {
+    font-size: 0.95rem;
+    color: #333333;
+    margin: 0.2rem 0;
+  }
+
+  .dean-print-title-block p {
+    font-size: 0.85rem;
+    color: #666666;
+    margin: 0;
+  }
+
+  .dean-stat-row {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .dean-stat-box, .dean-clean-card {
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+  }
+
+  .dean-print-footer {
+    display: flex !important;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid #cccccc;
+    font-size: 0.85rem;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .dean-stat-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dean-two-col {
+    grid-template-columns: 1fr;
+  }
+  .dean-roster-search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dean-roster-search-bar input {
+    max-width: 100%;
+  }
+  .dean-simple-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .dean-stat-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==========================================================================
+   FACULTY DASHBOARD MOBILE CARDS (Thumb-Friendly for GDoc / Dr. Alkadi)
+   ========================================================================== */
+.faculty-mobile-cards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .faculty-desktop-table {
+    display: none !important;
+  }
+  .faculty-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 0.5rem 0;
+  }
+  .faculty-mobile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--brand-green);
+    border-radius: var(--radius-small);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  .faculty-m-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .faculty-m-form {
+    font-size: 0.96rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    line-height: 1.25;
+  }
+  .faculty-m-student {
+    font-size: 0.86rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 0.15rem;
+  }
+  .faculty-m-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .faculty-m-waiting {
+    font-weight: 800;
+  }
+  .faculty-m-pipeline {
+    background: var(--surface-2);
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem;
+    overflow-x: auto;
+  }
+  .faculty-m-actions {
+    margin-top: 0.25rem;
+  }
+  .faculty-m-btn {
+    width: 100%;
+    min-height: 44px;
+    font-weight: 800;
+  }
+}
+
+/* =============================================================================
+   DEAN WORKSPACE TABS & TASK CENTER (Phase 1)
+   ============================================================================= */
+
+.dean-workspace-nav {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 0.25rem;
+  border-radius: 8px;
+  gap: 0.25rem;
+  align-self: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.dean-workspace-tab {
+  background: transparent;
+  border: none;
+  padding: 0.45rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dean-workspace-tab:hover {
+  color: var(--text-heading);
+}
+
+.dean-workspace-tab.is-active {
+  background: var(--surface);
+  color: var(--brand-green);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dean-task-center {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dean-task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dean-task-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dean-pref-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.dean-pref-checkbox {
+  accent-color: var(--brand-green);
+  cursor: pointer;
+}
+
+/* 4 Metric Buckets Grid */
+.dean-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .dean-metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .dean-metric-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dean-metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+
+.dean-metric-card:hover {
+  border-color: var(--brand-green);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.dean-metric-card.is-active {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 0 1.5px var(--brand-green);
+  background: var(--surface);
+}
+
+.dean-metric-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dean-metric-label {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.dean-metric-badge {
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+}
+
+.dean-metric-badge.tone-fresh {
+  background: var(--surface-2);
+  color: var(--text-heading);
+}
+
+.dean-metric-badge.tone-revised {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+}
+
+.dean-metric-badge.tone-waiting {
+  background: rgba(217, 119, 6, 0.12);
+  color: #d97706;
+}
+
+.dean-metric-badge.tone-approved {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.dean-metric-count {
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0.35rem 0 0.1rem;
+}
+
+.dean-metric-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Controls & Omni Search */
+.dean-task-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dean-task-active-desc {
+  font-size: 0.9rem;
+  color: var(--text-heading);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.dean-clear-filter {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand-green);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dean-clear-filter:hover {
+  text-decoration: underline;
+}
+
+.dean-task-filters-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.dean-filter-select-wrap {
+  position: relative;
+}
+
+.dean-filter-select {
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--text-heading);
+  cursor: pointer;
+  height: 38px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dean-filter-select:hover {
+  border-color: var(--brand-green);
+}
+
+.dean-filter-select:focus {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 0 2px rgba(0, 103, 71, 0.15);
+}
+
+.dean-task-search-wrap {
+  min-width: 240px;
+  max-width: 320px;
+}
+
+.dean-task-search {
+  width: 100%;
+  height: 38px;
+}
+
+/* Table Enhancements */
+.dean-task-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.dean-task-table {
+  width: 100%;
+  margin: 0;
+}
+
+.dean-table-row:hover {
+  background: var(--surface-2);
+}
+
+.dean-row-title {
+  font-weight: 700;
+  color: var(--text-heading);
+  font-size: 0.92rem;
+}
+
+.dean-pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+}
+
+.dean-pill.pill-revised {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+}
+
+.dean-student-name {
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.dean-wnum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  background: var(--surface-2);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  color: var(--text-heading);
+}
+
+.dean-date-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.84rem;
+}
+
+.dean-waiting-tag {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.dean-action-btn {
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Centered Empty State */
+.dean-task-empty {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dean-task-empty-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.dean-task-empty-desc {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem;
+  max-width: 440px;
+}
+
+/* =============================================================================
+   SLIDE-OVER QUICK REVIEW DRAWER (Phase 2)
+   ============================================================================= */
+
+.dean-table-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dean-table-row.is-selected-row {
+  background: rgba(0, 103, 71, 0.08) !important;
+  box-shadow: inset 3.5px 0 0 var(--brand-green);
+}
+
+.dean-drawer-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dean-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  animation: deanFadeIn 0.2s ease;
+}
+
+.dean-drawer-panel {
+  position: relative;
+  width: 480px;
+  max-width: 100vw;
+  height: 100vh;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18);
+  animation: deanSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1001;
+  border-left: 1px solid var(--border);
+}
+
+/* Origin Banners */
+.dean-drawer-panel.origin-student {
+  border-top: 5px solid #006747;
+}
+
+.dean-drawer-panel.origin-employer {
+  border-top: 5px solid #d97706;
+}
+
+.dean-drawer-panel.origin-faculty {
+  border-top: 5px solid #1e293b;
+}
+
+/* Drawer Header */
+.dean-drawer-header {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.dean-drawer-origin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.dean-origin-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.origin-badge-student {
+  background: rgba(0, 103, 71, 0.1);
+  color: #006747;
+}
+
+.origin-badge-employer {
+  background: rgba(217, 119, 6, 0.12);
+  color: #d97706;
+}
+
+.origin-badge-faculty {
+  background: rgba(30, 41, 59, 0.1);
+  color: #1e293b;
+}
+
+.dean-drawer-close {
+  background: none;
+  border: none;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.dean-drawer-close:hover {
+  color: var(--text-heading);
+  background: var(--surface-2);
+}
+
+.dean-drawer-title {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.35rem;
+  line-height: 1.3;
+}
+
+.dean-drawer-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.dean-drawer-student {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.dean-drawer-dot {
+  color: var(--text-muted);
+}
+
+.dean-drawer-wnum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  background: var(--surface-2);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  color: var(--text-heading);
+}
+
+/* Drawer Body */
+.dean-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dean-drawer-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.dean-drawer-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand-green);
+  border-radius: 50%;
+  animation: deanSpin 0.7s linear infinite;
+}
+
+.dean-drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.dean-section-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Resubmission Diff */
+.dean-drawer-diff {
+  background: rgba(2, 132, 199, 0.07);
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  border-left: 3.5px solid #0284c7;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+}
+
+.kicker-revised {
+  color: #0284c7;
+}
+
+.dean-diff-text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-heading);
+  line-height: 1.45;
+}
+
+/* Fields & Stacks */
+.dean-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.dean-field-grid.mb-sm {
+  margin-bottom: 0.65rem;
+}
+
+.dean-field-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dean-field-box.span-2 {
+  grid-column: span 2;
+}
+
+.dean-field-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.dean-field-val {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.val-strong {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.dean-detail-stack {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.dean-stack-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dean-stack-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.dean-stack-val {
+  font-size: 0.88rem;
+  color: var(--text-heading);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.dean-title-sub {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.dean-loc {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 400;
+}
+
+.dean-verified-pill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+}
+
+/* Duties Block */
+.dean-duties-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dean-duties-quote {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-heading);
+  font-style: italic;
+}
+
+/* Drawer Sticky Footer */
+.dean-drawer-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.dean-footer-link {
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.dean-footer-revision {
+  white-space: nowrap;
+  font-weight: 700;
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.35);
+}
+
+.dean-footer-approve {
+  flex: 1;
+  font-weight: 800;
+}
+
+/* Breakpoints & Responsive Behavior */
+@media (max-width: 1200px) {
+  .dean-drawer-panel {
+    width: 420px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dean-drawer-panel {
+    width: 100%;
+    height: 100%;
+    border-left: none;
+  }
+}
+
+/* Animations */
+@keyframes deanFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes deanSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes deanSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =============================================================================
+   APPROVE & NEXT ENGINE, UNDO TOAST, & CLEARANCE NOTICE (Phase 3)
+   ============================================================================= */
+
+.dean-table-row.is-just-approved {
+  background: rgba(16, 185, 129, 0.18) !important;
+  box-shadow: inset 3.5px 0 0 #059669;
+  transition: background-color 0.5s ease;
+}
+
+/* Academic Clearance Notice Box */
+.dean-clearance-box {
+  background: rgba(0, 103, 71, 0.08);
+  border: 1px solid rgba(0, 103, 71, 0.25);
+  border-left: 3.5px solid #006747;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+}
+
+.kicker-cleared {
+  color: #006747;
+}
+
+.dean-clearance-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.dean-clearance-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Revoke Button */
+.dean-footer-revoke {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.35);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dean-footer-revoke:hover {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+/* 5-Second Undo Toast (Centered & High-Visibility) */
+.dean-undo-toast {
+  position: fixed;
+  bottom: 2.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 0.85rem 1.45rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.94rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  animation: deanToastSlideUpCenter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dean-undo-text {
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.dean-undo-btn {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: none;
+  border-radius: 5px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dean-undo-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes deanToastSlideUpCenter {
+  from {
+    transform: translateX(-50%) translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* =============================================================================
+   REVISION MODE, SMART CHIPS & INLINE NOTES MANAGER (Phase 4)
+   ============================================================================= */
+
+/* Revision Panel in Drawer */
+.dean-revision-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.dean-revision-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dean-revision-hint {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.dean-revision-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 130px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-small);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.dean-revision-textarea:focus {
+  background: var(--surface);
+  border-color: var(--brand-green);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 103, 71, 0.15);
+}
+
+/* Canned Chips Section */
+.dean-chips-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dean-chips-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dean-chips-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.dean-manage-notes-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--brand-green);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dean-manage-notes-btn:hover {
+  text-decoration: underline;
+}
+
+.dean-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dean-chip {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.dean-chip:hover {
+  border-color: var(--brand-green);
+  background: var(--surface);
+}
+
+.dean-chip.is-active {
+  background: rgba(0, 103, 71, 0.1);
+  border-color: var(--brand-green);
+  color: var(--brand-green);
+}
+
+.dean-chip-check {
+  font-weight: 800;
+  font-size: 0.76rem;
+}
+
+.dean-btn-send-revision {
+  background: #d97706;
+  border-color: #d97706;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.dean-btn-send-revision:hover:not(:disabled) {
+  background: #b45309;
+  border-color: #b45309;
+}
+
+/* =============================================================================
+   INLINE MANAGE QUICK NOTES MODAL
+   ============================================================================= */
+
+.dean-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.dean-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  animation: deanFadeIn 0.15s ease;
+}
+
+.dean-modal-box {
+  position: relative;
+  width: 580px;
+  max-width: 100%;
+  max-height: 88vh;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  z-index: 2101;
+  animation: deanModalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+@keyframes deanModalPop {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.dean-modal-header {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  background: var(--surface);
+}
+
+.dean-modal-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.dean-modal-sub {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.dean-modal-body {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dean-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dean-note-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+}
+
+.dean-note-view {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.dean-note-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.dean-note-chip-preview {
+  font-size: 0.76rem;
+  font-weight: 800;
+  background: rgba(0, 103, 71, 0.1);
+  color: var(--brand-green);
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  align-self: flex-start;
+}
+
+.dean-note-text-preview {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-heading);
+  line-height: 1.45;
+}
+
+.dean-note-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.dean-btn-delete {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.dean-btn-delete:hover {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+}
+
+.dean-add-note-card {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dean-add-note-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.dean-add-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dean-add-textarea {
+  font-family: inherit;
+  font-size: 0.86rem;
+  resize: vertical;
+}
+
+.dean-btn-add {
+  align-self: flex-start;
+  font-weight: 800;
+}
+
+.dean-edit-note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dean-edit-input {
+  font-weight: 700;
+}
+
+.dean-edit-textarea {
+  font-family: inherit;
+  font-size: 0.86rem;
+  resize: vertical;
+}
+
+.dean-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-self: flex-start;
+}
+
+.dean-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+}
+
+.dean-reset-link {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dean-reset-link:hover {
+  text-decoration: underline;
+}
+
+.dean-btn-done {
+  min-width: 90px;
+  font-weight: 800;
+}
+
+/* =============================================================================
+   REVIEWER NOTIFICATION PREFERENCES (Profile)
+   ============================================================================= */
+
+.profile-section-block {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.profile-section-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.3rem;
+}
+
+.profile-section-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+  line-height: 1.45;
+}
+
+.dean-notif-radios {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dean-notif-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.dean-notif-option:hover {
+  border-color: var(--brand-green);
+  background: var(--surface);
+}
+
+.dean-notif-option input[type='radio'] {
+  margin-top: 0.2rem;
+  accent-color: var(--brand-green);
+  cursor: pointer;
+}
+
+.dean-notif-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dean-notif-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dean-notif-heading strong {
+  color: var(--text-heading);
+  font-size: 0.92rem;
+}
+
+.dean-notif-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(0, 103, 71, 0.12);
+  color: var(--brand-green);
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+}
+
+.dean-notif-content p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* =============================================================================
+   INLINE EXPANDABLE ACCORDION CARDS & TRAY (Batch 1)
+   ============================================================================= */
+
+.dean-queue-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.dean-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dean-queue-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  scroll-margin-top: 100px;
+  scroll-margin-bottom: 80px;
+}
+
+/* Submitter Origin Left Accent Borders */
+.dean-queue-card.origin-student {
+  border-left: 4.5px solid #006747;
+}
+
+.dean-queue-card.origin-employer {
+  border-left: 4.5px solid #d97706;
+}
+
+.dean-queue-card.origin-faculty {
+  border-left: 4.5px solid #1e293b;
+}
+
+.dean-queue-card.is-expanded {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 103, 71, 0.4);
+}
+
+.dean-queue-card.is-just-approved {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-left-color: #059669 !important;
+}
+
+/* Card Header Row */
+.dean-queue-row {
+  display: grid;
+  grid-template-columns: 2.3fr 1.6fr 1.1fr 1.1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dean-queue-row:hover {
+  background: var(--surface-2);
+}
+
+.dean-col-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dean-row-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.dean-col-student {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dean-col-date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.84rem;
+}
+
+.dean-date-val {
+  color: var(--text-muted);
+}
+
+.dean-col-status {
+  display: flex;
+  align-items: center;
+}
+
+.dean-col-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.dean-link-full {
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.dean-link-full:hover {
+  color: var(--text-heading);
+}
+
+/* =============================================================================
+   INLINE EXPANDED TRAY
+   ============================================================================= */
+
+.dean-inline-tray {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: deanTrayExpand 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes deanTrayExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dean-tray-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dean-tray-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.dean-tray-counter {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dean-tray-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dean-cycle-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dean-collapse-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.dean-collapse-btn:hover {
+  color: var(--text-heading);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.dean-tray-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.dean-tray-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.dean-tray-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.dean-tray-col.span-full {
+  grid-column: span 2;
+}
+
+.dean-duties-meta {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.dean-duties-meta strong {
+  color: var(--text-heading);
+}
+
+.dean-tray-footer {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+/* =============================================================================
+   FLOATING JUMP-TO-ACTIVE BUTTON
+   ============================================================================= */
+
+.dean-jump-pill {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1500;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 0.55rem 1.15rem;
+  border-radius: 30px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.dean-jump-pill:hover {
+  background: #1e293b;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.dean-jump-pill.jump-above {
+  top: 5rem;
+  animation: deanJumpSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dean-jump-pill.jump-below {
+  bottom: 5rem;
+  animation: deanJumpSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dean-jump-arrow {
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+@keyframes deanJumpSlideDown {
+  from {
+    transform: translateX(-50%) translateY(-12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes deanJumpSlideUp {
+  from {
+    transform: translateX(-50%) translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Queues */
+@media (max-width: 900px) {
+  .dean-queue-row {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+  .dean-tray-columns {
+    grid-template-columns: 1fr;
+  }
+  .dean-tray-col.span-full {
+    grid-column: span 1;
+  }
+}

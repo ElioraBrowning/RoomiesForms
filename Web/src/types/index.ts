@@ -56,6 +56,7 @@ export interface SubmissionSummary {
   createdAt: string;
   updatedAt: string;
   studentName: string;
+  wNumber?: string;
   progress?: number;
   isResubmission?: boolean;
   latestComment?: string | null;
@@ -129,4 +130,25 @@ export interface Student {
   id: number;
   fullName: string;
   email: string;
+}
+
+export interface StudentPlacement {
+  id: string;
+  studentName: string;
+  wNumber: string;
+  email: string;
+  classification: 'Freshman' | 'Sophomore' | 'Junior' | 'Senior' | 'Graduate';
+  gpa: number;
+  companyName: string;
+  companyLocation: string;
+  industrySector: string;
+  roleTitle: string;
+  roleDuties: string;
+  hourlyPay: number;
+  semester: string;
+  supervisorName: string;
+  supervisorEmail: string;
+  status: 'Approved' | 'In Progress' | 'Pending Review' | 'Needs Attention' | 'Completed';
+  employerRating?: number; // 1-5 scale
+  notes?: string;
 }

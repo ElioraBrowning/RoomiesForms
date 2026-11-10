@@ -11,7 +11,7 @@ import Assignments from './pages/Assignments.tsx';
 import SurveyResults from './pages/SurveyResults';
 import EmployerReview from './pages/EmployerReview';
 
-const REVIEWER_ROLES = ['Faculty', 'Department Head'];
+const REVIEWER_ROLES = ['Faculty', 'Department Head', 'Dean'];
 
 const ReviewerRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
