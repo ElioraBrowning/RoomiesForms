@@ -1,3 +1,4 @@
+/* Official Southeastern Louisiana University Brand Standards */
 :root {
   --brand-green: #1a5632;
   --brand-gold: #ffc629;
@@ -6,118 +7,169 @@
   --brand-salmon: #ea6852;
   --brand-orange: #e07c00;
 
-  --font-ui: "Archivo", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --radius: 10px;
   --radius-small: 6px;
   --focus-ring: 0 0 0 3px var(--focus);
   --measure: 760px;
 
-  --page-max: 1200px;
-  --page-gutter: clamp(1rem, 4vw, 2.5rem);
+  --page-max: 1400px;
+  --page-gutter: clamp(1.25rem, 3vw, 2.5rem);
+
+  /* Legacy brand aliases for backward compatibility */
+  --slu-green: var(--brand-green);
+  --slu-gold: var(--brand-gold);
+  --slu-mint: var(--brand-mint);
+  --slu-dark-gold: var(--brand-dark-gold);
+  --slu-salmon: var(--brand-salmon);
+  --slu-orange: var(--brand-orange);
 }
 
 :root,
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg: color-mix(in srgb, var(--brand-green) 5%, white);
+  /* LIGHT MODE (Official SELU Enterprise Standards - Clean White/Slate Canvas) */
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --surface-2: color-mix(in srgb, var(--brand-green) 4%, white);
-  --surface-3: color-mix(in srgb, var(--brand-green) 9%, white);
-  --border: color-mix(in srgb, var(--brand-green) 20%, white);
-  --border-strong: color-mix(in srgb, var(--brand-green) 55%, white);
+  --surface-2: #f1f5f9;
+  --surface-3: #e2e8f0;
+  --border: #e8e8e8;
+  --border-strong: #d1d5db;
 
-  --text: color-mix(in srgb, var(--brand-green) 45%, black);
-  --text-heading: color-mix(in srgb, var(--brand-green) 60%, black);
-  --text-muted: color-mix(in srgb, var(--brand-green) 85%, white);
+  --text: #1e293b;
+  --text-heading: #0f172a;
+  --text-muted: #64748b;
   --link: var(--brand-green);
-  --focus: color-mix(in srgb, var(--brand-gold) 85%, black);
+  --focus: #ffc629;
 
   --input-bg: #ffffff;
-  --input-border: color-mix(in srgb, var(--brand-green) 50%, white);
+  --input-border: #cbd5e1;
   --input-focus: var(--brand-green);
   --check: var(--brand-green);
 
   --primary-bg: var(--brand-gold);
-  --primary-bg-hover: color-mix(in srgb, var(--brand-gold) 88%, black);
-  --primary-text: color-mix(in srgb, var(--brand-green) 70%, black);
+  --primary-bg-hover: #e5b225;
+  --primary-text: #0f172a;
 
   --nav-bg: var(--brand-green);
   --nav-text: #ffffff;
   --band: var(--brand-green);
 
-  --success-bg: color-mix(in srgb, var(--brand-mint) 22%, white);
-  --success-border: var(--brand-mint);
-  --success-text: color-mix(in srgb, var(--brand-green) 80%, black);
+  --success-bg: #dcfce7;
+  --success-border: #86efac;
+  --success-text: #166534;
   --success-strong: var(--brand-green);
 
-  --warning-bg: color-mix(in srgb, var(--brand-gold) 24%, white);
-  --warning-border: var(--brand-dark-gold);
-  --warning-text: color-mix(in srgb, var(--brand-dark-gold) 42%, black);
+  --warning-bg: #fef3c7;
+  --warning-border: #fcd34d;
+  --warning-text: #92400e;
   --warning-strong: var(--brand-dark-gold);
 
-  --danger-bg: color-mix(in srgb, var(--brand-salmon) 13%, white);
-  --danger-border: var(--brand-salmon);
-  --danger-text: color-mix(in srgb, var(--brand-salmon) 45%, black);
-  --danger-strong: color-mix(in srgb, var(--brand-salmon) 75%, black);
+  --danger-bg: #fee2e2;
+  --danger-border: #fca5a5;
+  --danger-text: #991b1b;
+  --danger-strong: var(--brand-salmon);
 
-  --info-bg: color-mix(in srgb, var(--brand-orange) 12%, white);
-  --info-border: var(--brand-orange);
-  --info-text: color-mix(in srgb, var(--brand-orange) 45%, black);
+  --info-bg: #ffedd5;
+  --info-border: #fdba74;
+  --info-text: #9a3412;
 
-  --shadow: 0 1px 2px color-mix(in srgb, var(--brand-green) 12%, transparent),
-    0 4px 14px color-mix(in srgb, var(--brand-green) 8%, transparent);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+  /* Legacy aliases */
+  --bg-body: var(--bg);
+  --bg-sunken: var(--surface-2);
+  --bg-card: var(--surface);
+  --border-card: var(--border);
+  --bg-card-nested: var(--surface-2);
+  --border-card-nested: var(--border);
+  --bg-form-section: var(--surface);
+  --border-form-section: var(--brand-green);
+  --text-form-section-h3: var(--brand-green);
+  --text-main: var(--text);
+  --text-help: var(--text-muted);
+  --shadow-card: var(--shadow);
+  --btn-secondary-bg: var(--surface);
+  --btn-secondary-border: var(--border-strong);
+  --btn-secondary-hover: var(--surface-2);
+  --btn-secondary-border-hover: var(--brand-green);
+  --btn-secondary-text: var(--text);
+  --theme-toggle-bg: #0d3822;
+  --theme-toggle-border: #276b45;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: color-mix(in srgb, var(--brand-green) 16%, black);
-  --surface: color-mix(in srgb, var(--brand-green) 36%, black);
-  --surface-2: color-mix(in srgb, var(--brand-green) 46%, black);
-  --surface-3: color-mix(in srgb, var(--brand-green) 58%, black);
-  --border: color-mix(in srgb, var(--brand-mint) 22%, var(--surface));
-  --border-strong: color-mix(in srgb, var(--brand-mint) 50%, var(--surface));
+  /* DARK MODE (Developer / Testing Mode - Clean Slate/Charcoal neutrals, NOT Swamp Green) */
+  --bg: #0b1118;
+  --surface: #131b26;
+  --surface-2: #182230;
+  --surface-3: #223044;
+  --border: #243247;
+  --border-strong: #33445c;
 
-  --text: color-mix(in srgb, var(--brand-mint) 14%, white);
-  --text-heading: #ffffff;
-  --text-muted: color-mix(in srgb, var(--brand-mint) 62%, white);
-  --link: var(--brand-mint);
+  --text: #e2e8f0;
+  --text-heading: #f8fafc;
+  --text-muted: #94a3b8;
+  --link: #6cca98;
   --focus: var(--brand-gold);
 
-  --input-bg: color-mix(in srgb, var(--brand-green) 28%, black);
-  --input-border: color-mix(in srgb, var(--brand-mint) 45%, var(--surface));
+  --input-bg: #0e1520;
+  --input-border: #2f425c;
   --input-focus: var(--brand-gold);
   --check: var(--brand-gold);
 
   --primary-bg: var(--brand-gold);
-  --primary-bg-hover: color-mix(in srgb, var(--brand-gold) 85%, white);
-  --primary-text: color-mix(in srgb, var(--brand-green) 60%, black);
+  --primary-bg-hover: #e5b225;
+  --primary-text: #0b1118;
 
   --nav-bg: var(--brand-green);
   --nav-text: #ffffff;
   --band: var(--brand-green);
 
-  --success-bg: color-mix(in srgb, var(--brand-mint) 16%, var(--surface));
-  --success-border: var(--brand-mint);
-  --success-text: color-mix(in srgb, var(--brand-mint) 45%, white);
-  --success-strong: var(--brand-mint);
+  --success-bg: #052e16;
+  --success-border: #166534;
+  --success-text: #86efac;
+  --success-strong: #86efac;
 
-  --warning-bg: color-mix(in srgb, var(--brand-gold) 14%, var(--surface));
-  --warning-border: var(--brand-gold);
-  --warning-text: color-mix(in srgb, var(--brand-gold) 55%, white);
-  --warning-strong: var(--brand-gold);
+  --warning-bg: #422006;
+  --warning-border: #854d0e;
+  --warning-text: #fde047;
+  --warning-strong: #fde047;
 
-  --danger-bg: color-mix(in srgb, var(--brand-salmon) 16%, var(--surface));
-  --danger-border: var(--brand-salmon);
-  --danger-text: color-mix(in srgb, var(--brand-salmon) 45%, white);
-  --danger-strong: var(--brand-salmon);
+  --danger-bg: #450a0a;
+  --danger-border: #991b1b;
+  --danger-text: #fca5a5;
+  --danger-strong: #fca5a5;
 
-  --info-bg: color-mix(in srgb, var(--brand-orange) 16%, var(--surface));
-  --info-border: var(--brand-orange);
-  --info-text: color-mix(in srgb, var(--brand-orange) 40%, white);
+  --info-bg: #431407;
+  --info-border: #9a3412;
+  --info-text: #fed7aa;
 
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.35);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+
+  /* Legacy aliases */
+  --bg-body: var(--bg);
+  --bg-sunken: var(--surface-2);
+  --bg-card: var(--surface);
+  --border-card: var(--border);
+  --bg-card-nested: var(--surface-2);
+  --border-card-nested: var(--border);
+  --bg-form-section: #0f1722;
+  --border-form-section: var(--brand-green);
+  --text-form-section-h3: var(--brand-mint);
+  --text-main: var(--text);
+  --text-help: var(--text-muted);
+  --shadow-card: var(--shadow);
+  --btn-secondary-bg: var(--surface);
+  --btn-secondary-border: var(--border);
+  --btn-secondary-hover: var(--surface-2);
+  --btn-secondary-border-hover: var(--brand-mint);
+  --btn-secondary-text: var(--text);
+  --theme-toggle-bg: #131b26;
+  --theme-toggle-border: #243247;
 }
 
 *,
@@ -247,225 +299,456 @@ pre {
   padding: 1.25rem var(--page-gutter) 3rem;
 }
 
-/* The green/gold rule from the university site */
-.stripe,
-.stripes {
-  height: 14px;
-  flex-shrink: 0;
-  background: repeating-linear-gradient(to bottom, var(--brand-gold) 0 4px, var(--brand-green) 4px 7px);
-}
-.stripe-thin {
-  height: 7px;
+/* ------------------------------------------------------------------
+   Modern Southeastern Floating Capsule Header
+   Reflecting current southeastern.edu brand language:
+   - Green pill capsule enclosing university brand lockup on the left
+   - Green pill capsule enclosing actions, notifications, and menu on the right
+   ------------------------------------------------------------------ */
+
+.navbar-floating-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: var(--bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-.navbar {
-  background: var(--nav-bg);
-  color: var(--nav-text);
-  /* Same width as the page content: the bar is full width, its contents are not. */
-  padding: 0.75rem max(var(--page-gutter), calc((100% - var(--page-max)) / 2));
+.navbar-floating {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  padding: 0.85rem max(var(--page-gutter), calc((100% - var(--page-max)) / 2)) 0.75rem;
+}
+
+/* Thin subtle grey line separating the top hotbar from page content:
+   Inset on the far left and right to match the Southeastern site grid */
+.navbar-divider {
+  height: 1px;
+  background-color: var(--border);
+  margin: 0 max(var(--page-gutter), calc((100% - var(--page-max)) / 2));
+}
+
+/* ------------------------------------------------------------------
+   Southeastern Breadcrumbs & Page-to-Page Navigation Arrows
+   Reflecting authentic southeastern.edu breadcrumb language:
+   - Sits in normal flow below the sticky hotbar
+   - Automatically folds/slides behind the hotbar as the user scrolls
+   - Rounded pill link hover states
+   - Chevron page-to-page navigation arrows
+   ------------------------------------------------------------------ */
+
+.breadcrumbs-bar {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  background: transparent;
+}
+
+.breadcrumbs-container {
+  max-width: calc(var(--page-max) + 2 * var(--page-gutter));
+  margin: 0 auto;
+  padding: 0.5rem var(--page-gutter) 0.5rem;
+}
+
+.breadcrumbs-list {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.86rem;
+}
+
+.breadcrumbs-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.breadcrumbs-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.breadcrumbs-link:hover {
+  color: var(--brand-green);
+  background-color: var(--surface-2);
+}
+
+.breadcrumbs-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  opacity: 0.65;
+  flex-shrink: 0;
+}
+
+.breadcrumbs-current {
+  color: var(--text-heading);
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+}
+
+@media (max-width: 640px) {
+  .breadcrumbs-container {
+    padding: 0.35rem var(--page-gutter) 0.45rem;
+  }
+  .breadcrumbs-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .breadcrumbs-list::-webkit-scrollbar {
+    display: none;
+  }
+  .breadcrumbs-link,
+  .breadcrumbs-current {
+    font-size: 0.82rem;
+  }
+}
+
+.navbar-pill {
+  background: var(--brand-green);
+  color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Left Pill: Brand */
+.navbar-pill-brand {
+  padding: 0.45rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+}
+.navbar-pill-brand:hover {
+  box-shadow: 0 0 14px 0 rgba(0, 0, 0, 0.35);
 }
 
 .navbar-brand-link {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
   text-decoration: none;
-  color: inherit;
+  color: #ffffff;
 }
+
 .navbar-seal {
   display: block;
-  height: 40px;
+  height: 34px;
   width: auto;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
+
 .navbar-brand-divider {
   width: 1.5px;
-  height: 28px;
-  background: color-mix(in srgb, white 40%, transparent);
+  height: 22px;
+  background: rgba(255, 255, 255, 0.3);
 }
+
 .navbar-app-name {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--brand-gold);
   white-space: nowrap;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
-.navbar-nav {
-  display: flex;
+/* Right Pill: Actions, Navigation, Notifications, Account */
+.navbar-pill-actions {
+  padding: 0.35rem 0.6rem 0.35rem 0.9rem;
+  display: inline-flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 0.65rem;
 }
+
+/* Desktop Reviewer Navigation Links inside right capsule */
 .navbar-links {
   display: flex;
+  align-items: center;
   gap: 0.25rem;
+  margin-right: 0.35rem;
 }
+
 .navbar-link {
-  color: var(--nav-text);
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.45rem 0.8rem;
-  border-radius: var(--radius-small);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.4rem 0.75rem;
+  border-radius: 9999px;
+  transition: background-color 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
 }
+
 .navbar-link:hover {
-  background: color-mix(in srgb, black 22%, var(--brand-green));
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
 }
-.navbar-actions {
+
+.navbar-link.active {
+  background: rgba(255, 198, 41, 0.22);
+  color: var(--brand-gold);
+  border: 1px solid rgba(255, 198, 41, 0.35);
+}
+
+/* Notification Bell Wrapper inside capsule */
+.navbar-bell-wrapper {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
 }
+
+/* Theme Toggle Wrapper inside capsule */
+.navbar-theme-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* User Avatar Dropdown inside capsule */
 .navbar-profile-container {
   position: relative;
 }
+
 .navbar-avatar-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 0;
-  background: var(--brand-gold);
-  color: var(--primary-text);
-  font: inherit;
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2px 7px 2px 2px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.12);
   cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
+
+.navbar-avatar-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
 .navbar-avatar-btn:focus-visible {
-  box-shadow: 0 0 0 3px white;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--brand-gold);
 }
+
+.navbar-avatar-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--brand-gold);
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-avatar-caret {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  transition: transform 0.2s ease;
+}
+
+.navbar-avatar-caret.is-open {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
 .navbar-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   right: 0;
-  min-width: 210px;
+  min-width: 230px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 0.4rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.45rem;
   z-index: 100;
+  animation: navbarFadeIn 0.18s ease-out;
 }
+
+@keyframes navbarFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .navbar-dropdown-header {
-  padding: 0.5rem 0.65rem 0.65rem;
+  padding: 0.6rem 0.75rem 0.65rem;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
 }
+
 .navbar-dropdown-name {
   color: var(--text-heading);
   font-weight: 700;
+  font-size: 0.95rem;
 }
+
 .navbar-dropdown-email {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   word-break: break-all;
+  margin-top: 2px;
 }
+
+.navbar-dropdown-role-tag {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--brand-green);
+  border: 1px solid var(--border);
+}
+
 .navbar-dropdown-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   width: 100%;
   text-align: left;
-  padding: 0.6rem 0.7rem;
+  padding: 0.55rem 0.75rem;
   border: 0;
   border-radius: var(--radius-small);
   background: transparent;
   color: var(--text);
   font: inherit;
+  font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-}
-.navbar-dropdown-item:hover {
-  background: var(--surface-3);
-}
-.navbar-dropdown-logout {
-  color: var(--danger-strong);
+  transition: background-color 0.15s ease;
 }
 
-@media (max-width: 720px) {
-  .navbar {
-    padding-block: 0.65rem;
+.navbar-dropdown-item:hover {
+  background: var(--surface-2);
+  color: var(--text-heading);
+}
+
+.navbar-dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.3rem 0;
+}
+
+.navbar-dropdown-logout {
+  color: var(--danger-strong) !important;
+}
+
+.navbar-dropdown-logout:hover {
+  background: var(--danger-bg) !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .navbar-links-desktop {
+    display: none;
+  }
+  .navbar-floating {
+    padding: 0.65rem 0.75rem;
+  }
+  .navbar-pill-brand {
+    padding: 0.35rem 0.85rem;
   }
   .navbar-seal {
-    height: 30px;
+    height: 26px;
   }
   .navbar-app-name {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
-  .navbar-brand-link {
-    gap: 0.6rem;
+  .navbar-pill-actions {
+    padding: 0.3rem 0.5rem;
+    gap: 0.45rem;
   }
-  .navbar-nav {
-    display: contents;
+}
+
+@media (max-width: 480px) {
+  .navbar-brand-divider {
+    display: none;
   }
-  .navbar-actions {
-    order: 2;
-    margin-left: auto;
-  }
-  .navbar-links {
-    order: 3;
-    width: 100%;
-  }
-  .navbar-links {
-    overflow-x: auto;
-    margin-left: -0.8rem;
-  }
-  .navbar-link {
-    white-space: nowrap;
-  }
-  .main-content {
-    padding-top: 0.85rem;
+  .navbar-app-name {
+    display: none; /* On tiny phones, logo stands clean in the green oval */
   }
 }
 
 .theme-toggle-btn {
   position: relative;
-  width: 72px;
-  height: 40px;
+  width: 58px;
+  height: 32px;
   padding: 0;
   border-radius: 999px;
-  border: 1.5px solid color-mix(in srgb, white 35%, transparent);
-  background: color-mix(in srgb, black 30%, var(--brand-green));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.18);
   cursor: pointer;
   flex-shrink: 0;
+  transition: border-color 0.2s, background 0.2s;
+}
+.theme-toggle-btn:hover {
+  border-color: rgba(255, 255, 255, 0.35);
 }
 .theme-toggle-icon {
   position: absolute;
-  top: 11.5px;
-  width: 14px;
-  height: 14px;
+  top: 8px;
+  width: 13px;
+  height: 13px;
   pointer-events: none;
   z-index: 2;
 }
 .theme-toggle-sun {
-  left: 11px;
+  left: 8px;
   color: var(--primary-text);
 }
 .theme-toggle-moon {
-  right: 11px;
+  right: 8px;
   color: var(--brand-mint);
 }
 .theme-toggle-btn.is-dark .theme-toggle-sun {
   color: var(--brand-gold);
 }
 .theme-toggle-btn.is-dark .theme-toggle-moon {
-  color: var(--primary-text);
+  color: #0f172a;
 }
 .theme-toggle-thumb {
   position: absolute;
   top: 2.5px;
   left: 3px;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--brand-gold);
-  transition: transform 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.22s ease;
   z-index: 1;
 }
 .theme-toggle-btn.is-dark .theme-toggle-thumb {
-  transform: translateX(32px);
+  transform: translateX(26px);
 }
 
 .page-head {
@@ -1986,32 +2269,34 @@ fieldset:disabled .choice {
   position: relative;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, white 35%, transparent);
-  background: transparent;
-  color: var(--nav-text);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.12);
+  color: #ffffff;
   cursor: pointer;
+  transition: background 0.18s ease, transform 0.15s ease;
 }
 .bell-btn:hover {
-  background: color-mix(in srgb, black 22%, var(--brand-green));
+  background: rgba(255, 255, 255, 0.2);
 }
 .bell-count {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
+  top: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
   border-radius: 999px;
-  background: var(--brand-salmon);
-  color: color-mix(in srgb, var(--brand-salmon) 15%, black);
-  font-size: 0.72rem;
+  background: var(--brand-gold);
+  color: #0f172a;
+  font-size: 0.68rem;
   font-weight: 800;
-  line-height: 20px;
+  line-height: 17px;
   text-align: center;
   border: 2px solid var(--brand-green);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .bell-panel {
   position: absolute;
@@ -2504,11 +2789,6 @@ fieldset:disabled .choice {
   margin: 0;
 }
 
-/* Active tab in the navbar */
-.navbar-link.active {
-  background: color-mix(in srgb, black 22%, var(--brand-green));
-  box-shadow: inset 0 -3px 0 var(--brand-gold);
-}
 
 .form-department {
   margin-top: 0.75rem;
@@ -2728,5 +3008,2076 @@ fieldset:disabled .choice {
   }
   .theme-toggle-btn.is-dark .theme-toggle-thumb {
     transform: translateX(28px);
+  }
+}
+
+
+/* ==========================================================================
+   SOUTHEASTERN LOUISIANA UNIVERSITY — DEAN'S OVERVIEW (CALM & MINIMAL)
+   ========================================================================== */
+
+.dean-simple-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 3rem;
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+/* Header */
+.dean-simple-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dean-simple-kicker {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand-green);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.dean-simple-title {
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.2rem;
+  line-height: 1.2;
+}
+
+.dean-simple-sub {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.dean-simple-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Quiet Alert */
+.dean-quiet-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3.5px solid var(--brand-gold);
+  border-radius: var(--radius-small);
+  font-size: 0.88rem;
+  color: var(--text-heading);
+}
+
+.dean-quiet-link {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Stat Row */
+.dean-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.dean-stat-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dean-stat-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.dean-stat-num {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  line-height: 1.15;
+}
+
+.dean-stat-unit {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.dean-stat-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+/* Two Column Summary */
+.dean-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.dean-clean-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1.25rem 1.4rem;
+}
+
+.dean-card-heading {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.2rem;
+}
+
+.dean-card-subtext {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+}
+
+.dean-simple-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dean-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.dean-list-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.dean-row-name {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.dean-row-meta {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dean-dot {
+  color: var(--border-strong);
+}
+
+/* Roster Section (Hidden/Collapsed by default) */
+.dean-roster-section {
+  margin-top: 0.5rem;
+}
+
+.dean-roster-trigger-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dean-trigger-text h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.25rem;
+}
+
+.dean-trigger-text p {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 650px;
+}
+
+.dean-roster-expanded {
+  margin-top: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dean-roster-search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dean-roster-search-bar input {
+  max-width: 400px;
+}
+
+.dean-roster-count {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Modals */
+.dean-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.dean-modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.dean-modal-header {
+  padding: 1.15rem 1.35rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.dean-modal-header h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0 0 0.2rem;
+}
+
+.dean-modal-header p {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.dean-modal-body {
+  padding: 1.25rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dean-modal-footer {
+  padding: 0.9rem 1.35rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Print Only */
+.dean-print-only {
+  display: none;
+}
+
+@media print {
+  .navbar-floating-wrapper,
+  .navbar-divider,
+  .breadcrumbs-bar,
+  .dean-simple-actions,
+  .dean-quiet-bar,
+  .dean-roster-section,
+  .btn {
+    display: none !important;
+  }
+
+  body, .dean-simple-page {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .dean-print-only {
+    display: block !important;
+    margin-bottom: 1.5rem;
+  }
+
+  .dean-print-title-block h2 {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #1a5632 !important;
+    margin: 0;
+  }
+
+  .dean-print-title-block h3 {
+    font-size: 0.95rem;
+    color: #333333;
+    margin: 0.2rem 0;
+  }
+
+  .dean-print-title-block p {
+    font-size: 0.85rem;
+    color: #666666;
+    margin: 0;
+  }
+
+  .dean-stat-row {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .dean-stat-box, .dean-clean-card {
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+  }
+
+  .dean-print-footer {
+    display: flex !important;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid #cccccc;
+    font-size: 0.85rem;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .dean-stat-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dean-two-col {
+    grid-template-columns: 1fr;
+  }
+  .dean-roster-search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dean-roster-search-bar input {
+    max-width: 100%;
+  }
+  .dean-simple-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .dean-stat-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==========================================================================
+   FACULTY DASHBOARD MOBILE CARDS (Thumb-Friendly for GDoc / Dr. Alkadi)
+   ========================================================================== */
+.faculty-mobile-cards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .faculty-desktop-table {
+    display: none !important;
+  }
+  .faculty-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 0.5rem 0;
+  }
+  .faculty-mobile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--brand-green);
+    border-radius: var(--radius-small);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  .faculty-m-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .faculty-m-form {
+    font-size: 0.96rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    line-height: 1.25;
+  }
+  .faculty-m-student {
+    font-size: 0.86rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 0.15rem;
+  }
+  .faculty-m-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .faculty-m-waiting {
+    font-weight: 800;
+  }
+  .faculty-m-pipeline {
+    background: var(--surface-2);
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem;
+    overflow-x: auto;
+  }
+  .faculty-m-actions {
+    margin-top: 0.25rem;
+  }
+  .faculty-m-btn {
+    width: 100%;
+    min-height: 44px;
+    font-weight: 800;
+  }
+}
+
+/* =============================================================================
+   DEAN WORKSPACE TABS & TASK CENTER (Phase 1)
+   ============================================================================= */
+
+.dean-workspace-nav {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 0.25rem;
+  border-radius: 8px;
+  gap: 0.25rem;
+  align-self: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.dean-workspace-tab {
+  background: transparent;
+  border: none;
+  padding: 0.45rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dean-workspace-tab:hover {
+  color: var(--text-heading);
+}
+
+.dean-workspace-tab.is-active {
+  background: var(--surface);
+  color: var(--brand-green);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dean-task-center {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dean-task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dean-task-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dean-pref-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.dean-pref-checkbox {
+  accent-color: var(--brand-green);
+  cursor: pointer;
+}
+
+/* 4 Metric Buckets Grid */
+.dean-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .dean-metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .dean-metric-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dean-metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+
+.dean-metric-card:hover {
+  border-color: var(--brand-green);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.dean-metric-card.is-active {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 0 1.5px var(--brand-green);
+  background: var(--surface);
+}
+
+.dean-metric-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dean-metric-label {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.dean-metric-badge {
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+}
+
+.dean-metric-badge.tone-fresh {
+  background: var(--surface-2);
+  color: var(--text-heading);
+}
+
+.dean-metric-badge.tone-revised {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+}
+
+.dean-metric-badge.tone-waiting {
+  background: rgba(217, 119, 6, 0.12);
+  color: #d97706;
+}
+
+.dean-metric-badge.tone-approved {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.dean-metric-count {
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0.35rem 0 0.1rem;
+}
+
+.dean-metric-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Controls & Omni Search */
+.dean-task-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dean-task-active-desc {
+  font-size: 0.9rem;
+  color: var(--text-heading);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.dean-clear-filter {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand-green);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dean-clear-filter:hover {
+  text-decoration: underline;
+}
+
+.dean-task-filters-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.dean-filter-select-wrap {
+  position: relative;
+}
+
+.dean-filter-select {
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--text-heading);
+  cursor: pointer;
+  height: 38px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dean-filter-select:hover {
+  border-color: var(--brand-green);
+}
+
+.dean-filter-select:focus {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 0 2px rgba(0, 103, 71, 0.15);
+}
+
+.dean-task-search-wrap {
+  min-width: 240px;
+  max-width: 320px;
+}
+
+.dean-task-search {
+  width: 100%;
+  height: 38px;
+}
+
+/* Table Enhancements */
+.dean-task-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.dean-task-table {
+  width: 100%;
+  margin: 0;
+}
+
+.dean-table-row:hover {
+  background: var(--surface-2);
+}
+
+.dean-row-title {
+  font-weight: 700;
+  color: var(--text-heading);
+  font-size: 0.92rem;
+}
+
+.dean-pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+}
+
+.dean-pill.pill-revised {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+}
+
+.dean-student-name {
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.dean-wnum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  background: var(--surface-2);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  color: var(--text-heading);
+}
+
+.dean-date-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.84rem;
+}
+
+.dean-waiting-tag {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.dean-action-btn {
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Centered Empty State */
+.dean-task-empty {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dean-task-empty-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.dean-task-empty-desc {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem;
+  max-width: 440px;
+}
+
+/* =============================================================================
+   SLIDE-OVER QUICK REVIEW DRAWER (Phase 2)
+   ============================================================================= */
+
+.dean-table-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dean-table-row.is-selected-row {
+  background: rgba(0, 103, 71, 0.08) !important;
+  box-shadow: inset 3.5px 0 0 var(--brand-green);
+}
+
+.dean-drawer-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dean-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  animation: deanFadeIn 0.2s ease;
+}
+
+.dean-drawer-panel {
+  position: relative;
+  width: 480px;
+  max-width: 100vw;
+  height: 100vh;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18);
+  animation: deanSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1001;
+  border-left: 1px solid var(--border);
+}
+
+/* Origin Banners */
+.dean-drawer-panel.origin-student {
+  border-top: 5px solid #006747;
+}
+
+.dean-drawer-panel.origin-employer {
+  border-top: 5px solid #d97706;
+}
+
+.dean-drawer-panel.origin-faculty {
+  border-top: 5px solid #1e293b;
+}
+
+/* Drawer Header */
+.dean-drawer-header {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.dean-drawer-origin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.dean-origin-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.origin-badge-student {
+  background: rgba(0, 103, 71, 0.1);
+  color: #006747;
+}
+
+.origin-badge-employer {
+  background: rgba(217, 119, 6, 0.12);
+  color: #d97706;
+}
+
+.origin-badge-faculty {
+  background: rgba(30, 41, 59, 0.1);
+  color: #1e293b;
+}
+
+.dean-drawer-close {
+  background: none;
+  border: none;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.dean-drawer-close:hover {
+  color: var(--text-heading);
+  background: var(--surface-2);
+}
+
+.dean-drawer-title {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.35rem;
+  line-height: 1.3;
+}
+
+.dean-drawer-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.dean-drawer-student {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.dean-drawer-dot {
+  color: var(--text-muted);
+}
+
+.dean-drawer-wnum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  background: var(--surface-2);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  color: var(--text-heading);
+}
+
+/* Drawer Body */
+.dean-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dean-drawer-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.dean-drawer-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand-green);
+  border-radius: 50%;
+  animation: deanSpin 0.7s linear infinite;
+}
+
+.dean-drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.dean-section-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Resubmission Diff */
+.dean-drawer-diff {
+  background: rgba(2, 132, 199, 0.07);
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  border-left: 3.5px solid #0284c7;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+}
+
+.kicker-revised {
+  color: #0284c7;
+}
+
+.dean-diff-text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-heading);
+  line-height: 1.45;
+}
+
+/* Fields & Stacks */
+.dean-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.dean-field-grid.mb-sm {
+  margin-bottom: 0.65rem;
+}
+
+.dean-field-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dean-field-box.span-2 {
+  grid-column: span 2;
+}
+
+.dean-field-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.dean-field-val {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.val-strong {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.dean-detail-stack {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.dean-stack-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dean-stack-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.dean-stack-val {
+  font-size: 0.88rem;
+  color: var(--text-heading);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.dean-title-sub {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.dean-loc {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 400;
+}
+
+.dean-verified-pill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+}
+
+/* Duties Block */
+.dean-duties-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dean-duties-quote {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-heading);
+  font-style: italic;
+}
+
+/* Drawer Sticky Footer */
+.dean-drawer-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.dean-footer-link {
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.dean-footer-revision {
+  white-space: nowrap;
+  font-weight: 700;
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.35);
+}
+
+.dean-footer-approve {
+  flex: 1;
+  font-weight: 800;
+}
+
+/* Breakpoints & Responsive Behavior */
+@media (max-width: 1200px) {
+  .dean-drawer-panel {
+    width: 420px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dean-drawer-panel {
+    width: 100%;
+    height: 100%;
+    border-left: none;
+  }
+}
+
+/* Animations */
+@keyframes deanFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes deanSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes deanSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =============================================================================
+   APPROVE & NEXT ENGINE, UNDO TOAST, & CLEARANCE NOTICE (Phase 3)
+   ============================================================================= */
+
+.dean-table-row.is-just-approved {
+  background: rgba(16, 185, 129, 0.18) !important;
+  box-shadow: inset 3.5px 0 0 #059669;
+  transition: background-color 0.5s ease;
+}
+
+/* Academic Clearance Notice Box */
+.dean-clearance-box {
+  background: rgba(0, 103, 71, 0.08);
+  border: 1px solid rgba(0, 103, 71, 0.25);
+  border-left: 3.5px solid #006747;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+}
+
+.kicker-cleared {
+  color: #006747;
+}
+
+.dean-clearance-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.dean-clearance-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Revoke Button */
+.dean-footer-revoke {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.35);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dean-footer-revoke:hover {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+/* 5-Second Undo Toast (Centered & High-Visibility) */
+.dean-undo-toast {
+  position: fixed;
+  bottom: 2.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 0.85rem 1.45rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.94rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  animation: deanToastSlideUpCenter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dean-undo-text {
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.dean-undo-btn {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: none;
+  border-radius: 5px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dean-undo-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes deanToastSlideUpCenter {
+  from {
+    transform: translateX(-50%) translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* =============================================================================
+   REVISION MODE, SMART CHIPS & INLINE NOTES MANAGER (Phase 4)
+   ============================================================================= */
+
+/* Revision Panel in Drawer */
+.dean-revision-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.dean-revision-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dean-revision-hint {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.dean-revision-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 130px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-small);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.dean-revision-textarea:focus {
+  background: var(--surface);
+  border-color: var(--brand-green);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 103, 71, 0.15);
+}
+
+/* Canned Chips Section */
+.dean-chips-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dean-chips-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dean-chips-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.dean-manage-notes-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--brand-green);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dean-manage-notes-btn:hover {
+  text-decoration: underline;
+}
+
+.dean-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dean-chip {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.dean-chip:hover {
+  border-color: var(--brand-green);
+  background: var(--surface);
+}
+
+.dean-chip.is-active {
+  background: rgba(0, 103, 71, 0.1);
+  border-color: var(--brand-green);
+  color: var(--brand-green);
+}
+
+.dean-chip-check {
+  font-weight: 800;
+  font-size: 0.76rem;
+}
+
+.dean-btn-send-revision {
+  background: #d97706;
+  border-color: #d97706;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.dean-btn-send-revision:hover:not(:disabled) {
+  background: #b45309;
+  border-color: #b45309;
+}
+
+/* =============================================================================
+   INLINE MANAGE QUICK NOTES MODAL
+   ============================================================================= */
+
+.dean-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.dean-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  animation: deanFadeIn 0.15s ease;
+}
+
+.dean-modal-box {
+  position: relative;
+  width: 580px;
+  max-width: 100%;
+  max-height: 88vh;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  z-index: 2101;
+  animation: deanModalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+@keyframes deanModalPop {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.dean-modal-header {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  background: var(--surface);
+}
+
+.dean-modal-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.dean-modal-sub {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.dean-modal-body {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dean-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dean-note-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+}
+
+.dean-note-view {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.dean-note-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.dean-note-chip-preview {
+  font-size: 0.76rem;
+  font-weight: 800;
+  background: rgba(0, 103, 71, 0.1);
+  color: var(--brand-green);
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  align-self: flex-start;
+}
+
+.dean-note-text-preview {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-heading);
+  line-height: 1.45;
+}
+
+.dean-note-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.dean-btn-delete {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.dean-btn-delete:hover {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+}
+
+.dean-add-note-card {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dean-add-note-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.dean-add-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dean-add-textarea {
+  font-family: inherit;
+  font-size: 0.86rem;
+  resize: vertical;
+}
+
+.dean-btn-add {
+  align-self: flex-start;
+  font-weight: 800;
+}
+
+.dean-edit-note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dean-edit-input {
+  font-weight: 700;
+}
+
+.dean-edit-textarea {
+  font-family: inherit;
+  font-size: 0.86rem;
+  resize: vertical;
+}
+
+.dean-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-self: flex-start;
+}
+
+.dean-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+}
+
+.dean-reset-link {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dean-reset-link:hover {
+  text-decoration: underline;
+}
+
+.dean-btn-done {
+  min-width: 90px;
+  font-weight: 800;
+}
+
+/* =============================================================================
+   REVIEWER NOTIFICATION PREFERENCES (Profile)
+   ============================================================================= */
+
+.profile-section-block {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.profile-section-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.3rem;
+}
+
+.profile-section-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+  line-height: 1.45;
+}
+
+.dean-notif-radios {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dean-notif-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.dean-notif-option:hover {
+  border-color: var(--brand-green);
+  background: var(--surface);
+}
+
+.dean-notif-option input[type='radio'] {
+  margin-top: 0.2rem;
+  accent-color: var(--brand-green);
+  cursor: pointer;
+}
+
+.dean-notif-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dean-notif-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dean-notif-heading strong {
+  color: var(--text-heading);
+  font-size: 0.92rem;
+}
+
+.dean-notif-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(0, 103, 71, 0.12);
+  color: var(--brand-green);
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+}
+
+.dean-notif-content p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* =============================================================================
+   INLINE EXPANDABLE ACCORDION CARDS & TRAY (Batch 1)
+   ============================================================================= */
+
+.dean-queue-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.dean-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dean-queue-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  scroll-margin-top: 100px;
+  scroll-margin-bottom: 80px;
+}
+
+/* Submitter Origin Left Accent Borders */
+.dean-queue-card.origin-student {
+  border-left: 4.5px solid #006747;
+}
+
+.dean-queue-card.origin-employer {
+  border-left: 4.5px solid #d97706;
+}
+
+.dean-queue-card.origin-faculty {
+  border-left: 4.5px solid #1e293b;
+}
+
+.dean-queue-card.is-expanded {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 103, 71, 0.4);
+}
+
+.dean-queue-card.is-just-approved {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-left-color: #059669 !important;
+}
+
+/* Card Header Row */
+.dean-queue-row {
+  display: grid;
+  grid-template-columns: 2.3fr 1.6fr 1.1fr 1.1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dean-queue-row:hover {
+  background: var(--surface-2);
+}
+
+.dean-col-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dean-row-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.dean-col-student {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dean-col-date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.84rem;
+}
+
+.dean-date-val {
+  color: var(--text-muted);
+}
+
+.dean-col-status {
+  display: flex;
+  align-items: center;
+}
+
+.dean-col-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.dean-link-full {
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.dean-link-full:hover {
+  color: var(--text-heading);
+}
+
+/* =============================================================================
+   INLINE EXPANDED TRAY
+   ============================================================================= */
+
+.dean-inline-tray {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: deanTrayExpand 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes deanTrayExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dean-tray-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dean-tray-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.dean-tray-counter {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dean-tray-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dean-cycle-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dean-collapse-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.dean-collapse-btn:hover {
+  color: var(--text-heading);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.dean-tray-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.dean-tray-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.dean-tray-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.dean-tray-col.span-full {
+  grid-column: span 2;
+}
+
+.dean-duties-meta {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.dean-duties-meta strong {
+  color: var(--text-heading);
+}
+
+.dean-tray-footer {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+/* =============================================================================
+   FLOATING JUMP-TO-ACTIVE BUTTON
+   ============================================================================= */
+
+.dean-jump-pill {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1500;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 0.55rem 1.15rem;
+  border-radius: 30px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.dean-jump-pill:hover {
+  background: #1e293b;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.dean-jump-pill.jump-above {
+  top: 5rem;
+  animation: deanJumpSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dean-jump-pill.jump-below {
+  bottom: 5rem;
+  animation: deanJumpSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dean-jump-arrow {
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+@keyframes deanJumpSlideDown {
+  from {
+    transform: translateX(-50%) translateY(-12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes deanJumpSlideUp {
+  from {
+    transform: translateX(-50%) translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Queues */
+@media (max-width: 900px) {
+  .dean-queue-row {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+  .dean-tray-columns {
+    grid-template-columns: 1fr;
+  }
+  .dean-tray-col.span-full {
+    grid-column: span 1;
   }
 }

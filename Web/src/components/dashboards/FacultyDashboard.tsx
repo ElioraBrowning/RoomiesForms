@@ -124,83 +124,153 @@ export default function FacultyDashboard() {
 
 function PendingTable({ list }: { list: SubmissionSummary[] }) {
   return (
-    <div className="table-wrap">
-      <table className="table">
-        <thead>
-          <tr>
-            <th scope="col">Form</th>
-            <th scope="col">Student</th>
-            <th scope="col">Last updated</th>
-            <th scope="col">Progress</th>
-            <th scope="col"><span className="visually-hidden">Action</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((s) => {
-            const waiting = daysSince(s.updatedAt);
-            return (
-              <tr key={s.id}>
-                <td className="table-strong">
-                  {s.formTitle}
-                  {s.isResubmission && <> <Badge tone="info">Revised</Badge></>}
-                </td>
-                <td>{s.studentName}</td>
-                <td>
-                  {shortDate(s.updatedAt)}
-                  {waiting >= 7 && <span className="table-sub text-danger">Waiting {waiting} days</span>}
-                </td>
-                <td className="table-pipeline">
-                  <ApprovalProgress steps={s.approvals ?? []} compact />
-                </td>
-                <td className="table-actions">
-                  <Link to={`/submissions/${s.id}`} className="btn btn-primary btn-small">Review</Link>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <>
+      {/* Desktop Table View */}
+      <div className="table-wrap faculty-desktop-table">
+        <table className="table">
+          <thead>
+            <tr>
+              <th scope="col">Form</th>
+              <th scope="col">Student</th>
+              <th scope="col">Last updated</th>
+              <th scope="col">Progress</th>
+              <th scope="col"><span className="visually-hidden">Action</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((s) => {
+              const waiting = daysSince(s.updatedAt);
+              return (
+                <tr key={s.id}>
+                  <td className="table-strong">
+                    {s.formTitle}
+                    {s.isResubmission && <> <Badge tone="info">Revised</Badge></>}
+                  </td>
+                  <td>{s.studentName}</td>
+                  <td>
+                    {shortDate(s.updatedAt)}
+                    {waiting >= 7 && <span className="table-sub text-danger">Waiting {waiting} days</span>}
+                  </td>
+                  <td className="table-pipeline">
+                    <ApprovalProgress steps={s.approvals ?? []} compact />
+                  </td>
+                  <td className="table-actions">
+                    <Link to={`/submissions/${s.id}`} className="btn btn-primary btn-small">Review</Link>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View (Thumb-Friendly for GDoc / Phone Reviewers) */}
+      <div className="faculty-mobile-cards">
+        {list.map((s) => {
+          const waiting = daysSince(s.updatedAt);
+          return (
+            <div key={s.id} className="faculty-mobile-card">
+              <div className="faculty-m-header">
+                <div className="faculty-m-title-group">
+                  <div className="faculty-m-form">{s.formTitle}</div>
+                  <div className="faculty-m-student">{s.studentName}</div>
+                </div>
+                {s.isResubmission && <Badge tone="info">Revised</Badge>}
+              </div>
+
+              <div className="faculty-m-meta">
+                <span className="faculty-m-date">Updated: {shortDate(s.updatedAt)}</span>
+                {waiting >= 7 && (
+                  <span className="faculty-m-waiting text-danger">Waiting {waiting} days</span>
+                )}
+              </div>
+
+              <div className="faculty-m-pipeline">
+                <ApprovalProgress steps={s.approvals ?? []} compact />
+              </div>
+
+              <div className="faculty-m-actions">
+                <Link to={`/submissions/${s.id}`} className="btn btn-primary faculty-m-btn">
+                  Review Submission →
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
 function ReviewedTable({ list }: { list: SubmissionSummary[] }) {
   return (
-    <div className="table-wrap">
-      <table className="table">
-        <thead>
-          <tr>
-            <th scope="col">Form</th>
-            <th scope="col">Student</th>
-            <th scope="col">You</th>
-            <th scope="col">Now</th>
-            <th scope="col"><span className="visually-hidden">Action</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((s) => (
-            <tr key={s.id}>
-              <td className="table-strong">{s.formTitle}</td>
-              <td>{s.studentName}</td>
-              <td>
-                <StatusBadge
-                  status={s.reviewedAction === 'Approved' ? 'Completed' : 'Rejected'}
-                  label={s.reviewedAction === 'Approved' ? 'Approved' : 'Sent back'}
-                />
-                {s.reviewedAt && <span className="table-sub">{shortDate(s.reviewedAt)}</span>}
-              </td>
-              <td>
-                <StatusBadge status={s.status} />
-                {s.status === 'Pending' && s.currentStepName && <span className="table-sub">{s.currentStepName}</span>}
-              </td>
-              <td className="table-actions">
-                <Link to={`/submissions/${s.id}`} className="btn btn-secondary btn-small">View</Link>
-              </td>
+    <>
+      {/* Desktop Table View */}
+      <div className="table-wrap faculty-desktop-table">
+        <table className="table">
+          <thead>
+            <tr>
+              <th scope="col">Form</th>
+              <th scope="col">Student</th>
+              <th scope="col">You</th>
+              <th scope="col">Now</th>
+              <th scope="col"><span className="visually-hidden">Action</span></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {list.map((s) => (
+              <tr key={s.id}>
+                <td className="table-strong">{s.formTitle}</td>
+                <td>{s.studentName}</td>
+                <td>
+                  <StatusBadge
+                    status={s.reviewedAction === 'Approved' ? 'Completed' : 'Rejected'}
+                    label={s.reviewedAction === 'Approved' ? 'Approved' : 'Sent back'}
+                  />
+                  {s.reviewedAt && <span className="table-sub">{shortDate(s.reviewedAt)}</span>}
+                </td>
+                <td>
+                  <StatusBadge status={s.status} />
+                  {s.status === 'Pending' && s.currentStepName && <span className="table-sub">{s.currentStepName}</span>}
+                </td>
+                <td className="table-actions">
+                  <Link to={`/submissions/${s.id}`} className="btn btn-secondary btn-small">View</Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="faculty-mobile-cards">
+        {list.map((s) => (
+          <div key={s.id} className="faculty-mobile-card">
+            <div className="faculty-m-header">
+              <div className="faculty-m-title-group">
+                <div className="faculty-m-form">{s.formTitle}</div>
+                <div className="faculty-m-student">{s.studentName}</div>
+              </div>
+              <StatusBadge
+                status={s.reviewedAction === 'Approved' ? 'Completed' : 'Rejected'}
+                label={s.reviewedAction === 'Approved' ? 'Approved' : 'Sent back'}
+              />
+            </div>
+
+            <div className="faculty-m-meta">
+              <span>Current Status: <StatusBadge status={s.status} /></span>
+              {s.reviewedAt && <span className="faculty-m-date">Reviewed {shortDate(s.reviewedAt)}</span>}
+            </div>
+
+            <div className="faculty-m-actions">
+              <Link to={`/submissions/${s.id}`} className="btn btn-secondary faculty-m-btn">
+                View Submission
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 

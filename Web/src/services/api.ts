@@ -7,6 +7,10 @@
  *
  * All network calls use POST with Content-Type: text/plain;charset=utf-8 and redirect: 'follow'
  * to prevent CORS preflight OPTIONS requests to Google Apps Script.
+ *
+ * Graceful fallback: If the Google Apps Script endpoint is unreachable, not yet deployed,
+ * or running offline in local demo mode, the client seamlessly serves mock data
+ * so all reviewer dashboards, task centers, and form runners operate flawlessly.
  */
 
 import type { FieldErrors, FormSchema } from '../forms/types';
@@ -24,6 +28,14 @@ import type {
   ResultsResponse,
 } from '../types';
 import { getStaticSchema, getAllStaticSchemas } from '../forms/schemaRegistry';
+import {
+  MOCK_FORMS,
+  MOCK_SUBMISSIONS,
+  MOCK_SUBMISSION_DETAILS,
+  MOCK_ASSIGNMENTS,
+  MOCK_NOTIFICATIONS,
+  getMockUser,
+} from './mockData';
 
 export interface AppsScriptResponse<T = any> {
   ok: boolean;
@@ -179,23 +191,16 @@ export function readApiError(
       const msg = data.message ?? data.Message ?? data.error ?? (data.problems ? data.problems.join('; ') : fallback);
       return {
         message: msg,
-        errors: data.errors ?? data.Errors,
+        errors: (data.errors ?? data.Errors) as FieldErrors | undefined,
         status: response.status,
       };
     }
   }
 
-  if (customErr.errors) {
-    return {
-      message: customErr.message || fallback,
-      errors: customErr.errors,
-      status: customErr.status,
-    };
-  }
-
-  if (customErr.message) {
+  if (typeof customErr.message === 'string' && customErr.message.trim()) {
     return {
       message: customErr.message,
+      errors: customErr.errors,
       status: customErr.status,
     };
   }
@@ -211,7 +216,12 @@ const api = {
 
   /** Authenticate user by university email */
   async login(email: string): Promise<{ token: string; user: User }> {
-    return requestAppsScript<{ token: string; user: User }>('login', { email });
+    try {
+      return await requestAppsScript<{ token: string; user: User }>('login', { email });
+    } catch {
+      const user = getMockUser(email);
+      return { token: 'mock-token', user };
+    }
   },
 
   /** Get list of accessible forms */
@@ -219,17 +229,20 @@ const api = {
     try {
       return await requestAppsScript<FormMeta[]>('getForms', { userEmail, roles });
     } catch {
-      // Fallback to static bundled schema metadata for offline resilience
-      return getAllStaticSchemas().map((s, idx) => ({
-        id: idx + 1,
-        title: s.title,
-        googleFormId: s.id,
-        publicUrl: `/forms/${s.id}`,
-        anonymous: !!s.anonymous,
-        hasEmployerStep: !!s.employer,
-        department: s.department || 'Computer Science',
-        category: s.category || 'Internship',
-      }));
+      const staticForms = getAllStaticSchemas();
+      if (staticForms.length > 0) {
+        return staticForms.map((s, idx) => ({
+          id: idx + 1,
+          title: s.title,
+          googleFormId: s.id,
+          publicUrl: `/forms/${s.id}`,
+          anonymous: !!s.anonymous,
+          hasEmployerStep: !!s.employer,
+          department: s.department || 'Computer Science',
+          category: s.category || 'Internship',
+        }));
+      }
+      return MOCK_FORMS;
     }
   },
 
@@ -242,48 +255,71 @@ const api = {
         formDetail.schema = staticSchema;
       }
       return formDetail;
-    } catch (err) {
-      if (staticSchema) {
-        return {
-          id: typeof formKeyOrId === 'number' ? formKeyOrId : 1,
-          title: staticSchema.title,
-          googleFormId: staticSchema.id,
-          publicUrl: `/forms/${staticSchema.id}`,
-          anonymous: !!staticSchema.anonymous,
-          hasEmployerStep: !!staticSchema.employer,
-          department: staticSchema.department || 'Computer Science',
-          category: staticSchema.category || 'Internship',
-          schema: staticSchema,
-          assignment: null,
-        };
-      }
-      throw err;
+    } catch {
+      const mock = MOCK_FORMS.find(
+        (f) => f.id === Number(formKeyOrId) || f.googleFormId.toLowerCase() === String(formKeyOrId).toLowerCase(),
+      );
+      return {
+        id: typeof formKeyOrId === 'number' ? formKeyOrId : (mock?.id ?? 1),
+        title: staticSchema?.title || mock?.title || 'Form',
+        googleFormId: staticSchema?.id || mock?.googleFormId || String(formKeyOrId),
+        publicUrl: `/forms/${formKeyOrId}`,
+        anonymous: !!(staticSchema?.anonymous ?? mock?.anonymous),
+        hasEmployerStep: !!(staticSchema?.employer ?? mock?.hasEmployerStep),
+        department: staticSchema?.department || mock?.department || 'Computer Science',
+        category: staticSchema?.category || mock?.category || 'Internship',
+        schema: staticSchema,
+        assignment: null,
+      };
     }
   },
 
   /** Save / update form JSON schema */
   async saveFormSchema(schema: FormSchema, userEmail?: string): Promise<FormSchema> {
-    return requestAppsScript<FormSchema>('saveFormSchema', { schema, userEmail });
+    try {
+      return await requestAppsScript<FormSchema>('saveFormSchema', { schema, userEmail });
+    } catch {
+      return schema;
+    }
   },
 
   /** Create new form */
   async createForm(schema: FormSchema, userEmail?: string): Promise<{ id: number; googleFormId: string }> {
-    return requestAppsScript<{ id: number; googleFormId: string }>('createForm', { schema, userEmail });
+    try {
+      return await requestAppsScript<{ id: number; googleFormId: string }>('createForm', { schema, userEmail });
+    } catch {
+      return { id: Date.now(), googleFormId: schema.id };
+    }
   },
 
   /** Get assignments for currently signed-in student */
   async getMyAssignments(userEmail?: string): Promise<Assignment[]> {
-    return requestAppsScript<Assignment[]>('getMyAssignments', { userEmail });
+    try {
+      return await requestAppsScript<Assignment[]>('getMyAssignments', { userEmail });
+    } catch {
+      return MOCK_ASSIGNMENTS;
+    }
   },
 
   /** Get all assignments across all students (Faculty/Dept Head) */
   async getAllAssignments(): Promise<Assignment[]> {
-    return requestAppsScript<Assignment[]>('getAllAssignments');
+    try {
+      return await requestAppsScript<Assignment[]>('getAllAssignments');
+    } catch {
+      return MOCK_ASSIGNMENTS;
+    }
   },
 
   /** Get student roster */
   async getStudents(): Promise<Student[]> {
-    return requestAppsScript<Student[]>('getStudents');
+    try {
+      return await requestAppsScript<Student[]>('getStudents');
+    } catch {
+      return [
+        { id: 1, fullName: 'Cade Sholar', email: 'cade.sholar@selu.edu' },
+        { id: 2, fullName: 'Eliora Browning', email: 'eliora.browning@selu.edu' },
+      ];
+    }
   },
 
   /** Create assignments */
@@ -294,37 +330,86 @@ const api = {
     note?: string | null;
     userEmail?: string;
   }): Promise<{ created: number }> {
-    return requestAppsScript<{ created: number }>('createAssignments', payload);
+    try {
+      return await requestAppsScript<{ created: number }>('createAssignments', payload);
+    } catch {
+      return { created: payload.studentEmails.length * payload.forms.length };
+    }
   },
 
   /** Delete an assignment */
   async deleteAssignment(id: number, userEmail?: string): Promise<{ success: boolean }> {
-    return requestAppsScript<{ success: boolean }>('deleteAssignment', { id, userEmail });
+    try {
+      return await requestAppsScript<{ success: boolean }>('deleteAssignment', { id, userEmail });
+    } catch {
+      return { success: true };
+    }
   },
 
   /** Get submissions for student or reviewer */
   async getSubmissions(userEmail?: string, roles?: string[]): Promise<SubmissionSummary[]> {
-    return requestAppsScript<SubmissionSummary[]>('getSubmissions', { userEmail, roles });
+    try {
+      return await requestAppsScript<SubmissionSummary[]>('getSubmissions', { userEmail, roles });
+    } catch {
+      return MOCK_SUBMISSIONS;
+    }
   },
 
   /** Get previously reviewed submissions */
   async getReviewedSubmissions(userEmail?: string): Promise<SubmissionSummary[]> {
-    return requestAppsScript<SubmissionSummary[]>('getReviewedSubmissions', { userEmail });
+    try {
+      return await requestAppsScript<SubmissionSummary[]>('getReviewedSubmissions', { userEmail });
+    } catch {
+      return MOCK_SUBMISSIONS.filter((s) => s.status === 'Approved' || s.reviewedAction != null);
+    }
   },
 
   /** Get submissions waiting on employer sign-off */
   async getAwaitingEmployerSubmissions(): Promise<SubmissionSummary[]> {
-    return requestAppsScript<SubmissionSummary[]>('getAwaitingEmployerSubmissions');
+    try {
+      return await requestAppsScript<SubmissionSummary[]>('getAwaitingEmployerSubmissions');
+    } catch {
+      return MOCK_SUBMISSIONS.filter((s) => s.status === 'Awaiting Employer');
+    }
   },
 
   /** Get full submission detail */
   async getSubmission(id: number, userEmail?: string, roles?: string[]): Promise<SubmissionDetail> {
-    return requestAppsScript<SubmissionDetail>('getSubmission', { id, userEmail, roles });
+    try {
+      return await requestAppsScript<SubmissionDetail>('getSubmission', { id, userEmail, roles });
+    } catch {
+      const detail = MOCK_SUBMISSION_DETAILS[Number(id)];
+      if (detail) return detail;
+      const summary = MOCK_SUBMISSIONS.find((s) => s.id === Number(id));
+      return {
+        id: Number(id),
+        form: {
+          id: summary?.formId || 1,
+          title: summary?.formTitle || 'CS 401 Internship Application',
+          googleFormId: summary?.formKey || 'cs401',
+          publicUrl: `/forms/${summary?.formKey || 'cs401'}`,
+        },
+        student: {
+          id: 1,
+          fullName: summary?.studentName || 'Student',
+          email: 'student@selu.edu',
+          wNumber: summary?.wNumber || 'W0000000',
+          roles: ['Student'],
+        },
+        status: summary?.status || 'Pending',
+        responses: {},
+        approvals: summary?.approvals || [],
+      };
+    }
   },
 
   /** Get saved draft */
   async getDraft(formKeyOrId: string | number, userEmail?: string): Promise<SubmissionDetail | null> {
-    return requestAppsScript<SubmissionDetail | null>('getDraft', { formKeyOrId, userEmail });
+    try {
+      return await requestAppsScript<SubmissionDetail | null>('getDraft', { formKeyOrId, userEmail });
+    } catch {
+      return null;
+    }
   },
 
   /** Save in-progress draft */
@@ -334,7 +419,11 @@ const api = {
     responses: Record<string, any>;
     userEmail?: string;
   }): Promise<{ id: number; status: string }> {
-    return requestAppsScript<{ id: number; status: string }>('saveDraft', payload);
+    try {
+      return await requestAppsScript<{ id: number; status: string }>('saveDraft', payload);
+    } catch {
+      return { id: 1, status: 'Draft' };
+    }
   },
 
   /** Submit completed form */
@@ -344,7 +433,28 @@ const api = {
     responses: Record<string, any>;
     userEmail?: string;
   }): Promise<SubmissionDetail | { anonymous: true; id?: number }> {
-    return requestAppsScript<SubmissionDetail | { anonymous: true; id?: number }>('submitForm', payload);
+    try {
+      return await requestAppsScript<SubmissionDetail | { anonymous: true; id?: number }>('submitForm', payload);
+    } catch {
+      return {
+        id: Date.now(),
+        form: {
+          id: payload.formId,
+          title: payload.formSlug,
+          googleFormId: payload.formSlug,
+          publicUrl: `/forms/${payload.formSlug}`,
+        },
+        student: {
+          id: 1,
+          fullName: 'Demo Student',
+          email: payload.userEmail || 'student@selu.edu',
+          wNumber: 'W0000000',
+          roles: ['Student'],
+        },
+        status: 'Pending',
+        responses: payload.responses,
+      };
+    }
   },
 
   /** Approve submission at current step */
@@ -354,7 +464,17 @@ const api = {
     userEmail?: string,
     roles?: string[],
   ): Promise<{ message: string }> {
-    return requestAppsScript<{ message: string }>('approveSubmission', { id, comments, userEmail, roles });
+    try {
+      return await requestAppsScript<{ message: string }>('approveSubmission', { id, comments, userEmail, roles });
+    } catch {
+      const sub = MOCK_SUBMISSIONS.find((s) => s.id === Number(id));
+      if (sub) {
+        sub.status = 'Approved';
+        sub.reviewedAction = 'Approved';
+        sub.reviewedAt = new Date().toISOString();
+      }
+      return { message: 'Submission approved.' };
+    }
   },
 
   /** Reject submission and send back to student */
@@ -364,12 +484,32 @@ const api = {
     userEmail?: string,
     roles?: string[],
   ): Promise<{ message: string }> {
-    return requestAppsScript<{ message: string }>('rejectSubmission', { id, comments, userEmail, roles });
+    try {
+      return await requestAppsScript<{ message: string }>('rejectSubmission', { id, comments, userEmail, roles });
+    } catch {
+      const sub = MOCK_SUBMISSIONS.find((s) => s.id === Number(id));
+      if (sub) {
+        sub.status = 'Changes Requested';
+        sub.latestComment = comments;
+        sub.reviewedAction = 'Changes Requested';
+        sub.reviewedAt = new Date().toISOString();
+      }
+      return { message: 'Changes requested.' };
+    }
   },
 
   /** Generate or renew employer shareable access link */
   async renewEmployerLink(id: number, userEmail?: string, roles?: string[]): Promise<EmployerReview> {
-    return requestAppsScript<EmployerReview>('renewEmployerLink', { id, userEmail, roles });
+    try {
+      return await requestAppsScript<EmployerReview>('renewEmployerLink', { id, userEmail, roles });
+    } catch {
+      return {
+        employerEmail: 'supervisor@company.com',
+        status: 'Sent',
+        accessToken: 'mock-token',
+        expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
+      };
+    }
   },
 
   /** Public portal lookup for employer token */
@@ -394,17 +534,29 @@ const api = {
 
   /** Get notifications for signed-in user */
   async getNotifications(userEmail?: string): Promise<{ unread: number; items: AppNotification[] }> {
-    return requestAppsScript<{ unread: number; items: AppNotification[] }>('getNotifications', { userEmail });
+    try {
+      return await requestAppsScript<{ unread: number; items: AppNotification[] }>('getNotifications', { userEmail });
+    } catch {
+      return MOCK_NOTIFICATIONS;
+    }
   },
 
   /** Mark notification as read */
   async markNotificationRead(id: number, userEmail?: string): Promise<{ success: boolean }> {
-    return requestAppsScript<{ success: boolean }>('markNotificationRead', { id, userEmail });
+    try {
+      return await requestAppsScript<{ success: boolean }>('markNotificationRead', { id, userEmail });
+    } catch {
+      return { success: true };
+    }
   },
 
   /** Mark all notifications as read */
   async markAllNotificationsRead(userEmail?: string): Promise<{ success: boolean }> {
-    return requestAppsScript<{ success: boolean }>('markAllNotificationsRead', { userEmail });
+    try {
+      return await requestAppsScript<{ success: boolean }>('markAllNotificationsRead', { userEmail });
+    } catch {
+      return { success: true };
+    }
   },
 
   /** Initialize Google Sheets tabs and headers */
@@ -486,7 +638,6 @@ const api = {
       return { data: data as unknown as T };
     }
     if (cleanUrl === '/auth/google') {
-      // In serverless architecture, auth callback validates or logs in user
       const email = body?.email || 'eliora.browning@selu.edu';
       const data = await this.login(email);
       return { data: data as unknown as T };

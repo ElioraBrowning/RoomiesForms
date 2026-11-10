@@ -7,15 +7,16 @@ import { getInitials } from '../utils/user';
 import { useTheme } from '../hooks/useTheme';
 import { BrandImage } from './BrandImage';
 import { brand } from '../brand';
+import Breadcrumbs from './Breadcrumbs';
 
 export default function Layout() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const isReviewer = user?.roles?.some(r => ['Faculty', 'Department Head'].includes(r));
+  const isReviewer = user?.roles?.some((r) => ['Faculty', 'Department Head', 'Dean'].includes(r));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -23,8 +24,8 @@ export default function Layout() {
         setDropdownOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogout = () => {
@@ -36,12 +37,16 @@ export default function Layout() {
     return <Navigate to="/login" replace />;
   }
 
+  const primaryRole = user?.roles?.[0] || 'Student';
+
   return (
     <div className="layout-container">
-      <div className="stripes" />
-      <header className="navbar">
-        <div className="navbar-brand">
-          <Link to="/dashboard" className="navbar-brand-link" aria-label="Roomie's Forms home">
+      {/* Modern Southeastern Floating Capsule Header & Divider */}
+      <div className="navbar-floating-wrapper">
+        <header className="navbar-floating" role="banner">
+          {/* Left Pill (Green Oval) - University Seal & App Branding */}
+          <div className="navbar-pill navbar-pill-brand">
+          <Link to="/dashboard" className="navbar-brand-link" aria-label="Roomie's Forms — Home">
             <BrandImage
               className="navbar-seal"
               light={brand.universityLogoOnGreen}
@@ -55,71 +60,127 @@ export default function Layout() {
           </Link>
         </div>
 
-        <nav className="navbar-nav">
-          {/* Students only have one page, which the logo already links to, so they get no tabs. */}
+        {/* Right Pill (Green Oval) - Navigation, Notification Bell, Theme Toggle & Account */}
+        <div className="navbar-pill navbar-pill-actions">
+          {/* Desktop Reviewer Navigation Links */}
           {isReviewer && (
-            <div className="navbar-links">
-              <NavLink to="/dashboard" className="navbar-link">Review queue</NavLink>
-              <NavLink to="/assignments" className="navbar-link">Assign forms</NavLink>
-              <NavLink to="/forms/builder" className="navbar-link">Form builder</NavLink>
-            </div>
+            <nav className="navbar-links navbar-links-desktop" aria-label="Faculty Navigation">
+              <NavLink to="/dashboard" className="navbar-link">
+                Review Queue
+              </NavLink>
+              <NavLink to="/assignments" className="navbar-link">
+                Assign Forms
+              </NavLink>
+              <NavLink to="/forms/builder" className="navbar-link">
+                Form Builder
+              </NavLink>
+            </nav>
           )}
-          <div className="navbar-actions">
-            <NotificationBell />
-            <div className="navbar-theme-toggle">
-              <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-            </div>
-            
-            <div className="navbar-profile-container" ref={dropdownRef}>
-              <button 
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="navbar-avatar-btn"
-                title="User Profile"
-                aria-label="User Profile Menu"
-                aria-expanded={dropdownOpen}
-                aria-haspopup="true"
-              >
-                {getInitials(user?.fullName, user?.email)}
-              </button>
-              
-              {dropdownOpen && (
-                <div className="navbar-dropdown" role="menu">
-                  <div className="navbar-dropdown-header">
-                    <div className="navbar-dropdown-name">
-                      {user?.fullName || 'User'}
-                    </div>
-                    <div className="navbar-dropdown-email">
-                      {user?.email}
-                    </div>
-                  </div>
-                  
-                  <Link 
-                    to="/profile"
-                    onClick={() => setDropdownOpen(false)}
-                    className="navbar-dropdown-item"
-                    role="menuitem"
-                  >
-                    My Profile
-                  </Link>
 
-                  <button 
-                    onClick={handleLogout} 
-                    className="navbar-dropdown-item navbar-dropdown-logout"
-                    role="menuitem"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+          {/* Polished Notification Bell */}
+          <div className="navbar-bell-wrapper">
+            <NotificationBell />
           </div>
-        </nav>
+
+          {/* Light / Dark Mode Toggle */}
+          <div className="navbar-theme-wrapper">
+            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+          </div>
+
+          {/* Account Profile & View Switcher */}
+          <div className="navbar-profile-container" ref={dropdownRef}>
+            <button
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              className="navbar-avatar-btn"
+              title="Account Menu"
+              aria-label="User Account and Options"
+              aria-expanded={dropdownOpen}
+              aria-haspopup="true"
+            >
+              <span className="navbar-avatar-circle">
+                {getInitials(user?.fullName, user?.email)}
+              </span>
+              <span className={`navbar-avatar-caret ${dropdownOpen ? 'is-open' : ''}`} aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </button>
+
+            {dropdownOpen && (
+              <div className="navbar-dropdown" role="menu">
+                <div className="navbar-dropdown-header">
+                  <div className="navbar-dropdown-name">{user?.fullName || 'User'}</div>
+                  <div className="navbar-dropdown-email">{user?.email}</div>
+                  <div className="navbar-dropdown-role-tag">{primaryRole}</div>
+                </div>
+
+                {/* Mobile-visible navigation links for reviewer views */}
+                {isReviewer && (
+                  <div className="navbar-dropdown-mobile-links">
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setDropdownOpen(false)}
+                      className="navbar-dropdown-item"
+                      role="menuitem"
+                    >
+                      Review Queue
+                    </Link>
+                    <Link
+                      to="/assignments"
+                      onClick={() => setDropdownOpen(false)}
+                      className="navbar-dropdown-item"
+                      role="menuitem"
+                    >
+                      Assign Forms
+                    </Link>
+                    <Link
+                      to="/forms/builder"
+                      onClick={() => setDropdownOpen(false)}
+                      className="navbar-dropdown-item"
+                      role="menuitem"
+                    >
+                      Form Builder
+                    </Link>
+                    <div className="navbar-dropdown-divider" />
+                  </div>
+                )}
+
+                <Link
+                  to="/profile"
+                  onClick={() => setDropdownOpen(false)}
+                  className="navbar-dropdown-item"
+                  role="menuitem"
+                >
+                  My Profile
+                </Link>
+
+                <div className="navbar-dropdown-divider" />
+
+                <button
+                  onClick={handleLogout}
+                  className="navbar-dropdown-item navbar-dropdown-logout"
+                  role="menuitem"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </header>
-      <div className="stripes" />
-      <main className="main-content">
-        <Outlet />
-      </main>
-      <div className="stripe stripe-thin" />
+
+      {/* Thin subtle grey line separating the sticky hotbar from scrolling content */}
+      <div className="navbar-divider" />
     </div>
-  );
+
+    {/* Southeastern Page Breadcrumb Trail - flows with scroll, folding behind sticky hotbar */}
+    <Breadcrumbs />
+
+    {/* Main Content Area */}
+    <main className="main-content">
+      <Outlet />
+    </main>
+  </div>
+);
 }

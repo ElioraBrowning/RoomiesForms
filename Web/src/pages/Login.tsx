@@ -15,6 +15,19 @@ export default function Login() {
 
   const { theme, toggleTheme } = useTheme();
 
+  const handleQuickLogin = async (targetEmail: string) => {
+    setError("");
+    setLoading(true);
+    try {
+      await login(targetEmail);
+      navigate("/dashboard");
+    } catch {
+      setError("Failed to sign in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Redirects directly to Google OAuth consent screen
   const handleGoogleSignIn = () => {
     setError("");
@@ -184,12 +197,20 @@ export default function Login() {
             </form>
 
             <div className="login-quick">
-              <p className="login-quick-title">Test accounts</p>
+              <p className="login-quick-title">One-Click Demo Logins</p>
               <div className="login-quick-list">
                 <button
                   type="button"
                   className="login-quick-btn"
-                  onClick={() => setEmail("eliora.browning@selu.edu")}
+                  onClick={() => handleQuickLogin("cade.sholar@selu.edu")}
+                >
+                  <span className="login-quick-role">Student</span>{" "}
+                  <strong>Cade Sholar</strong>
+                </button>
+                <button
+                  type="button"
+                  className="login-quick-btn"
+                  onClick={() => handleQuickLogin("eliora.browning@selu.edu")}
                 >
                   <span className="login-quick-role">Student</span>{" "}
                   <strong>Eliora Browning</strong>
@@ -197,21 +218,22 @@ export default function Login() {
                 <button
                   type="button"
                   className="login-quick-btn"
-                  onClick={() => setEmail("galkadi@selu.edu")}
+                  onClick={() => handleQuickLogin("galkadi@selu.edu")}
                 >
-                  <span className="login-quick-role">Faculty</span>{" "}
+                  <span className="login-quick-role">Faculty / GDoc</span>{" "}
                   <strong>Dr. Ghassan Alkadi</strong>
                 </button>
                 <button
                   type="button"
                   className="login-quick-btn"
-                  onClick={() => setEmail("bonnie.achee@southeastern.edu")}
+                  onClick={() => handleQuickLogin("bonnie.achee@southeastern.edu")}
                 >
-                  <span className="login-quick-role">Dept head</span>{" "}
+                  <span className="login-quick-role">Dean</span>{" "}
                   <strong>Dr. Bonnie Achée</strong>
                 </button>
               </div>
             </div>
+            {/* ========================================================================= */}
           </div>
         </div>
       </div>
