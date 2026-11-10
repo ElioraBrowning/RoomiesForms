@@ -7,7 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node ../tests/e2e/runner.js",
+    "test:e2e": "node ../tests/e2e/runner.js",
+    "test:tier1": "node ../tests/e2e/runner.js --tier=1",
+    "test:tier2": "node ../tests/e2e/runner.js --tier=2",
+    "test:tier3": "node ../tests/e2e/runner.js --tier=3",
+    "test:tier4": "node ../tests/e2e/runner.js --tier=4",
+    "test:live": "node ../tests/e2e/runner.js --live"
   },
   "dependencies": {
     "axios": "^1.20.0",

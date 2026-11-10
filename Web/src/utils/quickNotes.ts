@@ -27,7 +27,7 @@ export const DEFAULT_QUICK_NOTES: QuickNote[] = [
   },
 ];
 
-const STORAGE_KEY = 'selu_dean_quick_notes';
+const STORAGE_KEY = 'selu_dept_head_quick_notes';
 
 export function getQuickNotes(): QuickNote[] {
   try {

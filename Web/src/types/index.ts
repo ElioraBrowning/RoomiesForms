@@ -5,6 +5,7 @@ export interface User {
   fullName: string;
   wNumber: string;
   roles: string[];
+  isDesignated?: boolean;
 }
 
 export interface FormMeta {
@@ -156,12 +157,15 @@ export interface EmployerView {
 }
 
 export interface ResultsResponse {
-  formId: number;
-  formKey: string;
+  formId?: number;
+  formKey?: string;
   title: string;
   assigned: number;
+  assignedCount?: number;
+  responseCount?: number;
   schema: FormSchema | null;
-  responses: { responses: Record<string, unknown> }[];
+  responses: { submittedOn?: string; responses: Record<string, unknown> }[];
+  byQuestion?: Record<string, any>;
 }
 
 export interface StudentPlacement {

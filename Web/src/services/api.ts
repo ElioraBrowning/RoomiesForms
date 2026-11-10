@@ -35,6 +35,7 @@ import {
   MOCK_ASSIGNMENTS,
   MOCK_NOTIFICATIONS,
   getMockUser,
+  getMockSurveyResponses,
 } from './mockData';
 
 export interface AppsScriptResponse<T = any> {
@@ -485,7 +486,13 @@ const api = {
     roles?: string[],
   ): Promise<{ message: string }> {
     try {
-      return await requestAppsScript<{ message: string }>('rejectSubmission', { id, comments, userEmail, roles });
+      return await requestAppsScript<{ message: string }>('rejectSubmission', {
+        id,
+        comments,
+        feedback: comments,
+        userEmail,
+        roles,
+      });
     } catch {
       const sub = MOCK_SUBMISSIONS.find((s) => s.id === Number(id));
       if (sub) {
@@ -529,7 +536,20 @@ const api = {
 
   /** Anonymous responses aggregation for exit survey */
   async getAnonymousResponses(formKeyOrId: string | number): Promise<ResultsResponse> {
-    return requestAppsScript<ResultsResponse>('getAnonymousResponses', { formKeyOrId });
+    const staticSchema = getStaticSchema(formKeyOrId);
+    try {
+      const liveData = await requestAppsScript<ResultsResponse>('getAnonymousResponses', { formKeyOrId });
+      if (liveData && Array.isArray(liveData.responses)) {
+        if (!liveData.schema && staticSchema) {
+          liveData.schema = staticSchema;
+        }
+        return liveData;
+      }
+      throw new Error('Malformed live response data: responses array missing.');
+    } catch (err) {
+      console.warn(`[api.getAnonymousResponses] Google Apps Script request failed; serving mock survey fallback for "${formKeyOrId}":`, err);
+      return getMockSurveyResponses(formKeyOrId, staticSchema);
+    }
   },
 
   /** Get notifications for signed-in user */
@@ -657,12 +677,12 @@ const api = {
     }
     const approveMatch = cleanUrl.match(/^\/submissions\/(\d+)\/approve$/);
     if (approveMatch) {
-      const data = await this.approveSubmission(Number(approveMatch[1]), body?.comments);
+      const data = await this.approveSubmission(Number(approveMatch[1]), body?.comments, body?.userEmail, body?.roles);
       return { data: data as unknown as T };
     }
     const rejectMatch = cleanUrl.match(/^\/submissions\/(\d+)\/reject$/);
     if (rejectMatch) {
-      const data = await this.rejectSubmission(Number(rejectMatch[1]), body?.comments || '');
+      const data = await this.rejectSubmission(Number(rejectMatch[1]), body?.comments || body?.feedback || '', body?.userEmail, body?.roles);
       return { data: data as unknown as T };
     }
     if (cleanUrl === '/submissions') {

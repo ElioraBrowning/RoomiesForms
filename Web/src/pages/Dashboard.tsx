@@ -1,19 +1,19 @@
 import { useAuth } from '../context/AuthContext';
 import StudentDashboard from '../components/dashboards/StudentDashboard';
 import FacultyDashboard from '../components/dashboards/FacultyDashboard';
-import DeanDashboard from '../components/dashboards/DeanDashboard';
+import DepartmentHeadDashboard from '../components/dashboards/DepartmentHeadDashboard';
 
 export default function Dashboard() {
   const { user } = useAuth();
 
-  // Dr. Bonnie Achée / Dean / Department Head View
-  const isDean =
-    user?.roles?.includes('Dean') ||
+  // Dr. Bonnie Achée / CS Department Head View
+  const isDepartmentHead =
     user?.roles?.includes('Department Head') ||
-    user?.email?.trim().toLowerCase() === 'bonnie.achee@southeastern.edu';
+    user?.email?.trim().toLowerCase() === 'bonnie.achee@southeastern.edu' ||
+    user?.email?.trim().toLowerCase() === 'bonnie.achee@selu.edu';
 
-  if (isDean) {
-    return <DeanDashboard />;
+  if (isDepartmentHead) {
+    return <DepartmentHeadDashboard />;
   }
 
   // Faculty / GDoc Reviewer View

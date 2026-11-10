@@ -26,6 +26,15 @@ Web/yarn-error.log*
 AppsScript/
 GoogleAppsScript/
 
+# Google Apps Script & Clasp backend files
+*.gs
+appsscript.json
+.clasp.json
+.clasprc.json
+
+# Temporary scratch and editing files
+temp_*
+
 # OS Files
 .DS_Store
 Thumbs.db

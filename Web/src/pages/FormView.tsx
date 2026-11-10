@@ -47,10 +47,31 @@ export default function FormView() {
           setDraft(draftRes.value.data);
         }
         if (subsRes.status === 'fulfilled') {
-          const live = subsRes.value.data.find(
-            (s) => s.formId === res.data.id && (s.status === 'Pending' || s.status === 'Completed'),
+          // Check for prior rejected submissions to restore prior answers
+          const rejectedSub = subsRes.value.data.find(
+            (s) => (s.status === 'Rejected' && s.formId && s.formId === res.data.id) || ((s.formKey === res.data.googleFormId || s.formKey === formId) && s.status === 'Rejected'),
           );
-          setAlreadySubmitted(live ?? null);
+          if (rejectedSub) {
+            try {
+              const subRes = await api.get<SubmissionDetail>(`/submissions/${rejectedSub.id}`);
+              setDraft((currentDraft) => ({
+                responses: (currentDraft?.responses || subRes.data?.responses || (rejectedSub as any).responses || {}) as Answers,
+                status: 'Rejected',
+                auditLogs: subRes.data?.auditLogs || (rejectedSub as any).auditLogs,
+              }));
+            } catch {
+              setDraft((currentDraft) => ({
+                responses: (currentDraft?.responses || (rejectedSub as any).responses || {}) as Answers,
+                status: 'Rejected',
+                auditLogs: (rejectedSub as any).auditLogs,
+              }));
+            }
+          } else {
+            const live = subsRes.value.data.find(
+              (s) => s.formId === res.data.id && (s.status === 'Pending' || s.status === 'Completed'),
+            );
+            setAlreadySubmitted(live ?? null);
+          }
         }
       } catch (err) {
         const { message, status } = readApiError(err, "Couldn't load this form.");

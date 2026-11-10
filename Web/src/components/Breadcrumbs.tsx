@@ -52,6 +52,15 @@ export default function Breadcrumbs() {
       ];
     }
 
+    // Analytics
+    if (pathname === '/analytics') {
+      return [
+        { label: 'Home', path: '/dashboard' },
+        { label: dashboardLabel, path: '/dashboard' },
+        { label: 'Placement Analytics' },
+      ];
+    }
+
     // 4. Form Builder
     if (pathname === '/forms/builder') {
       return [

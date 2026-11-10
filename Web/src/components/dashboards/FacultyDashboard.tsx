@@ -64,6 +64,7 @@ export default function FacultyDashboard() {
         <h1 className="dashboard-title">Review queue</h1>
         <div className="button-row">
           <Link to="/assignments" className="btn btn-primary btn-small">Assign forms</Link>
+          <Link to="/analytics" className="btn btn-secondary btn-small">CS Placement Analytics</Link>
           <Link to="/forms/ExitSurvey/results" className="btn btn-secondary btn-small">Exit survey results</Link>
         </div>
       </div>
