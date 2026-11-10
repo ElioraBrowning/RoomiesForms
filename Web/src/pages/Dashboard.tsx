@@ -17,7 +17,15 @@ export default function Dashboard() {
   }
 
   // Faculty / GDoc Reviewer View
-  const isFaculty = user?.roles?.some((role) => role === 'Faculty');
+  const cleanEmail = user?.email?.trim().toLowerCase() || '';
+  const isFaculty =
+    user?.roles?.some((role) => role === 'Faculty') ||
+    cleanEmail === 'alkadi@selu.edu' ||
+    cleanEmail === 'galkadi@selu.edu' ||
+    cleanEmail === 'ghassan.alkadi@selu.edu' ||
+    cleanEmail === 'alkadi@southeastern.edu' ||
+    cleanEmail === 'galkadi@southeastern.edu' ||
+    cleanEmail === 'ghassan.alkadi@southeastern.edu';
   if (isFaculty) {
     return <FacultyDashboard />;
   }

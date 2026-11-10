@@ -76,6 +76,34 @@ export function resolveAppsScriptUrl(): string {
 }
 
 /**
+ * Maps known Faculty / Department Head email aliases to the canonical email
+ * registered in the Google Apps Script sheet so live backend queries resolve
+ * the proper reviewer account and role.
+ */
+export function normalizeBackendEmail(email?: string): string {
+  const clean = (email || '').trim().toLowerCase();
+  if (
+    clean === 'alkadi@selu.edu' ||
+    clean === 'alkadi@southeastern.edu' ||
+    clean === 'galkadi@selu.edu' ||
+    clean === 'ghassan.alkadi@selu.edu' ||
+    clean === 'galkadi@southeastern.edu' ||
+    clean === 'ghassan.alkadi@southeastern.edu'
+  ) {
+    return 'galkadi@selu.edu';
+  }
+  if (
+    clean === 'bonnie.achee@selu.edu' ||
+    clean === 'bonnie.achee@southeastern.edu' ||
+    clean === 'bachee@selu.edu' ||
+    clean === 'bachee@southeastern.edu'
+  ) {
+    return 'bonnie.achee@southeastern.edu';
+  }
+  return clean;
+}
+
+/**
  * Dispatches an action request to Google Apps Script Web App.
  * Uses POST with Content-Type: text/plain;charset=utf-8 and redirect: 'follow'
  * to avoid CORS preflight OPTIONS failures.
@@ -97,12 +125,38 @@ export async function requestAppsScript<T = any>(
     // Session user unreadable; proceed with payload defaults
   }
 
-  const requestBody = {
+  // Strip undefined properties so omitted arguments do not overwrite sessionUser context
+  const cleanPayload: Record<string, any> = {};
+  for (const [k, v] of Object.entries(payload)) {
+    if (v !== undefined) {
+      cleanPayload[k] = v;
+    }
+  }
+
+  const rawUserEmail = cleanPayload.userEmail || sessionUser?.email || '';
+  const canonicalUserEmail = normalizeBackendEmail(rawUserEmail);
+  const rawRoles: string[] = Array.isArray(cleanPayload.roles) && cleanPayload.roles.length > 0
+    ? cleanPayload.roles
+    : Array.isArray(sessionUser?.roles) && sessionUser.roles.length > 0
+      ? sessionUser.roles
+      : [];
+
+  const mockProfile = rawUserEmail ? getMockUser(rawUserEmail) : null;
+  const effectiveRoles =
+    mockProfile && (mockProfile.roles.includes('Faculty') || mockProfile.roles.includes('Department Head'))
+      ? mockProfile.roles
+      : rawRoles;
+
+  const requestBody: Record<string, any> = {
+    ...cleanPayload,
     action,
-    userEmail: payload.userEmail || sessionUser?.email || '',
-    roles: payload.roles || sessionUser?.roles || [],
-    ...payload,
+    userEmail: canonicalUserEmail,
+    roles: effectiveRoles,
   };
+
+  if (typeof cleanPayload.email === 'string') {
+    requestBody.email = normalizeBackendEmail(cleanPayload.email);
+  }
 
   let response: Response;
   try {
@@ -217,11 +271,31 @@ const api = {
 
   /** Authenticate user by university email */
   async login(email: string): Promise<{ token: string; user: User }> {
+    const fallbackUser = getMockUser(email);
+    const isKnownReviewer =
+      fallbackUser.roles.includes('Faculty') || fallbackUser.roles.includes('Department Head');
     try {
-      return await requestAppsScript<{ token: string; user: User }>('login', { email });
+      const res = await requestAppsScript<{ token: string; user: User }>('login', { email });
+      if (res && res.user) {
+        return {
+          token: res.token,
+          user: {
+            ...res.user,
+            email: email.trim().toLowerCase() || res.user.email,
+            fullName: isKnownReviewer ? fallbackUser.fullName : (res.user.fullName || fallbackUser.fullName),
+            wNumber: res.user.wNumber || fallbackUser.wNumber,
+            roles: isKnownReviewer
+              ? fallbackUser.roles
+              : Array.isArray(res.user.roles) && res.user.roles.length > 0
+                ? res.user.roles
+                : fallbackUser.roles,
+            isDesignated: fallbackUser.isDesignated ?? res.user.isDesignated,
+          },
+        };
+      }
+      return { token: res?.token || 'mock-token', user: fallbackUser };
     } catch {
-      const user = getMockUser(email);
-      return { token: 'mock-token', user };
+      return { token: 'mock-token', user: fallbackUser };
     }
   },
 

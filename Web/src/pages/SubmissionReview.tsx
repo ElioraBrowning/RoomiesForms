@@ -94,7 +94,12 @@ export default function SubmissionReview() {
     })();
   }, [id]);
 
-  const requiredRole = submission?.currentStep?.requiredRole?.name;
+  const activeStep =
+    submission?.currentStep ||
+    submission?.approvals?.find(
+      (a) => a.status === 'Pending Review' || (a.status !== 'Approved' && !a.actionDate && !a.approvedBy)
+    );
+  const requiredRole = submission?.currentStep?.requiredRole?.name || (activeStep as any)?.roleName;
   const isMyTurn = Boolean(
     isReviewer && submission?.status === 'Pending' && matchesRole(requiredRole, user?.roles)
   );
