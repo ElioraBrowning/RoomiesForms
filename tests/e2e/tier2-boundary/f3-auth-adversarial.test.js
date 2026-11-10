@@ -207,8 +207,8 @@ describe('Feature F3 Empirical Adversarial Stress Suite: Auth & Lifecycle Integr
     // 1. Check for quick-login buttons
     assert.match(
       source,
-      /handleQuickLogin\s*\(\s*["']cobi\.smith@selu\.edu["']\s*\)/,
-      'Login.tsx must provide quick login for Cobi Smith (Student)'
+      /handleQuickLogin\s*\(\s*["']eliora\.browning@selu\.edu["']\s*\)/,
+      'Login.tsx must provide quick login for Eliora Browning (Student)'
     );
     assert.match(
       source,
@@ -224,7 +224,7 @@ describe('Feature F3 Empirical Adversarial Stress Suite: Auth & Lifecycle Integr
     // 2. Check role badges on the quick-login buttons
     assert.match(
       source,
-      /<span className="login-quick-role">Student<\/span>[\s{}"']*<strong>Cobi Smith<\/strong>/,
+      /<span className="login-quick-role">Student<\/span>[\s{}"']*<strong>Eliora Browning<\/strong>/,
       'Student quick-login button must display "Student" role'
     );
     assert.match(

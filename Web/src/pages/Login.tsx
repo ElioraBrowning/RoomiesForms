@@ -202,10 +202,10 @@ export default function Login() {
                 <button
                   type="button"
                   className="login-quick-btn"
-                  onClick={() => handleQuickLogin("cobi.smith@selu.edu")}
+                  onClick={() => handleQuickLogin("eliora.browning@selu.edu")}
                 >
                   <span className="login-quick-role">Student</span>{" "}
-                  <strong>Cobi Smith</strong>
+                  <strong>Eliora Browning</strong>
                 </button>
                 <button
                   type="button"

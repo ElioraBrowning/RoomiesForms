@@ -53,7 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (saved && saved !== 'undefined') {
         const parsed = JSON.parse(saved) as User;
         if (parsed && typeof parsed === 'object') {
-          return normalizeUser(parsed);
+          return normalizeUser({
+            ...parsed,
+            roles: sanitizeRoles(parsed.roles),
+          });
         }
       }
       return null;
@@ -70,7 +73,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const parsed = JSON.parse(savedUser) as User;
           if (parsed && typeof parsed === 'object') {
-            setUser(normalizeUser(parsed));
+            setUser(normalizeUser({
+              ...parsed,
+              roles: sanitizeRoles(parsed.roles),
+            }));
             return;
           }
         } catch {
