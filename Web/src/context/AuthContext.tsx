@@ -14,6 +14,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const EXIT_SURVEY_EMAILS = [
+  'kazim.sekeroglu@selu.edu',
+  'kazim.sekeroglu@southeastern.edu',
+  'ksekeroglu@selu.edu',
+  'ksekeroglu@southeastern.edu',
+];
+
 const sanitizeRoles = (rawRoles: unknown): string[] => {
   const rolesArray = Array.isArray(rawRoles)
     ? rawRoles
@@ -28,17 +35,25 @@ const normalizeUser = (parsed: User): User => {
   const mockProfile = email ? getMockUser(email) : null;
   const isKnownReviewer =
     mockProfile && (mockProfile.roles.includes('Faculty') || mockProfile.roles.includes('Department Head'));
+  const isExitSurveyReviewer = EXIT_SURVEY_EMAILS.includes(email);
+
   const sanitized = sanitizeRoles(parsed.roles);
-  const roles = isKnownReviewer
-    ? sanitizeRoles(mockProfile.roles)
-    : sanitized.length > 0
-      ? sanitized
-      : ['Student'];
+  const roles = isExitSurveyReviewer
+    ? ['Exit Survey Reviewer']
+    : isKnownReviewer
+      ? sanitizeRoles(mockProfile.roles)
+      : sanitized.length > 0
+        ? sanitized
+        : ['Student'];
 
   return {
     ...parsed,
     email: parsed.email || email,
-    fullName: isKnownReviewer ? mockProfile.fullName : (parsed.fullName || 'User'),
+    fullName: isExitSurveyReviewer
+      ? 'Dr. Kazim Sekeroglu'
+      : isKnownReviewer
+        ? mockProfile.fullName
+        : (parsed.fullName || 'User'),
     wNumber: parsed.wNumber || mockProfile?.wNumber || '',
     roles,
     isDesignated: mockProfile?.isDesignated ?? parsed.isDesignated,

@@ -132,11 +132,16 @@ public class AuthController : ControllerBase
                       || normalizedEmail.Equals("bachee@selu.edu", StringComparison.OrdinalIgnoreCase)
                       || normalizedEmail.Equals("bachee@southeastern.edu", StringComparison.OrdinalIgnoreCase);
 
+        var isSurveyReviewer = normalizedEmail.Equals("kazim.sekeroglu@selu.edu", StringComparison.OrdinalIgnoreCase)
+                            || normalizedEmail.Equals("kazim.sekeroglu@southeastern.edu", StringComparison.OrdinalIgnoreCase)
+                            || normalizedEmail.Equals("ksekeroglu@selu.edu", StringComparison.OrdinalIgnoreCase)
+                            || normalizedEmail.Equals("ksekeroglu@southeastern.edu", StringComparison.OrdinalIgnoreCase);
+
         if (user == null)
         {
             user = await _mockDataService.GetMockUserAsync(normalizedEmail);
 
-            // Set appropriate fallback display names for faculty/dept head or student
+            // Set appropriate fallback display names
             if (isFaculty && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
             {
                 user.FullName = "Dr. Ghassan Alkadi";
@@ -144,6 +149,10 @@ public class AuthController : ControllerBase
             else if (isDeptHead && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
             {
                 user.FullName = "Dr. Bonnie Achée";
+            }
+            else if (isSurveyReviewer && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Kazim Sekeroglu";
             }
             else if (!string.IsNullOrWhiteSpace(fallbackFullName) && (user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)))
             {
@@ -187,6 +196,10 @@ public class AuthController : ControllerBase
             {
                 user.FullName = "Dr. Bonnie Achée";
             }
+            else if (isSurveyReviewer && (string.IsNullOrWhiteSpace(user.FullName) || user.FullName == "Test User"))
+            {
+                user.FullName = "Dr. Kazim Sekeroglu";
+            }
             else if ((user.FullName == "Test User" || string.IsNullOrWhiteSpace(user.FullName)) && !string.IsNullOrWhiteSpace(fallbackFullName))
             {
                 user.FullName = fallbackFullName;
@@ -209,6 +222,14 @@ public class AuthController : ControllerBase
             await _context.SaveChangesAsync();
         }
 
+        var surveyReviewerRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Exit Survey Reviewer");
+        if (surveyReviewerRole == null)
+        {
+            surveyReviewerRole = new Entities.Role { Name = "Exit Survey Reviewer" };
+            _context.Roles.Add(surveyReviewerRole);
+            await _context.SaveChangesAsync();
+        }
+
         var studentRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Student");
         if (studentRole == null)
         {
@@ -221,22 +242,30 @@ public class AuthController : ControllerBase
         {
             if (!user.UserRoles.Any(ur => ur.RoleId == facultyRole.Id))
                 user.UserRoles.Add(new Entities.UserRole { RoleId = facultyRole.Id });
-            var dh = user.UserRoles.FirstOrDefault(ur => ur.RoleId == deptHeadRole.Id);
-            if (dh != null) user.UserRoles.Remove(dh);
+
+            var nonFaculty = user.UserRoles.Where(ur => ur.RoleId != facultyRole.Id).ToList();
+            foreach (var r in nonFaculty) user.UserRoles.Remove(r);
         }
         else if (isDeptHead)
         {
             if (!user.UserRoles.Any(ur => ur.RoleId == deptHeadRole.Id))
                 user.UserRoles.Add(new Entities.UserRole { RoleId = deptHeadRole.Id });
-            var fac = user.UserRoles.FirstOrDefault(ur => ur.RoleId == facultyRole.Id);
-            if (fac != null) user.UserRoles.Remove(fac);
+
+            var nonDeptHead = user.UserRoles.Where(ur => ur.RoleId != deptHeadRole.Id).ToList();
+            foreach (var r in nonDeptHead) user.UserRoles.Remove(r);
+        }
+        else if (isSurveyReviewer)
+        {
+            if (!user.UserRoles.Any(ur => ur.RoleId == surveyReviewerRole.Id))
+                user.UserRoles.Add(new Entities.UserRole { RoleId = surveyReviewerRole.Id });
+
+            var nonSurveyReviewer = user.UserRoles.Where(ur => ur.RoleId != surveyReviewerRole.Id).ToList();
+            foreach (var r in nonSurveyReviewer) user.UserRoles.Remove(r);
         }
         else
         {
-            var fac = user.UserRoles.FirstOrDefault(ur => ur.RoleId == facultyRole.Id);
-            if (fac != null) user.UserRoles.Remove(fac);
-            var dh = user.UserRoles.FirstOrDefault(ur => ur.RoleId == deptHeadRole.Id);
-            if (dh != null) user.UserRoles.Remove(dh);
+            var nonStudent = user.UserRoles.Where(ur => ur.RoleId != studentRole.Id).ToList();
+            foreach (var r in nonStudent) user.UserRoles.Remove(r);
 
             if (!user.UserRoles.Any(ur => ur.RoleId == studentRole.Id))
                 user.UserRoles.Add(new Entities.UserRole { RoleId = studentRole.Id });

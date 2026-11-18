@@ -14,13 +14,48 @@ import EmployerReview from './pages/EmployerReview';
 import Analytics from './pages/Analytics';
 
 const REVIEWER_ROLES = ['Faculty', 'Department Head'];
+const EXIT_SURVEY_ROLE = 'Exit Survey Reviewer';
+
+const isExitSurveyOnly = (roles?: string[]) =>
+  Boolean(roles?.includes(EXIT_SURVEY_ROLE) && !roles?.some((r) => REVIEWER_ROLES.includes(r)));
 
 const ReviewerRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
+  if (isExitSurveyOnly(user?.roles)) {
+    return <Navigate to="/exit-survey-results" replace />;
+  }
   if (!user?.roles?.some((r) => REVIEWER_ROLES.includes(r))) {
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
+};
+
+const ExitSurveyRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  const allowed =
+    user?.roles?.includes(EXIT_SURVEY_ROLE) ||
+    user?.roles?.some((r) => REVIEWER_ROLES.includes(r));
+
+  if (!allowed) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <>{children}</>;
+};
+
+const HomeRedirect = () => {
+  const { user } = useAuth();
+  if (isExitSurveyOnly(user?.roles)) {
+    return <Navigate to="/exit-survey-results" replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
+};
+
+const DashboardGate = () => {
+  const { user } = useAuth();
+  if (isExitSurveyOnly(user?.roles)) {
+    return <Navigate to="/exit-survey-results" replace />;
+  }
+  return <Dashboard />;
 };
 
 function App() {
@@ -33,13 +68,14 @@ function App() {
           {/* Employers open this from a link; they don't have accounts. */}
           <Route path="/employer/:token" element={<EmployerReview />} />
           <Route path="/" element={<Layout />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route index element={<HomeRedirect />} />
+            <Route path="dashboard" element={<DashboardGate />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="exit-survey-results" element={<ExitSurveyRoute><SurveyResults /></ExitSurveyRoute>} />
             <Route path="analytics" element={<ReviewerRoute><Analytics /></ReviewerRoute>} />
             <Route path="assignments" element={<ReviewerRoute><Assignments /></ReviewerRoute>} />
             <Route path="forms/builder" element={<ReviewerRoute><FormBuilder /></ReviewerRoute>} />
-            <Route path="forms/:formId/results" element={<ReviewerRoute><SurveyResults /></ReviewerRoute>} />
+            <Route path="forms/:formId/results" element={<ExitSurveyRoute><SurveyResults /></ExitSurveyRoute>} />
             <Route path="forms/:formId" element={<FormView />} />
             <Route path="submissions/:id" element={<SubmissionReview />} />
           </Route>
