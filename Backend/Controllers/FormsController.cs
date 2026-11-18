@@ -24,21 +24,26 @@ public class FormsController : ControllerBase
     }
 
     /// <summary>
-    /// Reviewers get every active form. Students only get the forms assigned to them.
+    /// Reviewers get every active form. Exit Survey Reviewers only get Exit/Anonymous Surveys.
+    /// Students only get the forms assigned to them.
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetForms()
     {
         if (User.GetUserId() is not int userId) return Unauthorized();
 
+        var roles = User.GetRoles();
+        var isExitSurveyOnly = roles.Contains("Exit Survey Reviewer") && !Roles.IsReviewer(roles);
+
         var query = _context.Forms.Where(f => f.IsActive);
-        if (!Roles.IsReviewer(User.GetRoles()))
+
+        if (!isExitSurveyOnly && !Roles.IsReviewer(roles))
         {
             query = query.Where(f => _context.FormAssignments.Any(a => a.FormId == f.Id && a.StudentId == userId));
         }
 
         var forms = await query.OrderBy(f => f.GoogleFormId).ToListAsync();
-        return Ok(forms.Select(f => new
+        var result = forms.Select(f => new
         {
             f.Id,
             f.Title,
@@ -48,7 +53,17 @@ public class FormsController : ControllerBase
             HasEmployerStep = _schemas.Get(f.GoogleFormId)?.HasEmployerPages ?? false,
             Department = _schemas.Get(f.GoogleFormId)?.Department,
             Category = _schemas.Get(f.GoogleFormId)?.Category,
-        }));
+        });
+
+        if (isExitSurveyOnly)
+        {
+            result = result.Where(f =>
+                f.Anonymous ||
+                f.Title.Contains("exit", StringComparison.OrdinalIgnoreCase) ||
+                f.GoogleFormId.Contains("exit", StringComparison.OrdinalIgnoreCase));
+        }
+
+        return Ok(result);
     }
 
     /// <summary>One form plus its definition (pages and questions), for rendering.</summary>
@@ -60,7 +75,14 @@ public class FormsController : ControllerBase
         var form = await FindFormAsync(id);
         if (form == null) return NotFound("Form not found.");
 
-        if (!Roles.IsReviewer(User.GetRoles()) &&
+        var roles = User.GetRoles();
+        var isExitSurveyOnly = roles.Contains("Exit Survey Reviewer") && !Roles.IsReviewer(roles);
+
+        if (isExitSurveyOnly)
+        {
+            if (!IsExitSurvey(form)) return Forbid();
+        }
+        else if (!Roles.IsReviewer(roles) &&
             !await _context.FormAssignments.AnyAsync(a => a.FormId == form.Id && a.StudentId == userId))
         {
             return StatusCode(403, new { Message = "This form hasn't been assigned to you." });
@@ -82,11 +104,17 @@ public class FormsController : ControllerBase
 
     /// <summary>Answers to an anonymous form. No names, ids or times, only the day each was submitted.</summary>
     [HttpGet("{id}/anonymous-responses")]
-    [Authorize(Roles = Roles.Faculty + "," + Roles.DepartmentHead)]
+    [Authorize(Roles = Roles.Faculty + "," + Roles.DepartmentHead + ",Exit Survey Reviewer")]
     public async Task<IActionResult> GetAnonymousResponses(string id)
     {
         var form = await FindFormAsync(id);
         if (form == null) return NotFound("Form not found.");
+
+        var roles = User.GetRoles();
+        if (roles.Contains("Exit Survey Reviewer") && !Roles.IsReviewer(roles) && !IsExitSurvey(form))
+        {
+            return Forbid();
+        }
 
         var rows = await _context.AnonymousResponses
             .Where(r => r.FormId == form.Id)
@@ -187,4 +215,9 @@ public class FormsController : ControllerBase
         var lowered = id.ToLower();
         return await _context.Forms.FirstOrDefaultAsync(f => f.GoogleFormId.ToLower() == lowered);
     }
+
+    private bool IsExitSurvey(Form form) =>
+        (_schemas.Get(form.GoogleFormId)?.Anonymous ?? false) ||
+        form.Title.Contains("exit", StringComparison.OrdinalIgnoreCase) ||
+        form.GoogleFormId.Contains("exit", StringComparison.OrdinalIgnoreCase);
 }

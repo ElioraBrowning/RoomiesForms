@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api, { readApiError } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import type { Answers, FormQuestion, FormSchema } from '../forms/types';
 import { questionsFor } from '../forms/types';
 import { SkeletonForm } from '../components/Skeleton';
@@ -12,20 +13,76 @@ interface ResultsResponse {
   responses: { submittedOn: string; responses: Answers }[];
 }
 
+interface FormSummary {
+  id: number;
+  googleFormId?: string;
+  title: string;
+  anonymous?: boolean;
+}
+
 /**
  * Results for an anonymous survey. Answers are grouped by question rather than by
  * person, which also makes it harder to piece one student's answers back together.
  */
 export default function SurveyResults() {
   const { formId } = useParams();
+  const { user } = useAuth();
   const [data, setData] = useState<ResultsResponse | null>(null);
   const [error, setError] = useState('');
 
+  // Check if current user is restricted solely to Exit Survey viewing
+  const isExitSurveyOnly = Boolean(
+    user?.roles?.includes('Exit Survey Reviewer') &&
+    !user?.roles?.some((r) => ['Faculty', 'Department Head'].includes(r))
+  );
+
   useEffect(() => {
-    api
-      .get<ResultsResponse>(`/forms/${formId}/anonymous-responses`)
-      .then((res) => setData(res.data))
-      .catch((err) => setError(readApiError(err, "Couldn't load the results.").message));
+    let active = true;
+
+    async function loadResults() {
+      try {
+        let targetId = formId;
+
+        // If accessed via /exit-survey-results without :formId param,
+        // automatically find the Exit Survey form ID
+        if (!targetId) {
+          const formsRes = await api.get<FormSummary[]>('/forms');
+          const list = Array.isArray(formsRes.data) ? formsRes.data : [];
+
+          const exitForm =
+            list.find(
+              (f) =>
+                f.title?.toLowerCase().includes('exit') ||
+                f.googleFormId?.toLowerCase().includes('exit') ||
+                f.title?.toLowerCase().includes('survey')
+            ) ??
+            list.find((f) => f.anonymous) ??
+            (list.length === 1 ? list[0] : undefined);
+
+          if (!exitForm) {
+            if (active) {
+              setError(
+                list.length === 0
+                  ? 'No forms were returned by /api/forms. Make sure your backend is restarted/deployed with the updated FormsController.'
+                  : `Exit Survey form could not be matched. Available forms: ${list.map((f) => `${f.id}: ${f.title}`).join(', ')}`
+              );
+            }
+            return;
+          }
+          targetId = String(exitForm.id);
+        }
+
+        const res = await api.get<ResultsResponse>(`/forms/${targetId}/anonymous-responses`);
+        if (active) setData(res.data);
+      } catch (err) {
+        if (active) setError(readApiError(err, "Couldn't load the results.").message);
+      }
+    }
+
+    loadResults();
+    return () => {
+      active = false;
+    };
   }, [formId]);
 
   if (error) return <div className="alert alert-danger">{error}</div>;
@@ -37,7 +94,11 @@ export default function SurveyResults() {
   return (
     <div className="results-page">
       <div className="page-head">
-        <p className="page-eyebrow"><Link to="/dashboard">Dashboard</Link> / Survey results</p>
+        {!isExitSurveyOnly && (
+          <p className="page-eyebrow">
+            <Link to="/dashboard">Dashboard</Link> / Survey results
+          </p>
+        )}
         <h1>{data.title}</h1>
         <p className="page-lede">
           {count} response{count === 1 ? '' : 's'} from {data.assigned} student{data.assigned === 1 ? '' : 's'} assigned. Responses are anonymous: no names, W#s or submission times are stored with them.
@@ -49,7 +110,9 @@ export default function SurveyResults() {
           <p>No responses yet.</p>
         </div>
       ) : (
-        questions.map((q) => <QuestionResults key={q.id} question={q} responses={data.responses.map((r) => r.responses)} />)
+        questions.map((q) => (
+          <QuestionResults key={q.id} question={q} responses={data.responses.map((r) => r.responses)} />
+        ))
       )}
     </div>
   );

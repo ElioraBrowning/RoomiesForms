@@ -6,6 +6,13 @@ import { useTheme } from "../hooks/useTheme";
 import { BrandImage } from "../components/BrandImage";
 import { brand } from "../brand";
 
+const EXIT_SURVEY_EMAILS = [
+  "kazim.sekeroglu@selu.edu",
+  "kazim.sekeroglu@southeastern.edu",
+  "ksekeroglu@selu.edu",
+  "ksekeroglu@southeastern.edu",
+];
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,12 +22,17 @@ export default function Login() {
 
   const { theme, toggleTheme } = useTheme();
 
+  const destinationFor = (targetEmail: string) =>
+    EXIT_SURVEY_EMAILS.includes(targetEmail.trim().toLowerCase())
+      ? "/exit-survey-results"
+      : "/dashboard";
+
   const handleQuickLogin = async (targetEmail: string) => {
     setError("");
     setLoading(true);
     try {
       await login(targetEmail);
-      navigate("/dashboard");
+      navigate(destinationFor(targetEmail));
     } catch {
       setError("Failed to sign in. Please try again.");
     } finally {
@@ -54,10 +66,10 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email);
-      navigate("/dashboard");
+      navigate(destinationFor(email));
     } catch {
       setError(
-        "Couldn't reach Google Apps Script backend. Please check your network connection and try again."
+        "Couldn't reach backend server. Please check your network connection and try again."
       );
     } finally {
       setLoading(false);
@@ -210,7 +222,7 @@ export default function Login() {
                 <button
                   type="button"
                   className="login-quick-btn"
-                  onClick={() => handleQuickLogin("alkadi@selu.edu")}
+                  onClick={() => handleQuickLogin("ghassan.alkadi@selu.edu")}
                 >
                   <span className="login-quick-role">Faculty</span>{" "}
                   <strong>Dr. Ghassan Alkadi</strong>
@@ -223,9 +235,16 @@ export default function Login() {
                   <span className="login-quick-role">Department Head</span>{" "}
                   <strong>Dr. Bonnie Achée</strong>
                 </button>
+                <button
+                  type="button"
+                  className="login-quick-btn"
+                  onClick={() => handleQuickLogin("kazim.sekeroglu@selu.edu")}
+                >
+                  <span className="login-quick-role">Exit Survey</span>{" "}
+                  <strong>Dr. Kazim Sekeroglu</strong>
+                </button>
               </div>
             </div>
-            {/* ========================================================================= */}
           </div>
         </div>
       </div>

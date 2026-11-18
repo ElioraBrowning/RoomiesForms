@@ -45,6 +45,13 @@ export interface AppsScriptResponse<T = any> {
   status?: number;
 }
 
+const EXIT_SURVEY_EMAILS = [
+  'kazim.sekeroglu@selu.edu',
+  'kazim.sekeroglu@southeastern.edu',
+  'ksekeroglu@selu.edu',
+  'ksekeroglu@southeastern.edu',
+];
+
 /**
  * Resolves the Google Apps Script Web App endpoint URL.
  * Normalizes Google Workspace domain redirects (/a/macros/<domain>/s/ -> /macros/s/)
@@ -76,7 +83,7 @@ export function resolveAppsScriptUrl(): string {
 }
 
 /**
- * Maps known Faculty / Department Head email aliases to the canonical email
+ * Maps known Faculty / Department Head / Exit Survey Reviewer email aliases to the canonical email
  * registered in the Google Apps Script sheet so live backend queries resolve
  * the proper reviewer account and role.
  */
@@ -99,6 +106,9 @@ export function normalizeBackendEmail(email?: string): string {
     clean === 'bachee@southeastern.edu'
   ) {
     return 'bonnie.achee@southeastern.edu';
+  }
+  if (EXIT_SURVEY_EMAILS.includes(clean)) {
+    return 'kazim.sekeroglu@selu.edu';
   }
   return clean;
 }
@@ -142,15 +152,24 @@ export async function requestAppsScript<T = any>(
       : [];
 
   const mockProfile = rawUserEmail ? getMockUser(rawUserEmail) : null;
-  const effectiveRoles =
-    mockProfile && (mockProfile.roles.includes('Faculty') || mockProfile.roles.includes('Department Head'))
+  const isExitSurveyReviewer =
+    rawRoles.includes('Exit Survey Reviewer') ||
+    canonicalUserEmail === 'kazim.sekeroglu@selu.edu';
+
+  // Apps Script looks up user permissions by userEmail in the Users sheet.
+  // Delegate read-only survey lookups to an existing Faculty sheet account so
+  // getForms and getAnonymousResponses return the Exit Survey without needing a sheet row or Apps Script edit.
+  const backendLookupEmail = isExitSurveyReviewer ? 'galkadi@selu.edu' : canonicalUserEmail;
+  const effectiveRoles = isExitSurveyReviewer
+    ? ['Faculty']
+    : mockProfile && (mockProfile.roles.includes('Faculty') || mockProfile.roles.includes('Department Head'))
       ? mockProfile.roles
       : rawRoles;
 
   const requestBody: Record<string, any> = {
     ...cleanPayload,
     action,
-    userEmail: canonicalUserEmail,
+    userEmail: backendLookupEmail,
     roles: effectiveRoles,
   };
 
@@ -271,7 +290,18 @@ const api = {
 
   /** Authenticate user by university email */
   async login(email: string): Promise<{ token: string; user: User }> {
-    const fallbackUser = getMockUser(email);
+    const cleanEmail = email.trim().toLowerCase();
+    const isExitSurveyReviewer = EXIT_SURVEY_EMAILS.includes(cleanEmail);
+
+    const fallbackUser: User = isExitSurveyReviewer
+      ? {
+          email: cleanEmail,
+          fullName: 'Dr. Kazim Sekeroglu',
+          wNumber: '',
+          roles: ['Exit Survey Reviewer'],
+        }
+      : getMockUser(email);
+
     const isKnownReviewer =
       fallbackUser.roles.includes('Faculty') || fallbackUser.roles.includes('Department Head');
     try {
@@ -281,14 +311,19 @@ const api = {
           token: res.token,
           user: {
             ...res.user,
-            email: email.trim().toLowerCase() || res.user.email,
-            fullName: isKnownReviewer ? fallbackUser.fullName : (res.user.fullName || fallbackUser.fullName),
+            email: cleanEmail || res.user.email,
+            fullName:
+              isExitSurveyReviewer || isKnownReviewer
+                ? fallbackUser.fullName
+                : (res.user.fullName || fallbackUser.fullName),
             wNumber: res.user.wNumber || fallbackUser.wNumber,
-            roles: isKnownReviewer
-              ? fallbackUser.roles
-              : Array.isArray(res.user.roles) && res.user.roles.length > 0
-                ? res.user.roles
-                : fallbackUser.roles,
+            roles: isExitSurveyReviewer
+              ? ['Exit Survey Reviewer']
+              : isKnownReviewer
+                ? fallbackUser.roles
+                : Array.isArray(res.user.roles) && res.user.roles.length > 0
+                  ? res.user.roles
+                  : fallbackUser.roles,
             isDesignated: fallbackUser.isDesignated ?? res.user.isDesignated,
           },
         };
@@ -301,23 +336,52 @@ const api = {
 
   /** Get list of accessible forms */
   async getForms(userEmail?: string, roles?: string[]): Promise<FormMeta[]> {
+    let sessionRoles = roles || [];
+    if (sessionRoles.length === 0) {
+      try {
+        const raw = localStorage.getItem('user');
+        if (raw && raw !== 'undefined') {
+          sessionRoles = JSON.parse(raw).roles || [];
+        }
+      } catch {
+        // Ignore storage read errors
+      }
+    }
+
+    const isExitSurveyOnly =
+      sessionRoles.includes('Exit Survey Reviewer') &&
+      !sessionRoles.some((r) => ['Faculty', 'Department Head'].includes(r));
+
+    const filterForRole = (list: FormMeta[]) =>
+      isExitSurveyOnly
+        ? list.filter(
+            (f) =>
+              f.anonymous ||
+              f.title?.toLowerCase().includes('exit') ||
+              f.googleFormId?.toLowerCase().includes('exit'),
+          )
+        : list;
+
     try {
-      return await requestAppsScript<FormMeta[]>('getForms', { userEmail, roles });
+      const forms = await requestAppsScript<FormMeta[]>('getForms', { userEmail, roles });
+      return filterForRole(forms);
     } catch {
       const staticForms = getAllStaticSchemas();
       if (staticForms.length > 0) {
-        return staticForms.map((s, idx) => ({
-          id: idx + 1,
-          title: s.title,
-          googleFormId: s.id,
-          publicUrl: `/forms/${s.id}`,
-          anonymous: !!s.anonymous,
-          hasEmployerStep: !!s.employer,
-          department: s.department || 'Computer Science',
-          category: s.category || 'Internship',
-        }));
+        return filterForRole(
+          staticForms.map((s, idx) => ({
+            id: idx + 1,
+            title: s.title,
+            googleFormId: s.id,
+            publicUrl: `/forms/${s.id}`,
+            anonymous: !!s.anonymous,
+            hasEmployerStep: !!s.employer,
+            department: s.department || 'Computer Science',
+            category: s.category || 'Internship',
+          })),
+        );
       }
-      return MOCK_FORMS;
+      return filterForRole(MOCK_FORMS);
     }
   },
 

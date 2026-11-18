@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Backend.Data;
 using Backend.DTOs;
 using Backend.Services;
 
@@ -12,17 +14,46 @@ public class SubmissionsController : ControllerBase
 {
     private readonly ISubmissionService _submissionService;
     private readonly Backend.Repositories.IUnitOfWork _unitOfWork;
+    private readonly AppDbContext _context;
 
-    public SubmissionsController(ISubmissionService submissionService, Backend.Repositories.IUnitOfWork unitOfWork)
+    public SubmissionsController(
+        ISubmissionService submissionService,
+        Backend.Repositories.IUnitOfWork unitOfWork,
+        AppDbContext context)
     {
         _submissionService = submissionService;
         _unitOfWork = unitOfWork;
+        _context = context;
+    }
+
+    /// <summary>Dedicated endpoint for Exit Survey Reviewer (Dr. Sekeroglu) to view anonymous exit survey responses.</summary>
+    [HttpGet("exit-surveys")]
+    [Authorize(Roles = "Exit Survey Reviewer")]
+    public async Task<IActionResult> GetExitSurveyResults()
+    {
+        var anonymousSurveys = await _context.AnonymousResponses
+            .Include(a => a.Form)
+            .OrderByDescending(a => a.SubmittedOn)
+            .ThenByDescending(a => a.Id)
+            .Select(a => new
+            {
+                id = a.Id,
+                formId = a.FormId,
+                formKey = a.Form != null ? a.Form.GoogleFormId : null,
+                formTitle = a.Form != null ? a.Form.Title : "Exit Survey",
+                submittedAt = a.SubmittedOn,
+                responses = a.Responses.RootElement
+            })
+            .ToListAsync();
+
+        return Ok(anonymousSurveys);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetMySubmissions()
     {
         if (User.GetUserId() is not int userId) return Unauthorized();
+        if (User.IsInRole("Exit Survey Reviewer")) return Forbid();
         return Ok(await _submissionService.GetSubmissionsForUserAsync(userId, User.GetRoles()));
     }
 
@@ -48,6 +79,7 @@ public class SubmissionsController : ControllerBase
     public async Task<IActionResult> RenewEmployerLink(int id)
     {
         if (User.GetUserId() is not int userId) return Unauthorized();
+        if (User.IsInRole("Exit Survey Reviewer")) return Forbid();
         return await Run(async () => Ok(await _submissionService.RenewEmployerLinkAsync(id, userId, User.GetRoles())));
     }
 
@@ -55,6 +87,7 @@ public class SubmissionsController : ControllerBase
     public async Task<IActionResult> SubmitForm([FromBody] SubmitFormRequestDto request)
     {
         if (User.GetUserId() is not int userId) return Unauthorized();
+        if (User.IsInRole("Exit Survey Reviewer")) return Forbid();
 
         return await Run(async () =>
         {
@@ -68,6 +101,7 @@ public class SubmissionsController : ControllerBase
     public async Task<IActionResult> SaveDraft([FromBody] SaveDraftRequestDto request)
     {
         if (User.GetUserId() is not int userId) return Unauthorized();
+        if (User.IsInRole("Exit Survey Reviewer")) return Forbid();
 
         return await Run(async () =>
         {
