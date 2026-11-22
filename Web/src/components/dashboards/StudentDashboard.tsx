@@ -19,6 +19,35 @@ const GROUPS: { key: Group; label: string; statuses: string[] }[] = [
 ];
 const GROUP_ORDER: Group[] = ['fix', 'todo', 'review', 'done'];
 
+/** Official 7-form Computer Science Internship Packet order */
+const INTERNSHIP_PACKET_ORDER: Record<string, number> = {
+  CS401: 1,
+  CS402: 2,
+  CS403: 3,
+  CS404: 4,
+  CS420: 5,
+  CS410: 6,
+  CS405: 7,
+  EXITSURVEY: 99,
+};
+
+function extractPacketCode(keyOrTitle?: string): string {
+  const raw = (keyOrTitle || '').trim().toUpperCase();
+  if (raw.includes('EXIT')) return 'EXITSURVEY';
+  const match = raw.match(/CS\s*(?:FORM\s*)?(\d{3})/);
+  if (match) return `CS${match[1]}`;
+  return raw.replace(/\s+/g, '');
+}
+
+function comparePacketOrder(a: Assignment, b: Assignment): number {
+  const codeA = extractPacketCode(a.formKey || a.formTitle);
+  const codeB = extractPacketCode(b.formKey || b.formTitle);
+  const orderA = INTERNSHIP_PACKET_ORDER[codeA] ?? 50;
+  const orderB = INTERNSHIP_PACKET_ORDER[codeB] ?? 50;
+  if (orderA !== orderB) return orderA - orderB;
+  return (a.formKey || a.formTitle).localeCompare(b.formKey || b.formTitle);
+}
+
 /** After this many days at one step, students get a nudge to follow up. */
 const FOLLOW_UP_DAYS = 7;
 
@@ -76,16 +105,17 @@ export default function StudentDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Needs-changes first, then by due date (soonest first), then by form number.
+  // Needs-changes first, then official 7-form internship packet order, then due date.
   const sorted = useMemo(
     () =>
       [...(Array.isArray(assignments) ? assignments : [])].sort((a, b) => {
         const g = GROUP_ORDER.indexOf(groupOf(a)) - GROUP_ORDER.indexOf(groupOf(b));
         if (g !== 0) return g;
+        const packet = comparePacketOrder(a, b);
+        if (packet !== 0) return packet;
         const da = a.dueDate ? Date.parse(a.dueDate) : Infinity;
         const db = b.dueDate ? Date.parse(b.dueDate) : Infinity;
-        if (da !== db) return da - db;
-        return a.formKey.localeCompare(b.formKey);
+        return da - db;
       }),
     [assignments],
   );
@@ -164,7 +194,7 @@ export default function StudentDashboard() {
   );
 }
 
-/** One form: name, summary, where it stands, and one main button. Never grows to match its neighbours. */
+/** One form: name, summary, where it stands, and one main button aligned cleanly across each row. */
 function AssignmentCard({
   assignment: a,
   submission,

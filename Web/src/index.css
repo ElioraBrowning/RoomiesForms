@@ -1516,13 +1516,14 @@ fieldset:disabled .choice {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
   gap: 1.9rem 1rem;
-  align-items: start;
+  align-items: stretch;
 }
 .form-card {
   position: relative;
   margin-top: 1.4rem;
   display: flex;
   flex-direction: column;
+  height: calc(100% - 1.4rem);
   gap: 0.6rem;
   padding: 0.95rem 1.05rem 1.05rem;
   background: var(--surface);
@@ -1594,6 +1595,10 @@ fieldset:disabled .choice {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+.form-card-needs + .form-card-meta + .form-card-actions,
+.form-card-needs ~ .form-card-actions {
+  margin-top: 0.25rem;
 }
 .form-card-actions .btn {
   flex: 1 1 auto;
@@ -2789,7 +2794,6 @@ fieldset:disabled .choice {
   margin: 0;
 }
 
-
 .form-department {
   margin-top: 0.75rem;
 }
@@ -2812,6 +2816,10 @@ fieldset:disabled .choice {
   margin: 0;
   font-size: 0.92rem;
   color: var(--text-muted);
+  flex: 1 1 auto;
+}
+.form-card-needs {
+  margin-top: auto;
 }
 .form-card-needs .btn-link {
   padding: 0;
@@ -3010,7 +3018,6 @@ fieldset:disabled .choice {
     transform: translateX(28px);
   }
 }
-
 
 /* ==========================================================================
    SOUTHEASTERN LOUISIANA UNIVERSITY — CS DEPARTMENT HEAD OVERVIEW (CALM & MINIMAL)
@@ -3412,7 +3419,6 @@ fieldset:disabled .choice {
     grid-template-columns: 1fr;
   }
 }
-
 
 /* ==========================================================================
    FACULTY DASHBOARD MOBILE CARDS (Thumb-Friendly for GDoc / Dr. Alkadi)

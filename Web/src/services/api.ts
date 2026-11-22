@@ -52,6 +52,47 @@ const EXIT_SURVEY_EMAILS = [
   'ksekeroglu@southeastern.edu',
 ];
 
+/** Official 7-form Computer Science Internship Packet sequence */
+const INTERNSHIP_PACKET_ORDER: Record<string, number> = {
+  CS401: 1,
+  CS402: 2,
+  CS403: 3,
+  CS404: 4,
+  CS420: 5,
+  CS410: 6,
+  CS405: 7,
+  EXITSURVEY: 99,
+};
+
+function extractPacketCode(keyOrTitle?: string): string {
+  const upper = (keyOrTitle || '').trim().toUpperCase();
+  if (upper.includes('EXIT')) return 'EXITSURVEY';
+  const match = upper.match(/CS\s*(?:FORM\s*)?(\d{3})/);
+  if (match) return `CS${match[1]}`;
+  return upper.replace(/\s+/g, '');
+}
+
+function comparePacketOrder(aKey?: string, bKey?: string): number {
+  const codeA = extractPacketCode(aKey);
+  const codeB = extractPacketCode(bKey);
+  const orderA = INTERNSHIP_PACKET_ORDER[codeA] ?? 50;
+  const orderB = INTERNSHIP_PACKET_ORDER[codeB] ?? 50;
+  if (orderA !== orderB) return orderA - orderB;
+  return (aKey || '').localeCompare(bKey || '');
+}
+
+function sortFormsInPacketOrder(list: FormMeta[]): FormMeta[] {
+  return [...list].sort((a, b) =>
+    comparePacketOrder(a.googleFormId || a.title, b.googleFormId || b.title),
+  );
+}
+
+function sortAssignmentsInPacketOrder(list: Assignment[]): Assignment[] {
+  return [...list].sort((a, b) =>
+    comparePacketOrder(a.formKey || a.formTitle, b.formKey || b.formTitle),
+  );
+}
+
 /**
  * Resolves the Google Apps Script Web App endpoint URL.
  * Normalizes Google Workspace domain redirects (/a/macros/<domain>/s/ -> /macros/s/)
@@ -334,7 +375,7 @@ const api = {
     }
   },
 
-  /** Get list of accessible forms */
+  /** Get list of accessible forms in canonical 7-form internship packet order */
   async getForms(userEmail?: string, roles?: string[]): Promise<FormMeta[]> {
     let sessionRoles = roles || [];
     if (sessionRoles.length === 0) {
@@ -353,14 +394,16 @@ const api = {
       !sessionRoles.some((r) => ['Faculty', 'Department Head'].includes(r));
 
     const filterForRole = (list: FormMeta[]) =>
-      isExitSurveyOnly
-        ? list.filter(
-            (f) =>
-              f.anonymous ||
-              f.title?.toLowerCase().includes('exit') ||
-              f.googleFormId?.toLowerCase().includes('exit'),
-          )
-        : list;
+      sortFormsInPacketOrder(
+        isExitSurveyOnly
+          ? list.filter(
+              (f) =>
+                f.anonymous ||
+                f.title?.toLowerCase().includes('exit') ||
+                f.googleFormId?.toLowerCase().includes('exit'),
+            )
+          : list,
+      );
 
     try {
       const forms = await requestAppsScript<FormMeta[]>('getForms', { userEmail, roles });
@@ -431,21 +474,23 @@ const api = {
     }
   },
 
-  /** Get assignments for currently signed-in student */
+  /** Get assignments for currently signed-in student in canonical packet order */
   async getMyAssignments(userEmail?: string): Promise<Assignment[]> {
     try {
-      return await requestAppsScript<Assignment[]>('getMyAssignments', { userEmail });
+      const list = await requestAppsScript<Assignment[]>('getMyAssignments', { userEmail });
+      return sortAssignmentsInPacketOrder(list);
     } catch {
-      return MOCK_ASSIGNMENTS;
+      return sortAssignmentsInPacketOrder(MOCK_ASSIGNMENTS);
     }
   },
 
-  /** Get all assignments across all students (Faculty/Dept Head) */
+  /** Get all assignments across all students (Faculty/Dept Head) in canonical packet order */
   async getAllAssignments(): Promise<Assignment[]> {
     try {
-      return await requestAppsScript<Assignment[]>('getAllAssignments');
+      const list = await requestAppsScript<Assignment[]>('getAllAssignments');
+      return sortAssignmentsInPacketOrder(list);
     } catch {
-      return MOCK_ASSIGNMENTS;
+      return sortAssignmentsInPacketOrder(MOCK_ASSIGNMENTS);
     }
   },
 
