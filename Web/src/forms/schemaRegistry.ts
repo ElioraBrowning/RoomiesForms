@@ -8,14 +8,35 @@ import cs420 from './schemas/CS420.json';
 import exitSurvey from './schemas/ExitSurvey.json';
 import type { FormSchema } from './types';
 
+/** Official 7-form Computer Science Internship Packet sequence */
+export const INTERNSHIP_PACKET_ORDER: Record<string, number> = {
+  CS401: 1,
+  CS402: 2,
+  CS403: 3,
+  CS404: 4,
+  CS420: 5,
+  CS410: 6,
+  CS405: 7,
+  EXITSURVEY: 99,
+};
+
+export function comparePacketOrder(aKey: string, bKey: string): number {
+  const normA = aKey.replace(/\s+/g, '').toUpperCase();
+  const normB = bKey.replace(/\s+/g, '').toUpperCase();
+  const orderA = INTERNSHIP_PACKET_ORDER[normA] ?? 50;
+  const orderB = INTERNSHIP_PACKET_ORDER[normB] ?? 50;
+  if (orderA !== orderB) return orderA - orderB;
+  return aKey.localeCompare(bKey);
+}
+
 export const STATIC_SCHEMAS: Record<string, FormSchema> = {
   CS401: cs401 as unknown as FormSchema,
   CS402: cs402 as unknown as FormSchema,
   CS403: cs403 as unknown as FormSchema,
   CS404: cs404 as unknown as FormSchema,
-  CS405: cs405 as unknown as FormSchema,
-  CS410: cs410 as unknown as FormSchema,
   CS420: cs420 as unknown as FormSchema,
+  CS410: cs410 as unknown as FormSchema,
+  CS405: cs405 as unknown as FormSchema,
   ExitSurvey: exitSurvey as unknown as FormSchema,
 };
 
@@ -33,7 +54,7 @@ export function getStaticSchema(keyOrId: string | number): FormSchema | null {
 }
 
 /**
- * Returns all 8 canonical form schemas bundled in the frontend.
+ * Returns all 8 canonical form schemas bundled in the frontend in official packet order.
  */
 export function getAllStaticSchemas(): FormSchema[] {
   return Object.values(STATIC_SCHEMAS);
