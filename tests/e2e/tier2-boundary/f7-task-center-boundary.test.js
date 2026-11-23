@@ -75,10 +75,10 @@ describe('Feature F7 (Tier 2): Department Task Center Boundary & Edge Cases', ()
       /export interface DepartmentTaskCenterProps/,
       'DepartmentTaskCenterProps interface must be defined'
     );
-    assert.match(
+    assert.doesNotMatch(
       content,
-      /export type DeanTaskCenterProps = DepartmentTaskCenterProps/,
-      'Legacy DeanTaskCenterProps alias must be preserved for compatibility'
+      /export type DeanTaskCenterProps/,
+      'Legacy DeanTaskCenterProps alias must be removed'
     );
   });
 });

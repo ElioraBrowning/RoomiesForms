@@ -45,8 +45,8 @@ export function loadWebEnv() {
     }
   }
   return {
-    url: process.env.VITE_GOOGLE_APPS_SCRIPT_URL || env.VITE_GOOGLE_APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbw7QOaoJQvCxc-1LaxJVlicq9wd00gYTOryX8vy_1XdGDSPTElR7dADKdBw7yXHXjAO2A/exec',
-    key: process.env.VITE_GOOGLE_APPS_SCRIPT_KEY || env.VITE_GOOGLE_APPS_SCRIPT_KEY || 'e81cc39b-3c52-4096-92ed-5054eee35d3e',
+    url: process.env.VITE_API_PROXY_URL || process.env.VITE_GOOGLE_APPS_SCRIPT_URL || env.VITE_API_PROXY_URL || env.VITE_GOOGLE_APPS_SCRIPT_URL || '',
+    key: process.env.VITE_GOOGLE_APPS_SCRIPT_KEY || env.VITE_GOOGLE_APPS_SCRIPT_KEY || '',
   };
 }
 

@@ -13,18 +13,18 @@ import SurveyResults from './pages/SurveyResults';
 import EmployerReview from './pages/EmployerReview';
 import Analytics from './pages/Analytics';
 
-const REVIEWER_ROLES = ['Faculty', 'Department Head'];
-const EXIT_SURVEY_ROLE = 'Exit Survey Reviewer';
-
-const isExitSurveyOnly = (roles?: string[]) =>
-  Boolean(roles?.includes(EXIT_SURVEY_ROLE) && !roles?.some((r) => REVIEWER_ROLES.includes(r)));
+import {
+  EXIT_SURVEY_ROLE,
+  hasReviewerRole,
+  isExitSurveyOnly,
+} from './utils/roles';
 
 const ReviewerRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   if (isExitSurveyOnly(user?.roles)) {
     return <Navigate to="/exit-survey-results" replace />;
   }
-  if (!user?.roles?.some((r) => REVIEWER_ROLES.includes(r))) {
+  if (!hasReviewerRole(user?.roles)) {
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
@@ -34,7 +34,7 @@ const ExitSurveyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   const allowed =
     user?.roles?.includes(EXIT_SURVEY_ROLE) ||
-    user?.roles?.some((r) => REVIEWER_ROLES.includes(r));
+    hasReviewerRole(user?.roles);
 
   if (!allowed) {
     return <Navigate to="/dashboard" replace />;

@@ -1,7 +1,7 @@
 /* Official Southeastern Louisiana University Brand Standards */
 :root {
-  --brand-green: #1a5632;
-  --brand-gold: #ffc629;
+  --brand-green: #215732;
+  --brand-gold: #ffc72c;
   --brand-mint: #6cca98;
   --brand-dark-gold: #cb9700;
   --brand-salmon: #ea6852;
@@ -41,7 +41,7 @@
   --text-heading: #0f172a;
   --text-muted: #64748b;
   --link: var(--brand-green);
-  --focus: #ffc629;
+  --focus: #ffc72c;
 
   --input-bg: #ffffff;
   --input-border: #cbd5e1;
@@ -306,6 +306,24 @@ pre {
    - Green pill capsule enclosing actions, notifications, and menu on the right
    ------------------------------------------------------------------ */
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.75rem;
+  z-index: 999;
+  padding: 0.6rem 1rem;
+  background: var(--brand-green);
+  color: var(--brand-gold);
+  font-weight: 700;
+  border-radius: var(--radius-small);
+  border: 2px solid var(--brand-gold);
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 0.75rem;
+  outline: none;
+}
+
 .navbar-floating-wrapper {
   position: sticky;
   top: 0;
@@ -319,7 +337,9 @@ pre {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 0.85rem max(var(--page-gutter), calc((100% - var(--page-max)) / 2)) 0.75rem;
 }
 
@@ -576,11 +596,12 @@ pre {
   right: 0;
   min-width: 230px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  opacity: 1;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.12);
   padding: 0.45rem;
-  z-index: 100;
+  z-index: 200;
   animation: navbarFadeIn 0.18s ease-out;
 }
 
@@ -667,10 +688,19 @@ pre {
 }
 
 /* Mobile Responsiveness */
-@media (max-width: 768px) {
+@media (max-width: 1120px) {
   .navbar-links-desktop {
     display: none;
   }
+}
+
+@media (min-width: 1121px) {
+  .navbar-dropdown-mobile-links {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
   .navbar-floating {
     padding: 0.65rem 0.75rem;
   }
@@ -1963,7 +1993,7 @@ fieldset:disabled .choice {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1.25rem;
+  padding: 4.5rem 1.25rem 2.5rem;
   background: var(--bg);
 }
 .login-backdrop {
@@ -1981,7 +2011,7 @@ fieldset:disabled .choice {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
-  z-index: 2;
+  z-index: 10;
 }
 .login-container {
   position: relative;
@@ -2566,7 +2596,7 @@ fieldset:disabled .choice {
 }
 
 .review-page.has-decision-bar {
-  padding-bottom: 6rem;
+  padding-bottom: 8.5rem;
 }
 .decision-bar {
   position: fixed;
@@ -3531,6 +3561,11 @@ fieldset:disabled .choice {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+:root[data-theme="dark"] .dean-workspace-tab.is-active {
+  background: rgba(255, 199, 44, 0.16);
+  color: var(--brand-gold);
+}
+
 .dean-task-center {
   display: flex;
   flex-direction: column;
@@ -3710,10 +3745,17 @@ fieldset:disabled .choice {
   position: relative;
 }
 
+.dean-filter-select,
+select.input {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .dean-filter-select {
   font-size: 0.84rem;
   font-weight: 600;
-  padding: 0.45rem 0.75rem;
+  padding: 0.45rem 1.75rem 0.45rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
   background: var(--surface);

@@ -33,12 +33,12 @@ describe('Feature F10 (Tier 2): E2E Audit Boundary & Edge Cases', () => {
   });
 
   it('TC-T2-F10-02: Dean Role Stripping on Login Context Initialization', () => {
-    const authContent = readFile('Web/src/context/AuthContext.tsx');
-    assert.ok(authContent, 'AuthContext.tsx must exist');
+    const rolesContent = readFile('Web/src/utils/roles.ts');
+    assert.ok(rolesContent, 'roles.ts must exist');
     assert.match(
-      authContent,
+      rolesContent,
       /filter\(\(r\).*r !== 'Dean'\)/,
-      "AuthContext.tsx must explicitly filter out 'Dean' role in sanitizeRoles"
+      "roles.ts must explicitly filter out 'Dean' role in sanitizeRoles"
     );
   });
 

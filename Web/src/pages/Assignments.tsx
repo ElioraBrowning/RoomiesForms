@@ -57,7 +57,7 @@ export default function Assignments() {
   const addEmail = () => {
     const email = newEmail.trim().toLowerCase();
     if (!STUDENT_EMAIL.test(email)) {
-      setErrors({ ...errors, newEmail: 'Enter a Southeastern email, ending in @selu.edu.' });
+      setErrors({ ...errors, newEmail: 'Enter a Southeastern email ending in @selu.edu or @southeastern.edu.' });
       return;
     }
     if (!students.some((s) => s.email.toLowerCase() === email)) {

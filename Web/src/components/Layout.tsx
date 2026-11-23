@@ -8,6 +8,7 @@ import { useTheme } from '../hooks/useTheme';
 import { BrandImage } from './BrandImage';
 import { brand } from '../brand';
 import Breadcrumbs from './Breadcrumbs';
+import { hasReviewerRole, isExitSurveyOnly as isExitSurveyOnlyRole } from '../utils/roles';
 
 export default function Layout() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -17,10 +18,8 @@ export default function Layout() {
   const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const isReviewer = user?.roles?.some((r) => ['Faculty', 'Department Head'].includes(r));
-  const isExitSurveyOnly = Boolean(
-    user?.roles?.includes('Exit Survey Reviewer') && !isReviewer
-  );
+  const isReviewer = hasReviewerRole(user?.roles);
+  const isExitSurveyOnly = isExitSurveyOnlyRole(user?.roles);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -28,8 +27,17 @@ export default function Layout() {
         setDropdownOpen(false);
       }
     }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setDropdownOpen(false);
+      }
+    }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -46,6 +54,9 @@ export default function Layout() {
 
   return (
     <div className="layout-container">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       {/* Modern Southeastern Floating Capsule Header & Divider */}
       <div className="navbar-floating-wrapper">
         <header className="navbar-floating" role="banner">
@@ -218,7 +229,7 @@ export default function Layout() {
       {!isExitSurveyOnly && <Breadcrumbs />}
 
       {/* Main Content Area */}
-      <main className="main-content">
+      <main id="main-content" className="main-content" tabIndex={-1}>
         <Outlet />
       </main>
     </div>

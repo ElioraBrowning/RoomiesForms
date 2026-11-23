@@ -90,20 +90,28 @@ export default function FormView() {
 
   const initialAnswers = useMemo<Answers>(() => {
     if (!schema) return {};
+    const defaults: Answers = {};
+    if (!schema.anonymous) {
+      // Fill in what we already know about the student, only for questions this form asks.
+      const known: Answers = {
+        name: user?.fullName,
+        studentName: user?.fullName,
+        email: user?.email,
+        wNumber: user?.wNumber || undefined,
+      };
+      const ids = new Set(questionsFor(schema, 'student').map((q) => q.id));
+      for (const [k, v] of Object.entries(known)) {
+        if (ids.has(k) && v) defaults[k] = v;
+      }
+    }
     if (draft) {
       const { __progress: _ignored, ...rest } = draft.responses as Answers & { __progress?: unknown };
-      return rest;
+      const cleanedRest = Object.fromEntries(
+        Object.entries(rest).filter(([, v]) => v !== undefined && v !== null && v !== ''),
+      );
+      return { ...defaults, ...cleanedRest };
     }
-    if (schema.anonymous) return {};
-    // Fill in what we already know about the student, only for questions this form asks.
-    const known: Answers = {
-      name: user?.fullName,
-      studentName: user?.fullName,
-      email: user?.email,
-      wNumber: user?.wNumber || undefined,
-    };
-    const ids = new Set(questionsFor(schema, 'student').map((q) => q.id));
-    return Object.fromEntries(Object.entries(known).filter(([k, v]) => ids.has(k) && v));
+    return defaults;
   }, [schema, draft, user]);
 
   const sentBack = useMemo(

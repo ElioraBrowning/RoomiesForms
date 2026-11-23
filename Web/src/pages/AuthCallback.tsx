@@ -5,26 +5,21 @@ import api, { readApiError } from "../services/api";
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [error, setError] = useState("");
+  const [asyncError, setAsyncError] = useState("");
   const exchangeAttempted = useRef(false);
 
+  const code = searchParams.get("code");
+  const errorParam = searchParams.get("error");
+  const paramError = errorParam
+    ? `Google sign-in was denied: ${errorParam}`
+    : !code
+      ? "No authorization code was returned from Google."
+      : "";
+
+  const error = paramError || asyncError;
+
   useEffect(() => {
-    // Avoid double-firing in React 18 Strict Mode
-    if (exchangeAttempted.current) return;
-
-    const code = searchParams.get("code");
-    const errorParam = searchParams.get("error");
-
-    if (errorParam) {
-      setError(`Google sign-in was denied: ${errorParam}`);
-      return;
-    }
-
-    if (!code) {
-      setError("No authorization code was returned from Google.");
-      return;
-    }
-
+    if (exchangeAttempted.current || !code || errorParam) return;
     exchangeAttempted.current = true;
 
     const exchangeCode = async () => {
@@ -32,21 +27,19 @@ export default function AuthCallback() {
         const redirectUri = `${window.location.origin}/auth/callback`;
         const res = await api.post("/auth/google", { code, redirectUri });
 
-        // Save session credentials
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
 
-        // Navigate to the dashboard
         navigate("/dashboard", { replace: true });
-        window.location.reload(); // Re-initialize AuthContext with stored token
+        window.location.reload();
       } catch (err: any) {
         const { message } = readApiError(err, "Google sign-in failed.");
-        setError(message);
+        setAsyncError(message);
       }
     };
 
     void exchangeCode();
-  }, [searchParams, navigate]);
+  }, [code, errorParam, navigate]);
 
   if (error) {
     return (

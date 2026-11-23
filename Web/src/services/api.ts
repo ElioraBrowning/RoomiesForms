@@ -108,6 +108,11 @@ export function resolveAppsScriptUrl(): string {
     return 'http://localhost:5001';
   }
 
+  const proxyUrl = (import.meta.env.VITE_API_PROXY_URL as string | undefined)?.trim();
+  if (proxyUrl) {
+    return proxyUrl;
+  }
+
   const rawUrl = (import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL as string | undefined)?.trim();
   const apiKey = (import.meta.env.VITE_GOOGLE_APPS_SCRIPT_KEY as string | undefined)?.trim();
 
@@ -147,6 +152,9 @@ export function normalizeBackendEmail(email?: string): string {
     clean === 'bachee@southeastern.edu'
   ) {
     return 'bonnie.achee@southeastern.edu';
+  }
+  if (clean === 'cs@selu.edu' || clean === 'cs@southeastern.edu') {
+    return 'cs@southeastern.edu';
   }
   if (EXIT_SURVEY_EMAILS.includes(clean)) {
     return 'kazim.sekeroglu@selu.edu';
@@ -192,26 +200,20 @@ export async function requestAppsScript<T = any>(
       ? sessionUser.roles
       : [];
 
-  const mockProfile = rawUserEmail ? getMockUser(rawUserEmail) : null;
-  const isExitSurveyReviewer =
-    rawRoles.includes('Exit Survey Reviewer') ||
-    canonicalUserEmail === 'kazim.sekeroglu@selu.edu';
-
-  // Apps Script looks up user permissions by userEmail in the Users sheet.
-  // Delegate read-only survey lookups to an existing Faculty sheet account so
-  // getForms and getAnonymousResponses return the Exit Survey without needing a sheet row or Apps Script edit.
-  const backendLookupEmail = isExitSurveyReviewer ? 'galkadi@selu.edu' : canonicalUserEmail;
-  const effectiveRoles = isExitSurveyReviewer
-    ? ['Faculty']
-    : mockProfile && (mockProfile.roles.includes('Faculty') || mockProfile.roles.includes('Department Head'))
-      ? mockProfile.roles
-      : rawRoles;
+  let sessionToken: string | undefined;
+  try {
+    const t = localStorage.getItem('token');
+    if (t && t !== 'undefined') sessionToken = t;
+  } catch {
+    // Ignore storage access errors
+  }
 
   const requestBody: Record<string, any> = {
     ...cleanPayload,
     action,
-    userEmail: backendLookupEmail,
-    roles: effectiveRoles,
+    userEmail: canonicalUserEmail,
+    roles: rawRoles,
+    ...(sessionToken ? { sessionToken } : {}),
   };
 
   if (typeof cleanPayload.email === 'string') {
@@ -458,20 +460,22 @@ const api = {
 
   /** Save / update form JSON schema */
   async saveFormSchema(schema: FormSchema, userEmail?: string): Promise<FormSchema> {
-    try {
-      return await requestAppsScript<FormSchema>('saveFormSchema', { schema, userEmail });
-    } catch {
-      return schema;
-    }
+    return await requestAppsScript<FormSchema>('saveFormSchema', { schema, userEmail });
   },
 
   /** Create new form */
   async createForm(schema: FormSchema, userEmail?: string): Promise<{ id: number; googleFormId: string }> {
-    try {
-      return await requestAppsScript<{ id: number; googleFormId: string }>('createForm', { schema, userEmail });
-    } catch {
-      return { id: Date.now(), googleFormId: schema.id };
-    }
+    return await requestAppsScript<{ id: number; googleFormId: string }>('createForm', { schema, userEmail });
+  },
+
+  /** List all users and their roles (Admin / Department Head) */
+  async getUsers(userEmail?: string): Promise<User[]> {
+    return await requestAppsScript<User[]>('getUsers', { userEmail });
+  },
+
+  /** Update a user's roles (Admin) */
+  async updateUserRoles(targetEmail: string, roles: string[], userEmail?: string): Promise<User> {
+    return await requestAppsScript<User>('updateUserRoles', { targetEmail, roles, userEmail });
   },
 
   /** Get assignments for currently signed-in student in canonical packet order */
@@ -688,6 +692,26 @@ const api = {
     }
   },
 
+  /** Revoke an approval and return submission to Pending */
+  async revokeApproval(
+    id: number,
+    userEmail?: string,
+    roles?: string[],
+  ): Promise<{ message: string }> {
+    return await requestAppsScript<{ message: string }>('revokeApproval', {
+      id,
+      userEmail,
+      roles,
+    });
+  },
+
+  /** Clean up stale test rows and duplicate aliases in Google Sheet (Admin) */
+  async cleanupSheetTestData(userEmail?: string): Promise<{ cleaned: boolean; removed: Record<string, number> }> {
+    return await requestAppsScript<{ cleaned: boolean; removed: Record<string, number> }>('cleanupSheetTestData', {
+      userEmail,
+    });
+  },
+
   /** Generate or renew employer shareable access link */
   async renewEmployerLink(id: number, userEmail?: string, roles?: string[]): Promise<EmployerReview> {
     try {
@@ -737,6 +761,20 @@ const api = {
 
   /** Get notifications for signed-in user */
   async getNotifications(userEmail?: string): Promise<{ unread: number; items: AppNotification[] }> {
+    try {
+      const raw = localStorage.getItem('user');
+      if (raw && raw !== 'undefined') {
+        const parsed = JSON.parse(raw) as { roles?: string[] };
+        const roles = parsed?.roles || [];
+        const isReviewer = roles.some((r) => ['Admin', 'Department Head', 'Faculty'].includes(r));
+        if (roles.includes('Exit Survey Reviewer') && !isReviewer) {
+          return { unread: 0, items: [] };
+        }
+      }
+    } catch {
+      // Ignore storage errors
+    }
+
     try {
       return await requestAppsScript<{ unread: number; items: AppNotification[] }>('getNotifications', { userEmail });
     } catch {
@@ -841,8 +879,15 @@ const api = {
       return { data: data as unknown as T };
     }
     if (cleanUrl === '/auth/google') {
-      const email = body?.email || 'eliora.browning@selu.edu';
-      const data = await this.login(email);
+      const code = body?.code;
+      const redirectUri = body?.redirectUri;
+      if (!code) {
+        throw new Error('Google authorization code is required.');
+      }
+      const data = await requestAppsScript<{ token: string; user: User }>('authGoogle', {
+        code,
+        redirectUri,
+      });
       return { data: data as unknown as T };
     }
     if (cleanUrl === '/assignments') {

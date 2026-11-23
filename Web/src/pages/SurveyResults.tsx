@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import api, { readApiError } from '../services/api';
-import { useAuth } from '../context/AuthContext';
 import type { Answers, FormQuestion, FormSchema } from '../forms/types';
 import { questionsFor } from '../forms/types';
 import { SkeletonForm } from '../components/Skeleton';
@@ -26,15 +25,8 @@ interface FormSummary {
  */
 export default function SurveyResults() {
   const { formId } = useParams();
-  const { user } = useAuth();
   const [data, setData] = useState<ResultsResponse | null>(null);
   const [error, setError] = useState('');
-
-  // Check if current user is restricted solely to Exit Survey viewing
-  const isExitSurveyOnly = Boolean(
-    user?.roles?.includes('Exit Survey Reviewer') &&
-    !user?.roles?.some((r) => ['Faculty', 'Department Head'].includes(r))
-  );
 
   useEffect(() => {
     let active = true;
@@ -94,11 +86,6 @@ export default function SurveyResults() {
   return (
     <div className="results-page">
       <div className="page-head">
-        {!isExitSurveyOnly && (
-          <p className="page-eyebrow">
-            <Link to="/dashboard">Dashboard</Link> / Survey results
-          </p>
-        )}
         <h1>{data.title}</h1>
         <p className="page-lede">
           {count} response{count === 1 ? '' : 's'} from {data.assigned} student{data.assigned === 1 ? '' : 's'} assigned. Responses are anonymous: no names, W#s or submission times are stored with them.

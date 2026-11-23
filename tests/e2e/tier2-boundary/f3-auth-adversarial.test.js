@@ -212,7 +212,7 @@ describe('Feature F3 Empirical Adversarial Stress Suite: Auth & Lifecycle Integr
     );
     assert.match(
       source,
-      /handleQuickLogin\s*\(\s*["']alkadi@selu\.edu["']\s*\)/,
+      /handleQuickLogin\s*\(\s*["'](?:ghassan\.)?alkadi@selu\.edu["']\s*\)/,
       'Login.tsx must provide quick login for Dr. Ghassan Alkadi (Faculty)'
     );
     assert.match(

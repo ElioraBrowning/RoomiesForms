@@ -95,19 +95,20 @@ describe('Feature F2 (Tier 1): Dean Role & Terminology Removal', () => {
 
   it('TC-E2E-F2-04: Navigation Bar & Reviewer Role Segregation', () => {
     const appContent = readFile('Web/src/App.tsx');
+    const rolesContent = readFile('Web/src/utils/roles.ts');
     const layoutContent = readFile('Web/src/components/Layout.tsx');
-    assert.ok(appContent && layoutContent, 'App.tsx and Layout.tsx must exist');
+    assert.ok(appContent && rolesContent && layoutContent, 'App.tsx, roles.ts, and Layout.tsx must exist');
 
-    // In App.tsx, REVIEWER_ROLES must not contain 'Dean'
+    // In roles.ts, REVIEWER_ROLES must not contain 'Dean'
     assert.match(
-      appContent,
+      rolesContent,
       /REVIEWER_ROLES\s*=\s*\[.*'Faculty'.*'Department Head'.*\]/s,
-      'App.tsx REVIEWER_ROLES must include Faculty and Department Head'
+      'roles.ts REVIEWER_ROLES must include Faculty and Department Head'
     );
     assert.doesNotMatch(
-      appContent,
+      rolesContent,
       /REVIEWER_ROLES\s*=\s*\[[^\]]*'Dean'[^\]]*\]/s,
-      "App.tsx REVIEWER_ROLES must not include 'Dean'"
+      "roles.ts REVIEWER_ROLES must not include 'Dean'"
     );
 
     // In Layout.tsx, reviewer check must not include 'Dean'

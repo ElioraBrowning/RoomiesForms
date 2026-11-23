@@ -13,6 +13,7 @@ import { CopyLink } from '../components/CopyLink';
 import { SkeletonForm } from '../components/Skeleton';
 import { employerLink } from '../utils/links';
 import { submitToGoogleWorkspace } from '../services/googleSheetsService';
+import { getStaticSchema } from '../forms/schemaRegistry';
 
 type Mark = 'ok' | 'flag' | 'note';
 interface QuestionReview {
@@ -21,10 +22,11 @@ interface QuestionReview {
 }
 type View = 'check' | 'all' | 'layout';
 
-const REVIEWER_ROLES = ['Faculty', 'Department Head'];
+const REVIEWER_ROLES = ['Admin', 'Faculty', 'Department Head'];
 
 function matchesRole(requiredRole?: string, userRoles?: string[]): boolean {
   if (!requiredRole || !userRoles) return false;
+  if (userRoles.includes('Admin')) return true;
   if (userRoles.includes(requiredRole)) return true;
   if (requiredRole === 'Faculty Evaluator' && userRoles.includes('Faculty')) return true;
   if (
@@ -68,6 +70,7 @@ export default function SubmissionReview() {
 
   const [submission, setSubmission] = useState<SubmissionDetail | null>(null);
   const [schema, setSchema] = useState<FormSchema | null>(null);
+  const [schemaLoaded, setSchemaLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [reviews, setReviews] = useState<Record<string, QuestionReview>>({});
   const [view, setView] = useState<View>('check');
@@ -83,11 +86,12 @@ export default function SubmissionReview() {
       try {
         const res = await api.get<SubmissionDetail>(`/submissions/${id}`);
         setSubmission(res.data);
-        const formKey = res.data.form?.googleFormId;
+        const formKey = res.data.form?.googleFormId || res.data.form?.id;
         if (formKey) {
           const formRes = await api.get<FormDetail>(`/forms/${formKey}`).catch(() => null);
-          setSchema(formRes?.data.schema ?? null);
+          setSchema(formRes?.data.schema ?? getStaticSchema(formKey));
         }
+        setSchemaLoaded(true);
       } catch (err) {
         setLoadError(readApiError(err, "Couldn't load this submission.").message);
       }
@@ -320,7 +324,9 @@ export default function SubmissionReview() {
             </div>
           </div>
 
-          {!schema ? (
+          {!schemaLoaded ? (
+            <p className="help-text">Loading form definition…</p>
+          ) : !schema ? (
             <p className="help-text">This form's definition couldn't be loaded.</p>
           ) : activeView === 'layout' ? (
             <FormLayoutReview

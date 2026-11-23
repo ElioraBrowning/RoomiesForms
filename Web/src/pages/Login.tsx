@@ -173,13 +173,13 @@ export default function Login() {
                 alignItems: "center",
                 textAlign: "center",
                 margin: "1rem 0",
-                color: "var(--color-text-muted, #666)",
+                color: "var(--muted)",
                 fontSize: "0.85rem",
               }}
             >
-              <div style={{ flex: 1, borderBottom: "1px solid var(--color-border, #ccc)" }} />
+              <div style={{ flex: 1, borderBottom: "1px solid var(--line)" }} />
               <span style={{ padding: "0 10px" }}>or use test credentials</span>
-              <div style={{ flex: 1, borderBottom: "1px solid var(--color-border, #ccc)" }} />
+              <div style={{ flex: 1, borderBottom: "1px solid var(--line)" }} />
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
@@ -234,6 +234,14 @@ export default function Login() {
                 >
                   <span className="login-quick-role">Department Head</span>{" "}
                   <strong>Dr. Bonnie Achée</strong>
+                </button>
+                <button
+                  type="button"
+                  className="login-quick-btn"
+                  onClick={() => handleQuickLogin("cs@southeastern.edu")}
+                >
+                  <span className="login-quick-role">Admin</span>{" "}
+                  <strong>CS Department Admin</strong>
                 </button>
                 <button
                   type="button"
