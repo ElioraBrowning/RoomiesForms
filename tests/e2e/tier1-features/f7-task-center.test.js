@@ -16,16 +16,11 @@ describe('Feature F7 (Tier 1): Department Task Center Action Persistence', () =>
     const content = readFile('Web/src/components/dashboards/DepartmentTaskCenter.tsx');
     assert.ok(content, 'DepartmentTaskCenter.tsx must exist');
 
-    // handleApproveNext must call backend approval and submitToGoogleWorkspace
+    // handleApproveNext must call backend approval
     assert.match(
       content,
       /(?:api\.approveSubmission|api\.post\(`\/submissions\/\${id}\/approve`|approveSubmission)/,
       'DepartmentTaskCenter.tsx handleApproveNext must invoke backend approval API (Feature F7)'
-    );
-    assert.match(
-      content,
-      /submitToGoogleWorkspace/,
-      'DepartmentTaskCenter.tsx handleApproveNext must persist approval audit record to Google Sheets (Feature F7)'
     );
   });
 
@@ -33,16 +28,11 @@ describe('Feature F7 (Tier 1): Department Task Center Action Persistence', () =>
     const content = readFile('Web/src/components/dashboards/DepartmentTaskCenter.tsx');
     assert.ok(content, 'DepartmentTaskCenter.tsx must exist');
 
-    // handleSendRevision must call backend rejection and submitToGoogleWorkspace
+    // handleSendRevision must call backend rejection
     assert.match(
       content,
       /(?:api\.rejectSubmission|api\.post\(`\/submissions\/\${id}\/reject`|rejectSubmission)/,
       'DepartmentTaskCenter.tsx handleSendRevision must invoke backend rejection API (Feature F7)'
-    );
-    assert.match(
-      content,
-      /submitToGoogleWorkspace/,
-      'DepartmentTaskCenter.tsx handleSendRevision must persist revision audit record to Google Sheets (Feature F7)'
     );
   });
 

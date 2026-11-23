@@ -654,6 +654,15 @@ export const MOCK_SUBMISSION_DETAILS: Record<number, SubmissionDetail> = {
 
 export function getMockUser(email: string): User {
   const clean = email.trim().toLowerCase();
+  if (clean === 'cs@southeastern.edu' || clean === 'cs@selu.edu') {
+    return {
+      email: 'cs@southeastern.edu',
+      fullName: 'CS Department Admin',
+      wNumber: 'W0000001',
+      roles: ['Admin', 'Department Head', 'Faculty'],
+      isDesignated: true,
+    };
+  }
   if (
     clean === 'alkadi@selu.edu' ||
     clean === 'alkadi@southeastern.edu' ||

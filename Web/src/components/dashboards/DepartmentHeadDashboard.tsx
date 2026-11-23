@@ -1,7 +1,8 @@
-import { useState, useMemo, useEffect } from 'react';
-import type { StudentPlacement } from '../../types';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import type { StudentPlacement, SubmissionSummary } from '../../types';
 import { INITIAL_PLACEMENTS } from '../../services/mockPlacements';
 import DepartmentTaskCenter from './DepartmentTaskCenter';
+import api, { readApiError } from '../../services/api';
 
 const STORAGE_KEY = 'selu_dept_head_placements_v1';
 const DEFAULT_VIEW_KEY = 'selu_dept_head_default_view';
@@ -36,9 +37,41 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<StudentPlacement | null>(null);
 
-  // Sync state
+  // Sync & live queue state
   const [sheetInput, setSheetInput] = useState('');
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [pendingCount, setPendingCount] = useState<number>(0);
+
+  const loadLiveQueueCount = useCallback(async () => {
+    try {
+      const res = await api.get<SubmissionSummary[]>('/submissions');
+      const items = Array.isArray(res.data) ? res.data : [];
+      const pending = items.filter(
+        (s) => s.status !== 'Approved' && s.status !== 'Completed' && s.status !== 'Awaiting Employer'
+      );
+      setPendingCount(pending.length);
+    } catch {
+      setPendingCount(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadLiveQueueCount();
+  }, [loadLiveQueueCount]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selectedStudent) setSelectedStudent(null);
+        if (showSyncModal) setShowSyncModal(false);
+      }
+    };
+    if (selectedStudent || showSyncModal) {
+      document.addEventListener('keydown', onKeyDown);
+      return () => document.removeEventListener('keydown', onKeyDown);
+    }
+  }, [selectedStudent, showSyncModal]);
 
   useEffect(() => {
     try {
@@ -126,14 +159,11 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
     window.print();
   };
 
-  const handleSyncSubmit = () => {
-    if (!sheetInput.trim()) {
-      setSyncStatus('Please enter a Google Sheet URL or paste CSV rows.');
-      return;
-    }
+  const handleSyncSubmit = async () => {
+    const trimmed = sheetInput.trim();
 
-    // If it's a CSV or text block
-    const lines = sheetInput.trim().split('\n');
+    // If it's a CSV or text block with header + rows
+    const lines = trimmed ? trimmed.split('\n') : [];
     if (lines.length > 1) {
       try {
         const parsed: StudentPlacement[] = [];
@@ -144,42 +174,47 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
               id: `sync-${i}-${Date.now()}`,
               studentName: cols[0] || `Student ${i}`,
               wNumber: cols[1] || `W000000${i}`,
-              email: `${(cols[0] || 'student').toLowerCase().replace(/\s+/g, '.')}@selu.edu`,
+              email: `${(cols[0] || 'student').toLowerCase().replace(/\s+/g, '.')}@southeastern.edu`,
               classification: (cols[2] as any) || 'Senior',
-              gpa: parseFloat(cols[3]) || 3.5,
+              gpa: parseFloat(cols[3]) || 0,
               companyName: cols[4] || 'Partner Company',
               companyLocation: 'Hammond / Baton Rouge, LA',
               industrySector: 'Technology',
               roleTitle: cols[5] || 'Intern',
               roleDuties: 'Student internship duties recorded.',
-              hourlyPay: parseFloat(cols[6]) || 24.0,
+              hourlyPay: parseFloat(cols[6]) || 0,
               semester: 'Fall 2026',
               supervisorName: 'Supervisor',
-              supervisorEmail: 'supervisor@company.com',
+              supervisorEmail: '',
               status: 'Approved',
             });
           }
         }
         if (parsed.length > 0) {
           setPlacements(parsed);
-          setSyncStatus(`Updated successfully with ${parsed.length} student records.`);
-          setTimeout(() => {
-            setShowSyncModal(false);
-            setSyncStatus(null);
-            setSheetInput('');
-          }, 1000);
+          setSyncStatus(`Updated with ${parsed.length} student records from CSV.`);
           return;
         }
       } catch {
-        // fall through
+        setSyncStatus('Could not parse CSV rows. Please check the format and try again.');
+        return;
       }
     }
 
-    setSyncStatus('Connected and refreshed with university Google Sheet.');
-    setTimeout(() => {
-      setShowSyncModal(false);
-      setSyncStatus(null);
-    }, 1000);
+    setSyncing(true);
+    setSyncStatus('Refreshing from live Google Sheet backend...');
+    try {
+      const [subsRes] = await Promise.all([
+        api.get<SubmissionSummary[]>('/submissions/reviewed'),
+        loadLiveQueueCount(),
+      ]);
+      const reviewed = Array.isArray(subsRes.data) ? subsRes.data : [];
+      setSyncStatus(`Synced with live Google Sheet (${reviewed.length} reviewed submissions, ${pendingCount} pending).`);
+    } catch (err) {
+      setSyncStatus(readApiError(err, 'Could not reach the live Google Sheet backend.').message);
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const handleReset = () => {
@@ -297,9 +332,11 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
       {/* =========================================================================
           QUIET ACTION ITEM (Links to Task Center)
           ========================================================================= */}
-      {!standalone && (
+      {!standalone && pendingCount > 0 && (
         <div className="dean-quiet-bar">
-          <span>You have student internship forms ready for review and CMPS 400 approval.</span>
+          <span>
+            You have {pendingCount} student internship {pendingCount === 1 ? 'form' : 'forms'} ready for review and CMPS 400 approval.
+          </span>
           <button
             type="button"
             className="btn btn-link dean-quiet-link"
@@ -464,15 +501,22 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
           ========================================================================= */}
       {selectedStudent && (
         <div className="dean-modal-overlay" onClick={() => setSelectedStudent(null)}>
-          <div className="dean-modal-card" onClick={(e) => e.stopPropagation()} role="dialog">
+          <div
+            className="dean-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="student-modal-title"
+          >
             <div className="dean-modal-header">
               <div>
-                <h2>{selectedStudent.studentName}</h2>
+                <h2 id="student-modal-title">{selectedStudent.studentName}</h2>
                 <p>{selectedStudent.wNumber} · {selectedStudent.email}</p>
               </div>
               <button
                 type="button"
                 className="btn-link"
+                aria-label="Close student details"
                 onClick={() => setSelectedStudent(null)}
                 style={{ fontSize: '1.2rem', cursor: 'pointer' }}
               >
@@ -508,15 +552,22 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
           ========================================================================= */}
       {showSyncModal && (
         <div className="dean-modal-overlay" onClick={() => setShowSyncModal(false)}>
-          <div className="dean-modal-card" onClick={(e) => e.stopPropagation()} role="dialog">
+          <div
+            className="dean-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sync-modal-title"
+          >
             <div className="dean-modal-header">
               <div>
-                <h2>Sync University Google Sheet</h2>
-                <p>Update placement figures from the shared departmental spreadsheet.</p>
+                <h2 id="sync-modal-title">Sync University Google Sheet</h2>
+                <p>Update placement figures from the live backend or pasted CSV rows.</p>
               </div>
               <button
                 type="button"
                 className="btn-link"
+                aria-label="Close sync modal"
                 onClick={() => setShowSyncModal(false)}
                 style={{ fontSize: '1.2rem', cursor: 'pointer' }}
               >
@@ -561,9 +612,10 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
                 <button
                   type="button"
                   className="btn btn-primary btn-small"
-                  onClick={handleSyncSubmit}
+                  disabled={syncing}
+                  onClick={() => void handleSyncSubmit()}
                 >
-                  Save &amp; Update
+                  {syncing ? 'Syncing...' : 'Sync & Update'}
                 </button>
               </div>
             </div>

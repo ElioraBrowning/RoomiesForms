@@ -42,10 +42,10 @@ describe('Feature F9 (Tier 1): Live Google Apps Script Interaction Verification'
 
   it('TC-T1-F9-02: API Key Parameter Verification', () => {
     const rawUrl = 'https://script.google.com/macros/s/AKfycbw7QOaoJQvCxc-1LaxJVlicq9wd00gYTOryX8vy_1XdGDSPTElR7dADKdBw7yXHXjAO2A/exec';
-    const key = 'e81cc39b-3c52-4096-92ed-5054eee35d3e';
+    const key = 'test-api-key-placeholder';
 
     const resolved = resolveAppsScriptUrl(rawUrl, key);
-    assert.match(resolved, /\?key=e81cc39b-3c52-4096-92ed-5054eee35d3e/);
+    assert.match(resolved, /\?key=test-api-key-placeholder/);
     assert.doesNotMatch(resolved, /\/a\/macros\//, 'Should strip workspace domain prefix if present');
   });
 

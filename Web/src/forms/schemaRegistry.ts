@@ -40,11 +40,24 @@ export const STATIC_SCHEMAS: Record<string, FormSchema> = {
   ExitSurvey: exitSurvey as unknown as FormSchema,
 };
 
+const NUMERIC_FORM_IDS: Record<string, string> = {
+  '1': 'CS401',
+  '2': 'CS402',
+  '3': 'CS403',
+  '4': 'CS404',
+  '5': 'CS405',
+  '6': 'CS410',
+  '7': 'CS420',
+  '8': 'ExitSurvey',
+};
+
 /**
- * Looks up a bundled canonical form schema by key (e.g. "CS401") or ID.
+ * Looks up a bundled canonical form schema by key (e.g. "CS401") or numeric ID ("1"–"8").
  */
 export function getStaticSchema(keyOrId: string | number): FormSchema | null {
-  const norm = String(keyOrId).trim().toLowerCase();
+  const raw = String(keyOrId).trim();
+  const mapped = NUMERIC_FORM_IDS[raw] || raw;
+  const norm = mapped.toLowerCase();
   for (const [key, schema] of Object.entries(STATIC_SCHEMAS)) {
     if (key.toLowerCase() === norm || schema.id.toLowerCase() === norm) {
       return schema;

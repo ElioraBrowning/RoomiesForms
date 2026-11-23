@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getInitials } from '../utils/user';
+import { hasReviewerRole, isDepartmentHeadUser } from '../utils/roles';
 
 const NOTIF_KEY = 'selu_reviewer_notification_pref';
 const DEFAULT_VIEW_KEY = 'selu_dept_head_default_view';
@@ -8,6 +9,8 @@ type NotifPref = 'daily' | 'realtime' | 'off';
 
 export default function Profile() {
   const { user } = useAuth();
+  const isReviewer = hasReviewerRole(user?.roles);
+  const hasTaskCenter = isDepartmentHeadUser(user);
 
   const [notifPref, setNotifPref] = useState<NotifPref>(() => {
     try {
@@ -43,10 +46,6 @@ export default function Profile() {
       console.error(e);
     }
   };
-
-  const isReviewer = user?.roles?.some((r) =>
-    ['Faculty', 'Department Head'].includes(r)
-  );
 
   return (
     <div className="profile">
@@ -92,7 +91,7 @@ export default function Profile() {
           <div className="profile-section-block">
             <h3 className="profile-section-title">Reviewer Notification Preferences</h3>
             <p className="profile-section-desc">
-              Choose how RoomiesForms alerts you when students submit or resubmit internship forms for approval.
+              Saved locally in this browser for your reviewer workspace preferences.
             </p>
 
             <div className="dean-notif-radios">
@@ -146,25 +145,27 @@ export default function Profile() {
               </label>
             </div>
 
-            <div className="profile-section-block">
-              <h3 className="profile-section-title">Default Dashboard View</h3>
-              <p className="profile-section-desc">
-                Choose which workspace opens first when you log into RoomiesForms.
-              </p>
-              <label className="dean-notif-option">
-                <input
-                  type="checkbox"
-                  checked={defaultToTasks}
-                  onChange={(e) => handleToggleDefaultView(e.target.checked)}
-                />
-                <div className="dean-notif-content">
-                  <div className="dean-notif-heading">
-                    <strong>Default to Task Center &amp; Approvals</strong>
+            {hasTaskCenter && (
+              <div className="profile-section-block">
+                <h3 className="profile-section-title">Default Dashboard View</h3>
+                <p className="profile-section-desc">
+                  Choose which workspace opens first when you log into RoomiesForms.
+                </p>
+                <label className="dean-notif-option">
+                  <input
+                    type="checkbox"
+                    checked={defaultToTasks}
+                    onChange={(e) => handleToggleDefaultView(e.target.checked)}
+                  />
+                  <div className="dean-notif-content">
+                    <div className="dean-notif-heading">
+                      <strong>Default to Task Center &amp; Approvals</strong>
+                    </div>
+                    <p>Skip the Program Outcomes summary and land straight into your active review queue.</p>
                   </div>
-                  <p>Skip the Program Outcomes summary and land straight into your active review queue.</p>
-                </div>
-              </label>
-            </div>
+                </label>
+              </div>
+            )}
           </div>
         )}
       </div>

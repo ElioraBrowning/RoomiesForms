@@ -70,12 +70,10 @@ export function FormRunner({
 
   const step = steps[stepIndex];
   const progress = computeProgress(schema, respondent, answers);
-
-  useEffect(() => {
-    if (!serverErrors || Object.keys(serverErrors).length === 0) return;
-    setErrors(serverErrors);
-    setStepIndex(steps.length - 1);
-  }, [serverErrors, steps.length]);
+  const displayErrors = useMemo(
+    () => (Object.keys(errors).length > 0 ? errors : (serverErrors ?? {})),
+    [errors, serverErrors],
+  );
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -261,8 +259,8 @@ export function FormRunner({
                       question={q}
                       value={answers[q.id]}
                       scope={answers}
-                      error={errors[q.id]}
-                      errors={errors}
+                      error={displayErrors[q.id]}
+                      errors={displayErrors}
                       onChange={(v) => setAnswer(q.id, v)}
                     />
                   </div>
@@ -285,7 +283,7 @@ export function FormRunner({
             <AnswerSummary
               pages={pages}
               answers={answers}
-              errors={errors}
+              errors={displayErrors}
               onEdit={editPage}
               answerClassName={(q) => (feedback[q.id] ? 'is-flag' : '')}
               renderExtra={(q) => feedback[q.id] && <p className="answer-feedback"><strong>Reviewer:</strong> {feedback[q.id]}</p>}

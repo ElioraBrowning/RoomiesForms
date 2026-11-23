@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { hasReviewerRole } from '../utils/roles';
 
 interface Crumb {
   label: string;
@@ -7,22 +8,38 @@ interface Crumb {
 }
 
 const FORM_TITLES: Record<string, string> = {
-  '1': 'CS 401: Pre-Internship Agreement',
-  '2': 'CS 402: Post-Internship Evaluation',
-  '3': 'CS 403: Internship Bi-Weekly Report',
-  '4': 'CS 404: Employer Midterm Evaluation',
-  '5': 'CS 405: Employer Final Evaluation',
-  '6': 'CS 410: Degree Evaluation & Checklist',
-  '7': 'CS 420: Senior Capstone Proposal',
-  '8': 'CS Exit Survey',
+  '1': 'CS 401: Internship Application',
+  'CS401': 'CS 401: Internship Application',
+  '2': 'CS 402: Internship Employer Agreement',
+  'CS402': 'CS 402: Internship Employer Agreement',
+  '3': "CS 403: Student's Measurable Learning Objectives",
+  'CS403': "CS 403: Student's Measurable Learning Objectives",
+  '4': "CS 404: Student's Time & Wage Report",
+  'CS404': "CS 404: Student's Time & Wage Report",
+  '5': 'CS 405: Computer Science Internship Weekly Activity Log',
+  'CS405': 'CS 405: Computer Science Internship Weekly Activity Log',
+  '6': "CS 410: Student's Evaluation of Internship Employer",
+  'CS410': "CS 410: Student's Evaluation of Internship Employer",
+  '7': "CS 420: Employer's Evaluation of the Computer Science Internship Student",
+  'CS420': "CS 420: Employer's Evaluation of the Computer Science Internship Student",
+  '8': 'Department of Computer Science Exit Survey',
+  'ExitSurvey': 'Department of Computer Science Exit Survey',
 };
+
+function resolveFormTitle(formId: string): string {
+  const direct = FORM_TITLES[formId];
+  if (direct) return direct;
+  const upper = formId.trim().toUpperCase();
+  const entry = Object.entries(FORM_TITLES).find(([k]) => k.toUpperCase() === upper);
+  return entry ? entry[1] : `Form #${formId}`;
+}
 
 export default function Breadcrumbs() {
   const location = useLocation();
   const { user } = useAuth();
   const pathname = location.pathname;
 
-  const isReviewer = user?.roles?.some((r) => ['Faculty', 'Department Head'].includes(r));
+  const isReviewer = hasReviewerRole(user?.roles);
   const dashboardLabel = isReviewer ? 'Review Queue' : 'Dashboard';
 
   const getCrumbs = (): Crumb[] => {
@@ -74,7 +91,7 @@ export default function Breadcrumbs() {
     const resultsMatch = pathname.match(/^\/forms\/([^/]+)\/results$/);
     if (resultsMatch) {
       const formId = resultsMatch[1];
-      const formTitle = FORM_TITLES[formId] || `Form #${formId}`;
+      const formTitle = resolveFormTitle(formId);
       return [
         { label: 'Home', path: '/dashboard' },
         { label: dashboardLabel, path: '/dashboard' },
@@ -87,7 +104,7 @@ export default function Breadcrumbs() {
     const formMatch = pathname.match(/^\/forms\/([^/]+)$/);
     if (formMatch) {
       const formId = formMatch[1];
-      const formTitle = FORM_TITLES[formId] || `Form #${formId}`;
+      const formTitle = resolveFormTitle(formId);
       return [
         { label: 'Home', path: '/dashboard' },
         { label: dashboardLabel, path: '/dashboard' },

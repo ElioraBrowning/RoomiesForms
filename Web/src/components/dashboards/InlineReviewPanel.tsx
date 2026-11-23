@@ -46,17 +46,27 @@ export default function InlineReviewPanel({
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
 
   useEffect(() => {
-    setIsRevisionMode(false);
-    setFeedbackText('');
-    setActiveChipIds([]);
-    setLoading(true);
-    setError('');
-
+    let cancelled = false;
     api
       .get<SubmissionDetail>(`/submissions/${submissionId}`)
-      .then((res) => setDetail(res.data))
-      .catch((err) => setError(readApiError(err, 'Could not load details.').message))
-      .finally(() => setLoading(false));
+      .then((res) => {
+        if (cancelled) return;
+        setDetail(res.data);
+        setIsRevisionMode(false);
+        setFeedbackText('');
+        setActiveChipIds([]);
+        setError('');
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(readApiError(err, 'Could not load details.').message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [submissionId]);
 
   const formKey = detail?.form?.googleFormId || '';
@@ -82,19 +92,22 @@ export default function InlineReviewPanel({
   const responses = (detail?.responses || {}) as Record<string, any>;
   const student = detail?.student || { fullName: 'Student', email: '', wNumber: '' };
 
-  const majorGpa = responses.majorGpa || responses.gpa || null;
-  const classification = responses.classification || 'Senior';
-  const degree = responses.degree || 'B.S. Computer Science';
-  const companyName = responses.companyName || responses.employer || null;
-  const companyLocation = responses.companyLocation || null;
+  const rawGpa = responses.gpa ?? responses.majorGpa ?? null;
+  const majorGpa = rawGpa !== null && rawGpa !== '' && !Number.isNaN(Number(rawGpa)) ? Number(rawGpa) : null;
+  const classification = responses.classification || null;
+  const degree = responses.degree || null;
+  const companyName = responses.employerName || responses.companyName || responses.employer || null;
+  const companyLocation = responses.companyLocation || (typeof responses.employerAddress === 'string' ? responses.employerAddress : null);
   const supervisorName = responses.supervisorName || null;
   const supervisorTitle = responses.supervisorTitle || null;
   const supervisorEmail = responses.supervisorEmail || null;
   const jobTitle = responses.jobTitle || responses.roleTitle || null;
-  const weeklyHours = responses.weeklyHours || responses.hoursPerWeek || null;
-  const semester = responses.semester || 'Spring 2027';
-  const jobDuties = responses.jobDuties || responses.duties || responses.objective || null;
+  const employmentType = responses.employmentType || null;
+  const weeklyHours = responses.hoursPerWeek || responses.weeklyHours || null;
+  const semester = responses.semester || (responses.startDate ? `${responses.startDate}${responses.endDate ? ` – ${responses.endDate}` : ''}` : null);
+  const jobDuties = responses.jobResponsibilities || responses.jobDuties || responses.duties || responses.objective || null;
   const resubmissionNote = responses.resubmissionNote || null;
+  const employerVerified = Boolean(detail?.employerReview?.signedAt);
 
   const isResubmission =
     Boolean(resubmissionNote) ||
@@ -258,16 +271,16 @@ export default function InlineReviewPanel({
                   <div className="dean-stack-row">
                     <span className="dean-stack-label">Major GPA</span>
                     <span className="dean-field-val val-strong">
-                      {majorGpa != null ? Number(majorGpa).toFixed(2) : '3.50'}
+                      {majorGpa != null ? majorGpa.toFixed(2) : 'Not provided'}
                     </span>
                   </div>
                   <div className="dean-stack-row">
                     <span className="dean-stack-label">Classification</span>
-                    <span className="dean-field-val">{classification}</span>
+                    <span className="dean-field-val">{classification || 'Not provided'}</span>
                   </div>
                   <div className="dean-stack-row">
                     <span className="dean-stack-label">Degree Track</span>
-                    <span className="dean-field-val">{degree}</span>
+                    <span className="dean-field-val">{degree || 'Not provided'}</span>
                   </div>
                 </div>
               </div>
@@ -279,22 +292,22 @@ export default function InlineReviewPanel({
                   <div className="dean-stack-row">
                     <span className="dean-stack-label">Company</span>
                     <span className="dean-stack-val">
-                      <strong>{companyName || 'Corporate Partner'}</strong>
+                      <strong>{companyName || 'Not provided'}</strong>
                       {companyLocation && <span className="dean-loc"> ({companyLocation})</span>}
                     </span>
                   </div>
                   <div className="dean-stack-row">
                     <span className="dean-stack-label">Supervisor</span>
                     <span className="dean-stack-val">
-                      {supervisorName || 'Not listed'}
+                      {supervisorName || 'Not provided'}
                       {supervisorTitle && <span className="dean-title-sub"> · {supervisorTitle}</span>}
                     </span>
                   </div>
                   <div className="dean-stack-row">
                     <span className="dean-stack-label">Work Email</span>
                     <span className="dean-stack-val">
-                      <code>{supervisorEmail || 'supervisor@company.com'}</code>
-                      <span className="dean-verified-pill">Verified</span>
+                      {supervisorEmail ? <code>{supervisorEmail}</code> : 'Not provided'}
+                      {employerVerified && <span className="dean-verified-pill">Verified</span>}
                     </span>
                   </div>
                 </div>
@@ -305,14 +318,13 @@ export default function InlineReviewPanel({
                 <span className="dean-section-kicker">Role &amp; Responsibilities</span>
                 <div className="dean-duties-box">
                   <div className="dean-duties-meta">
-                    <strong>{jobTitle || 'Computing Intern'}</strong>
-                    <span> · {weeklyHours ? `${weeklyHours} hrs/wk` : '20 hrs/wk'} ({semester})</span>
+                    <strong>{jobTitle || 'Not provided'}</strong>
+                    {employmentType && <span> · {employmentType}</span>}
+                    {weeklyHours && <span> · {weeklyHours} hrs/wk</span>}
+                    {semester && <span> ({semester})</span>}
                   </div>
                   <p className="dean-duties-quote">
-                    &ldquo;
-                    {jobDuties ||
-                      'Student will engage in software development, data management, and computing project assignments under direct industry supervisor oversight.'}
-                    &rdquo;
+                    {jobDuties ? <>&ldquo;{jobDuties}&rdquo;</> : 'No job responsibilities provided.'}
                   </p>
                 </div>
               </div>

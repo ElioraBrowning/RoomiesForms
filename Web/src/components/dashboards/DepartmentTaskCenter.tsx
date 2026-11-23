@@ -6,7 +6,6 @@ import { SkeletonTable } from '../Skeleton';
 import { Badge } from '../StatusBadge';
 import InlineReviewPanel from './InlineReviewPanel';
 import { useAuth } from '../../context/AuthContext';
-import { submitToGoogleWorkspace } from '../../services/googleSheetsService';
 
 export type TaskBucket = 'all' | 'fresh' | 'resubmission' | 'waiting' | 'approved';
 export type SortOption = 'oldest' | 'newest';
@@ -15,7 +14,6 @@ export type OriginFilter = 'all' | 'student' | 'employer' | 'faculty';
 export interface DepartmentTaskCenterProps {
   onSwitchToOverview?: () => void;
 }
-export type DeanTaskCenterProps = DepartmentTaskCenterProps;
 
 const shortDate = (iso: string) => {
   try {
@@ -45,12 +43,12 @@ interface UndoState {
 }
 
 const getOrigin = (s: SubmissionSummary): { origin: 'student' | 'employer' | 'faculty'; label: string } => {
-  const k = s.formKey || '';
-  if (k === 'CS404' || k === 'CS405' || s.employerReview != null) {
+  const k = (s.formKey || '').toUpperCase();
+  if (k === 'CS420' || (s.employerReview != null && s.employerReview.signedAt != null)) {
     return { origin: 'employer', label: 'Employer / Business' };
   }
-  if (k === 'CS410' || k === 'CS420') {
-    return { origin: 'faculty', label: 'Faculty Review' };
+  if (s.approvals?.some((a) => a.roleName === 'Faculty' && a.status === 'Approved')) {
+    return { origin: 'faculty', label: 'Faculty Reviewed' };
   }
   return { origin: 'student', label: 'Student Submission' };
 };
@@ -92,10 +90,7 @@ export default function DepartmentTaskCenter({ onSwitchToOverview }: DepartmentT
 
   // Monitor if the expanded card is scrolled out of viewport
   useEffect(() => {
-    if (!expandedId) {
-      setIsOutOfView(false);
-      return;
-    }
+    if (!expandedId) return;
 
     const checkVisibility = () => {
       if (!activeCardRef.current) return;
@@ -231,13 +226,34 @@ export default function DepartmentTaskCenter({ onSwitchToOverview }: DepartmentT
     return list;
   }, [baseList, originFilter, searchQuery, sortBy]);
 
+  const commitApproval = (targetId: number, previousQueue: SubmissionSummary[], previousReviewed: SubmissionSummary[]) => {
+    api
+      .approveSubmission(
+        targetId,
+        'Approved (Department Head Authorization)',
+        user?.email,
+        user?.roles
+      )
+      .catch((err) => {
+        setQueue(previousQueue);
+        setReviewed(previousReviewed);
+        setError(readApiError(err, 'Failed to persist approval to backend.').message);
+      });
+  };
+
   // Handle Approve & Next Transition Engine
   const handleApproveNext = (id: number) => {
     const sub = queue.find((s) => s.id === id) || baseList.find((s) => s.id === id);
     if (!sub) return;
 
+    if (undoState?.timeoutId) {
+      clearTimeout(undoState.timeoutId);
+      commitApproval(undoState.submission.id, undoState.previousQueue, undoState.previousReviewed);
+    }
+
     const previousQueue = [...queue];
     const previousReviewed = [...reviewed];
+    const reviewerLabel = user?.fullName || 'Department Head';
 
     const now = new Date().toISOString();
     const updatedSub: SubmissionSummary = {
@@ -251,35 +267,18 @@ export default function DepartmentTaskCenter({ onSwitchToOverview }: DepartmentT
           stepOrder: (sub.approvals?.length || 0) + 1,
           stepName: 'Department Head Authorization',
           roleName: 'Department Head',
-          reviewerName: 'Dr. Bonnie Achée',
+          reviewerName: reviewerLabel,
           status: 'Approved',
-          approvedBy: 'Dr. Bonnie Achée',
+          approvedBy: reviewerLabel,
           actionDate: now,
-          comments:
-            'Prerequisites verified and cleared for CMPS 400 Workday override by Dr. Bonnie Achée.',
+          comments: `Prerequisites verified and cleared by ${reviewerLabel}.`,
         },
       ],
     };
 
+    setError('');
     setQueue((prev) => prev.filter((s) => s.id !== id));
     setReviewed((prev) => [updatedSub, ...prev.filter((s) => s.id !== id)]);
-
-    // Invoke backend approval API and Google Workspace audit
-    api.approveSubmission(
-      id,
-      'Approved (Department Head Authorization)',
-      user?.email,
-      user?.roles
-    ).catch((err) => console.error('Approval API dispatch failed:', err));
-
-    submitToGoogleWorkspace({
-      studentName: sub.studentName || '',
-      studentEmail: (sub as any).studentEmail || `${(sub.studentName || 'student').toLowerCase().replace(/\s+/g, '.')}@selu.edu`,
-      submissionId: sub.id,
-      formId: sub.formKey || String(sub.formId || 'CS401'),
-      summary: `Approved (Department Head Authorization) by ${user?.fullName || 'Dr. Bonnie Achée'}`,
-      responses: {},
-    }).catch((err) => console.error('Google Sheets write notice:', err));
 
     setJustApprovedId(id);
     setTimeout(() => {
@@ -305,11 +304,8 @@ export default function DepartmentTaskCenter({ onSwitchToOverview }: DepartmentT
       setExpandedId(nextSub ? nextSub.id : null);
     }
 
-    if (undoState?.timeoutId) {
-      clearTimeout(undoState.timeoutId);
-    }
-
     const timeoutId = setTimeout(() => {
+      commitApproval(id, previousQueue, previousReviewed);
       setUndoState(null);
     }, 5000);
 
@@ -335,23 +331,37 @@ export default function DepartmentTaskCenter({ onSwitchToOverview }: DepartmentT
     const sub = reviewed.find((s) => s.id === id) || queue.find((s) => s.id === id);
     if (!sub) return;
 
+    const previousQueue = [...queue];
+    const previousReviewed = [...reviewed];
+    const reviewerLabel = user?.fullName || 'Department Head';
+
     const reverted: SubmissionSummary = {
       ...sub,
       status: 'Pending',
       reviewedAction: null,
       reviewedAt: null,
-      approvals: (sub.approvals || []).filter((a) => a.approvedBy !== 'Dr. Bonnie Achée'),
+      approvals: (sub.approvals || []).filter((a) => a.approvedBy !== reviewerLabel),
     };
 
+    setError('');
     setReviewed((prev) => prev.filter((s) => s.id !== id));
     setQueue((prev) => [reverted, ...prev.filter((s) => s.id !== id)]);
     setExpandedId(id);
+
+    api
+      .revokeApproval(id, user?.email, user?.roles)
+      .catch((err) => {
+        setQueue(previousQueue);
+        setReviewed(previousReviewed);
+        setError(readApiError(err, 'Failed to revoke approval on backend.').message);
+      });
   };
 
   const handleSendRevision = (id: number, feedback: string) => {
     const sub = queue.find((s) => s.id === id) || baseList.find((s) => s.id === id);
     if (!sub) return;
 
+    const previousQueue = [...queue];
     const updatedSub: SubmissionSummary = {
       ...sub,
       status: 'Changes Requested',
@@ -359,24 +369,15 @@ export default function DepartmentTaskCenter({ onSwitchToOverview }: DepartmentT
       isResubmission: false,
     };
 
+    setError('');
     setQueue((prev) => prev.map((s) => (s.id === id ? updatedSub : s)));
 
-    // Invoke backend rejection API and Google Workspace audit
-    api.rejectSubmission(
-      id,
-      feedback,
-      user?.email,
-      user?.roles
-    ).catch((err) => console.error('Reject API dispatch failed:', err));
-
-    submitToGoogleWorkspace({
-      studentName: sub.studentName || '',
-      studentEmail: (sub as any).studentEmail || `${(sub.studentName || 'student').toLowerCase().replace(/\s+/g, '.')}@selu.edu`,
-      submissionId: sub.id,
-      formId: sub.formKey || String(sub.formId || 'CS401'),
-      summary: `Revision requested by ${user?.fullName || 'Dr. Bonnie Achée'}: ${feedback}`,
-      responses: {},
-    }).catch((err) => console.error('Google Sheets write notice:', err));
+    api
+      .rejectSubmission(id, feedback, user?.email, user?.roles)
+      .catch((err) => {
+        setQueue(previousQueue);
+        setError(readApiError(err, 'Failed to send revision request to backend.').message);
+      });
 
     const remainingPending = filteredList.filter(
       (s) =>
@@ -668,7 +669,7 @@ export default function DepartmentTaskCenter({ onSwitchToOverview }: DepartmentT
                     {/* Col 2: Student */}
                     <div className="dean-col-student">
                       <span className="dean-student-name">{s.studentName}</span>
-                      <code className="dean-wnum">{s.wNumber || 'W0123456'}</code>
+                      {s.wNumber ? <code className="dean-wnum">{s.wNumber}</code> : null}
                     </div>
 
                     {/* Col 3: Date & Waiting */}
