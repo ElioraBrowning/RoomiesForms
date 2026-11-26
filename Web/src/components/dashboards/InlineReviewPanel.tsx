@@ -69,12 +69,12 @@ export default function InlineReviewPanel({
     };
   }, [submissionId]);
 
-  const formKey = detail?.form?.googleFormId || '';
+  const formKey = (detail?.form?.googleFormId || '').toUpperCase();
   const isEmployerOrigin =
-    formKey === 'CS404' ||
-    formKey === 'CS405' ||
-    (detail?.employerReview?.signedAt != null && formKey !== 'CS401');
-  const isFacultyOrigin = formKey === 'CS410' || formKey === 'CS420';
+    formKey === 'CS420' || detail?.employerReview?.signedAt != null;
+  const isFacultyOrigin = Boolean(
+    detail?.approvals?.some((a) => a.roleName === 'Faculty' && a.status === 'Approved'),
+  );
 
   const origin: OriginType = isEmployerOrigin
     ? 'employer'
@@ -84,9 +84,9 @@ export default function InlineReviewPanel({
 
   const originLabel =
     origin === 'employer'
-      ? 'Employer / Business Admin'
+      ? 'Employer / Business'
       : origin === 'faculty'
-      ? 'Faculty Review'
+      ? 'Faculty Reviewed'
       : 'Student Submission';
 
   const responses = (detail?.responses || {}) as Record<string, any>;

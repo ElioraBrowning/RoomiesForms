@@ -11,7 +11,8 @@
     "The employer's name and address",
     "Your supervisor's name, title, email and phone number",
     "The internship's start and end dates",
-    "Your job title and a short description of what you'll be doing"
+    "Your job title and a short description of what you'll be doing",
+    "Your electronic signature"
   ],
   "submitLabel": "Submit application",
   "pages": [
@@ -86,6 +87,19 @@
       "title": "What will you be doing?",
       "questions": [
         { "id": "jobResponsibilities", "reviewRequired": true, "type": "longText", "label": "Job responsibilities", "help": "The main tasks and technologies you will work with.", "minLength": 20, "maxLength": 2000 }
+      ]
+    },
+    {
+      "id": "signature",
+      "title": "Sign your application",
+      "questions": [
+        {
+          "id": "studentSignature",
+          "type": "signature",
+          "label": "Type your full name to sign",
+          "statement": "I certify that the information in this internship application is accurate and that this employment relates to my degree and concentration.",
+          "matchField": "name"
+        }
       ]
     }
   ]

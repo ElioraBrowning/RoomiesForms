@@ -3,13 +3,20 @@
   "title": "CS 404: Time and Wage Report",
   "department": "Computer Science",
   "category": "Internship",
-  "description": "Your total hours and pay for the semester.",
+  "description": "Your total hours and pay for the semester, verified by your supervisor.",
   "needs": [
-    "Total hours worked this semester and your average hours per week",
+    "Your supervisor's name, title and email (they'll get a link to verify your hours)",
+    "Total hours worked this semester and your average hours per week (20 hrs/wk in fall or spring, 40 hrs/wk in summer)",
     "Your hourly wage and total wages before taxes (pay stubs help)",
     "Enter 0 for an unpaid internship"
   ],
-  "submitLabel": "Submit report",
+  "submitLabel": "Send to employer",
+  "employer": {
+    "emailField": "supervisorEmail",
+    "nameField": "supervisorName",
+    "mode": "signoff",
+    "instructions": "A student from Southeastern Louisiana University's Computer Science department has submitted their semester Time and Wage Report. Please verify the hours and wages below and sign to certify, or send it back to the student if anything needs to be corrected."
+  },
   "pages": [
     {
       "id": "who",
@@ -17,6 +24,15 @@
       "questions": [
         { "id": "studentName", "type": "text", "label": "Student full name", "minLength": 2, "maxLength": 100 },
         { "id": "employerName", "type": "text", "label": "Employer name", "placeholder": "Acme Corp", "maxLength": 120 }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "title": "Who will verify your hours?",
+      "description": "Your supervisor will get a link to verify and sign off on your hours and wages after you submit.",
+      "questions": [
+        { "id": "supervisorName", "type": "text", "label": "Supervisor name and title", "placeholder": "John Smith, Senior Developer", "maxLength": 120 },
+        { "id": "supervisorEmail", "reviewRequired": true, "type": "email", "label": "Supervisor email", "placeholder": "john.smith@acme.com" }
       ]
     },
     {
@@ -41,6 +57,23 @@
       "title": "Certify your report",
       "questions": [
         { "id": "studentSignature", "type": "signature", "label": "Type your full name to sign", "statement": "I certify that these hours and wages are accurate.", "matchField": "studentName" }
+      ]
+    },
+    {
+      "id": "employerSignoff",
+      "respondent": "employer",
+      "title": "Supervisor verification",
+      "questions": [
+        { "id": "employerSignerName", "reviewRequired": true, "type": "text", "label": "Your name", "minLength": 2, "maxLength": 100 },
+        { "id": "employerSignerTitle", "type": "text", "label": "Your title", "maxLength": 100 },
+        {
+          "id": "employerSignature",
+          "reviewRequired": true,
+          "type": "signature",
+          "label": "Type your full name to sign",
+          "statement": "On behalf of the employer, I verify that the internship hours and wages reported above are accurate.",
+          "matchField": "employerSignerName"
+        }
       ]
     }
   ]

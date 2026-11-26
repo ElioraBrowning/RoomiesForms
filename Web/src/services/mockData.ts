@@ -8,6 +8,7 @@ export const MOCK_FORMS: FormMeta[] = [
     publicUrl: '/forms/CS401',
     department: 'Computer Science',
     category: 'Internship',
+    hasEmployerStep: false,
   },
   {
     id: 2,
@@ -16,6 +17,7 @@ export const MOCK_FORMS: FormMeta[] = [
     publicUrl: '/forms/CS402',
     department: 'Computer Science',
     category: 'Internship',
+    hasEmployerStep: true,
   },
   {
     id: 3,
@@ -24,6 +26,7 @@ export const MOCK_FORMS: FormMeta[] = [
     publicUrl: '/forms/CS403',
     department: 'Computer Science',
     category: 'Internship',
+    hasEmployerStep: true,
   },
   {
     id: 4,
@@ -32,6 +35,7 @@ export const MOCK_FORMS: FormMeta[] = [
     publicUrl: '/forms/CS404',
     department: 'Computer Science',
     category: 'Internship',
+    hasEmployerStep: true,
   },
   {
     id: 7,
@@ -40,6 +44,7 @@ export const MOCK_FORMS: FormMeta[] = [
     publicUrl: '/forms/CS420',
     department: 'Computer Science',
     category: 'Internship',
+    hasEmployerStep: true,
   },
   {
     id: 6,
@@ -48,6 +53,7 @@ export const MOCK_FORMS: FormMeta[] = [
     publicUrl: '/forms/CS410',
     department: 'Computer Science',
     category: 'Internship',
+    hasEmployerStep: false,
   },
   {
     id: 5,
@@ -56,6 +62,7 @@ export const MOCK_FORMS: FormMeta[] = [
     publicUrl: '/forms/CS405',
     department: 'Computer Science',
     category: 'Internship',
+    hasEmployerStep: false,
   },
   {
     id: 8,
@@ -65,6 +72,7 @@ export const MOCK_FORMS: FormMeta[] = [
     department: 'Computer Science',
     category: 'Surveys',
     anonymous: true,
+    hasEmployerStep: false,
   },
 ];
 

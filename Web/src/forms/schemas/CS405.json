@@ -6,7 +6,8 @@
   "description": "A week-by-week log of what you worked on and how many hours you put in.",
   "needs": [
     "What you worked on each week",
-    "Hours worked each week"
+    "Hours worked each week",
+    "Your electronic signature"
   ],
   "submitLabel": "Submit activity log",
   "pages": [
@@ -28,6 +29,20 @@
             { "id": "description", "type": "longText", "label": "Activities", "minLength": 10, "maxLength": 1000 },
             { "id": "hours", "type": "number", "label": "Hours", "min": 0, "max": 60, "step": 0.5 }
           ]
+        }
+      ]
+    },
+    {
+      "id": "signature",
+      "title": "Certify your activity log",
+      "questions": [
+        { "id": "studentName", "type": "text", "label": "Student full name", "minLength": 2, "maxLength": 100 },
+        {
+          "id": "studentSignature",
+          "type": "signature",
+          "label": "Type your full name to sign",
+          "statement": "I certify that this weekly activity log accurately reflects the work and hours I completed during the semester.",
+          "matchField": "studentName"
         }
       ]
     }

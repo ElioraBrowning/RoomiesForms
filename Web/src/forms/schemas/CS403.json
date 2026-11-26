@@ -3,13 +3,32 @@
   "title": "CS 403: Measurable Learning Objectives",
   "department": "Computer Science",
   "category": "Internship",
-  "description": "The goals you plan to reach this semester. Your supervisor rates how well you met each one at the end of the semester.",
+  "description": "The goals you plan to reach this semester, developed with your supervisor and internship coordinator. Your supervisor approves and evaluates how well you met them.",
   "needs": [
-    "One to ten objectives you've agreed on with your supervisor",
-    "Each objective written so someone could check whether it was met"
+    "Your supervisor's name, title and email (they'll get a link to approve and rate your objectives)",
+    "One to ten measurable objectives you've agreed on with your supervisor",
+    "Each objective written so someone could check whether it was met",
+    "Your electronic signature"
   ],
-  "submitLabel": "Submit objectives",
+  "submitLabel": "Send to employer",
+  "employer": {
+    "emailField": "supervisorEmail",
+    "nameField": "supervisorName",
+    "mode": "complete",
+    "instructions": "A student from Southeastern Louisiana University's Computer Science department has submitted their Measurable Learning Objectives. Please review and approve these objectives (or rate the student's performance at the end of the semester) and sign below, or send it back to the student with what needs to change."
+  },
   "pages": [
+    {
+      "id": "intern",
+      "title": "Who is the intern and supervisor?",
+      "description": "Your supervisor will receive a link to approve and evaluate these objectives after you submit.",
+      "questions": [
+        { "id": "studentName", "type": "text", "label": "Student full name", "minLength": 2, "maxLength": 100 },
+        { "id": "employerName", "reviewRequired": true, "type": "text", "label": "Employer name", "placeholder": "Acme Corp", "maxLength": 120 },
+        { "id": "supervisorName", "type": "text", "label": "Supervisor name and title", "placeholder": "John Smith, Senior Developer", "maxLength": 120 },
+        { "id": "supervisorEmail", "reviewRequired": true, "type": "email", "label": "Supervisor email", "placeholder": "john.smith@acme.com" }
+      ]
+    },
     {
       "id": "objectives",
       "title": "What do you plan to accomplish?",
@@ -34,7 +53,57 @@
       "id": "signature",
       "title": "Sign your objectives",
       "questions": [
-        { "id": "studentSignature", "type": "signature", "label": "Type your full name to sign", "statement": "I confirm these are my learning objectives for this semester." }
+        {
+          "id": "studentSignature",
+          "type": "signature",
+          "label": "Type your full name to sign",
+          "statement": "I confirm these measurable learning objectives were developed for my internship this semester.",
+          "matchField": "studentName"
+        }
+      ]
+    },
+    {
+      "id": "employerEvaluation",
+      "respondent": "employer",
+      "title": "Supervisor approval and performance evaluation",
+      "questions": [
+        {
+          "id": "objectivesApproval",
+          "reviewRequired": true,
+          "type": "choice",
+          "label": "Objective approval and performance evaluation",
+          "options": [
+            "Exceeded all learning objectives",
+            "Met all learning objectives",
+            "Met most learning objectives",
+            "Partially met learning objectives",
+            "Did not meet learning objectives",
+            "Pre-semester sign-off: Objectives approved for the upcoming semester"
+          ]
+        },
+        {
+          "id": "supervisorComments",
+          "type": "longText",
+          "label": "Supervisor comments on objectives or performance",
+          "required": false,
+          "maxLength": 2000
+        },
+        {
+          "id": "employerSignerName",
+          "reviewRequired": true,
+          "type": "text",
+          "label": "Your full name",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        {
+          "id": "employerSignature",
+          "reviewRequired": true,
+          "type": "signature",
+          "label": "Type your full name to sign",
+          "statement": "On behalf of the employer, I approve these measurable learning objectives and certify this assessment of the intern's performance.",
+          "matchField": "employerSignerName"
+        }
       ]
     }
   ]
