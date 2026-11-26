@@ -54,7 +54,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="bell-panel" role="dialog" aria-label="Notifications">
+        <div className="bell-panel" role="region" aria-label="Notifications">
           <div className="bell-head">
             <span className="bell-title">Notifications</span>
             {unread > 0 && (

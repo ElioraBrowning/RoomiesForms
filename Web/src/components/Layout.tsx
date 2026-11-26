@@ -125,9 +125,12 @@ export default function Layout() {
                 aria-expanded={dropdownOpen}
                 aria-haspopup="true"
               >
-                <span className="navbar-avatar-circle">
+                <span className="navbar-avatar-circle" aria-hidden="true">
                   {getInitials(user?.fullName, user?.email)}
                 </span>
+                {(isReviewer || isExitSurveyOnly) && (
+                  <span className="navbar-menu-cue" aria-hidden="true">Menu</span>
+                )}
                 <span className={`navbar-avatar-caret ${dropdownOpen ? 'is-open' : ''}`} aria-hidden="true">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="6 9 12 15 18 9" />

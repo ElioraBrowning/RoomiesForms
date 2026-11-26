@@ -451,7 +451,7 @@ export default function DepartmentTaskCenter({ onSwitchToOverview }: DepartmentT
           <span className="dean-simple-kicker">Department of Computer Science · Office of the Department Head</span>
           <h1 className="dean-simple-title">Department Task Center</h1>
           <p className="dean-simple-sub">
-            Review and clear internship applications for CMPS 400 enrollment.
+            Review and clear internship applications for CMPS 4000 enrollment.
           </p>
         </div>
 

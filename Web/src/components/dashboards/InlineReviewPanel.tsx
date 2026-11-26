@@ -245,7 +245,7 @@ export default function InlineReviewPanel({
               <section className="dean-drawer-section dean-clearance-box mb-sm">
                 <span className="dean-section-kicker kicker-cleared">Academic Clearance Granted</span>
                 <div className="dean-clearance-content">
-                  <p className="dean-clearance-title">Cleared for CMPS 400 Enrollment</p>
+                  <p className="dean-clearance-title">Cleared for CMPS 4000 Enrollment</p>
                   <p className="dean-clearance-desc">
                     Official department authorization recorded by Dr. Bonnie Achée. The student has been notified to submit their Prerequisite Override Request in Workday.
                   </p>

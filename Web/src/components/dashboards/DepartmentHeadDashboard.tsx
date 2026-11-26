@@ -3,6 +3,8 @@ import type { StudentPlacement, SubmissionSummary } from '../../types';
 import { INITIAL_PLACEMENTS } from '../../services/mockPlacements';
 import DepartmentTaskCenter from './DepartmentTaskCenter';
 import api, { readApiError } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { useAccessibleModal } from '../../hooks/useAccessibleModal';
 
 const STORAGE_KEY = 'selu_dept_head_placements_v1';
 const DEFAULT_VIEW_KEY = 'selu_dept_head_default_view';
@@ -12,6 +14,7 @@ export interface DepartmentHeadDashboardProps {
 }
 
 export default function DepartmentHeadDashboard({ standalone = false }: DepartmentHeadDashboardProps = {}) {
+  const { user } = useAuth();
   const [placements, setPlacements] = useState<StudentPlacement[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('selu_cs_dept_placements_v1');
@@ -60,18 +63,10 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
     void loadLiveQueueCount();
   }, [loadLiveQueueCount]);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (selectedStudent) setSelectedStudent(null);
-        if (showSyncModal) setShowSyncModal(false);
-      }
-    };
-    if (selectedStudent || showSyncModal) {
-      document.addEventListener('keydown', onKeyDown);
-      return () => document.removeEventListener('keydown', onKeyDown);
-    }
-  }, [selectedStudent, showSyncModal]);
+  const closeStudentModal = useCallback(() => setSelectedStudent(null), []);
+  const closeSyncModal = useCallback(() => setShowSyncModal(false), []);
+  const studentModalRef = useAccessibleModal(Boolean(selectedStudent), closeStudentModal);
+  const syncModalRef = useAccessibleModal(showSyncModal, closeSyncModal);
 
   useEffect(() => {
     try {
@@ -307,7 +302,7 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
           <p className="dean-simple-sub">
             {standalone
               ? 'Program outcomes, employer hiring metrics, and internship compensation brief.'
-              : <>Executive summary for <strong>Dr. Bonnie Achée, Department Head</strong></>}
+              : <>Executive summary for <strong>{user?.fullName || 'Department Head'}, {user?.roles?.includes('Admin') ? 'CS Department Admin' : 'Department Head'}</strong></>}
           </p>
         </div>
 
@@ -335,7 +330,7 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
       {!standalone && pendingCount > 0 && (
         <div className="dean-quiet-bar">
           <span>
-            You have {pendingCount} student internship {pendingCount === 1 ? 'form' : 'forms'} ready for review and CMPS 400 approval.
+            You have {pendingCount} student internship {pendingCount === 1 ? 'form' : 'forms'} ready for review and CMPS 4000 approval.
           </span>
           <button
             type="button"
@@ -500,8 +495,10 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
           STUDENT DETAIL POPUP (Calm & straightforward)
           ========================================================================= */}
       {selectedStudent && (
-        <div className="dean-modal-overlay" onClick={() => setSelectedStudent(null)}>
+        <div className="dean-modal-overlay" onClick={closeStudentModal}>
           <div
+            ref={studentModalRef}
+            tabIndex={-1}
             className="dean-modal-card"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
@@ -551,8 +548,10 @@ export default function DepartmentHeadDashboard({ standalone = false }: Departme
           SYNC MODAL (Simple input, no fluff)
           ========================================================================= */}
       {showSyncModal && (
-        <div className="dean-modal-overlay" onClick={() => setShowSyncModal(false)}>
+        <div className="dean-modal-overlay" onClick={closeSyncModal}>
           <div
+            ref={syncModalRef}
+            tabIndex={-1}
             className="dean-modal-card"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
