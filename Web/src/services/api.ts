@@ -332,11 +332,11 @@ const api = {
   // --- 1. Typed Actions ---
 
   /** Authenticate user by university email */
-  async login(email: string): Promise<{ token: string; user: User }> {
+  async login(email: string, fallbackFullName?: string): Promise<{ token: string; user: User }> {
     const cleanEmail = email.trim().toLowerCase();
     const isExitSurveyReviewer = EXIT_SURVEY_EMAILS.includes(cleanEmail);
 
-    const fallbackUser: User = isExitSurveyReviewer
+    const baseFallback: User = isExitSurveyReviewer
       ? {
           email: cleanEmail,
           fullName: 'Dr. Kazim Sekeroglu',
@@ -346,10 +346,28 @@ const api = {
       : getMockUser(email);
 
     const isKnownReviewer =
-      fallbackUser.roles.includes('Faculty') || fallbackUser.roles.includes('Department Head');
+      baseFallback.roles.includes('Faculty') ||
+      baseFallback.roles.includes('Department Head') ||
+      baseFallback.roles.includes('Admin');
+
+    const resolvedFallbackName =
+      !isExitSurveyReviewer && !isKnownReviewer && fallbackFullName?.trim()
+        ? fallbackFullName.trim()
+        : baseFallback.fullName;
+
+    const fallbackUser: User = {
+      ...baseFallback,
+      fullName: resolvedFallbackName,
+    };
+
     try {
-      const res = await requestAppsScript<{ token: string; user: User }>('login', { email });
+      const res = await requestAppsScript<{ token: string; user: User }>('login', {
+        email,
+        ...(fallbackFullName?.trim() ? { fullName: fallbackFullName.trim() } : {}),
+      });
       if (res && res.user) {
+        const apiName = res.user.fullName?.trim();
+        const useApiName = apiName && apiName !== 'Test User' && apiName !== 'User';
         return {
           token: res.token,
           user: {
@@ -358,7 +376,7 @@ const api = {
             fullName:
               isExitSurveyReviewer || isKnownReviewer
                 ? fallbackUser.fullName
-                : (res.user.fullName || fallbackUser.fullName),
+                : (useApiName ? apiName : fallbackUser.fullName),
             wNumber: res.user.wNumber || fallbackUser.wNumber,
             roles: isExitSurveyReviewer
               ? ['Exit Survey Reviewer']
@@ -375,6 +393,89 @@ const api = {
     } catch {
       return { token: 'mock-token', user: fallbackUser };
     }
+  },
+
+  /** Verify a Google OAuth access token directly with Google and establish a session */
+  async loginWithGoogleToken(accessToken: string): Promise<{ token: string; user: User }> {
+    const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined)?.trim();
+
+    // 1. Validate token audience via Google tokeninfo to prevent confused-deputy token injection
+    let tokenInfoRes: Response;
+    try {
+      tokenInfoRes = await fetch(
+        `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`,
+      );
+    } catch {
+      const err: any = new Error('Could not reach Google to verify your sign-in. Please check your connection and try again.');
+      err.status = 503;
+      throw err;
+    }
+
+    if (!tokenInfoRes.ok) {
+      const err: any = new Error('Your Google sign-in token is invalid or expired. Please try again.');
+      err.status = 401;
+      throw err;
+    }
+
+    const tokenInfo = (await tokenInfoRes.json()) as {
+      aud?: string;
+      azp?: string;
+      email?: string;
+      email_verified?: string | boolean;
+    };
+
+    if (clientId && tokenInfo.aud !== clientId && tokenInfo.azp !== clientId) {
+      const err: any = new Error('Google sign-in token was not issued for this application.');
+      err.status = 401;
+      throw err;
+    }
+
+    // 2. Retrieve verified profile from Google OpenID userinfo endpoint
+    let profileRes: Response;
+    try {
+      profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+    } catch {
+      const err: any = new Error('Could not fetch your Google profile. Please try again.');
+      err.status = 503;
+      throw err;
+    }
+
+    if (!profileRes.ok) {
+      const err: any = new Error('Failed to retrieve your Google account profile. Please try again.');
+      err.status = 401;
+      throw err;
+    }
+
+    const profile = (await profileRes.json()) as {
+      email?: string;
+      email_verified?: boolean | string;
+      name?: string;
+    };
+
+    const email = (profile.email || tokenInfo.email || '').trim().toLowerCase();
+    const emailVerified =
+      profile.email_verified === true ||
+      String(profile.email_verified) === 'true' ||
+      tokenInfo.email_verified === true ||
+      String(tokenInfo.email_verified) === 'true';
+
+    if (!email || !emailVerified) {
+      const err: any = new Error('Your Google account email could not be verified.');
+      err.status = 401;
+      throw err;
+    }
+
+    if (!/@(selu\.edu|southeastern\.edu)$/i.test(email)) {
+      const err: any = new Error(
+        'Access restricted. Please sign in with your Southeastern Google account (@selu.edu or @southeastern.edu).',
+      );
+      err.status = 403;
+      throw err;
+    }
+
+    return await this.login(email, profile.name);
   },
 
   /** Get list of accessible forms in canonical 7-form internship packet order */
@@ -879,10 +980,15 @@ const api = {
       return { data: data as unknown as T };
     }
     if (cleanUrl === '/auth/google') {
+      const accessToken = body?.accessToken;
+      if (accessToken) {
+        const data = await this.loginWithGoogleToken(accessToken);
+        return { data: data as unknown as T };
+      }
       const code = body?.code;
       const redirectUri = body?.redirectUri;
       if (!code) {
-        throw new Error('Google authorization code is required.');
+        throw new Error('Google authorization token or code is required.');
       }
       const data = await requestAppsScript<{ token: string; user: User }>('authGoogle', {
         code,

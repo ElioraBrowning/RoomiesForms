@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string) => Promise<void>;
+  completeLogin: (newToken: string, apiUser: User) => User;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -104,34 +105,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(restoreInitialUser);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
 
+  const completeLogin = (newToken: string, apiUser: User): User => {
+    const email = apiUser.email || '';
+    const isEliora = normalizeUserEmail(email) === 'eliora.browning@selu.edu';
+    const userData = normalizeUser({
+      email,
+      fullName: apiUser.fullName || 'User',
+      wNumber: isEliora ? (apiUser.wNumber || 'W0712345') : (apiUser.wNumber || ''),
+      roles: sanitizeRoles(apiUser.roles),
+      isDesignated: apiUser.isDesignated,
+    });
+
+    setToken(newToken);
+    setUser(userData);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    return userData;
+  };
+
   const login = async (email: string) => {
     try {
       const res = await api.login(email);
       const { token: newToken, user: apiUser } = res;
-      setToken(newToken);
-      localStorage.setItem('token', newToken);
-
-      let userData: User;
       if (apiUser) {
-        const isEliora = normalizeUserEmail(apiUser.email || email) === 'eliora.browning@selu.edu';
-        userData = normalizeUser({
+        completeLogin(newToken, {
+          ...apiUser,
           email: apiUser.email || email,
-          fullName: apiUser.fullName || 'User',
-          wNumber: isEliora ? (apiUser.wNumber || 'W0712345') : (apiUser.wNumber || ''),
-          roles: sanitizeRoles(apiUser.roles),
-          isDesignated: apiUser.isDesignated,
         });
       } else {
-        userData = normalizeUser({
+        completeLogin(newToken, {
           email,
           fullName: 'User',
           wNumber: '',
           roles: ['Student'],
         });
       }
-
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
       console.error('Login failed', error);
       throw error;
@@ -146,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!(token && user) }}>
+    <AuthContext.Provider value={{ user, token, login, completeLogin, logout, isAuthenticated: !!(token && user) }}>
       {children}
     </AuthContext.Provider>
   );

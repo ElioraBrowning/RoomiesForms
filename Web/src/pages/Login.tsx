@@ -43,21 +43,41 @@ export default function Login() {
   // Redirects directly to Google OAuth consent screen
   const handleGoogleSignIn = () => {
     setError("");
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined)?.trim();
 
     if (!clientId) {
       setError("Google Client ID is missing. Please check your Web/.env file.");
       return;
     }
 
+    const bytes = new Uint8Array(16);
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      crypto.getRandomValues(bytes);
+    } else {
+      for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+    }
+    const state = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    try {
+      sessionStorage.setItem("google_oauth_state", state);
+    } catch {
+      // Ignore storage access errors in restricted browsing modes
+    }
+
     const redirectUri = `${window.location.origin}/auth/callback`;
-    const scope = encodeURIComponent("openid email profile");
+    const hasServerProxy = Boolean((import.meta.env.VITE_API_PROXY_URL as string | undefined)?.trim());
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: hasServerProxy ? "code" : "token",
+      scope: "openid email profile",
+      prompt: "select_account",
+      state,
+    });
+    if (hasServerProxy) {
+      params.set("access_type", "online");
+    }
 
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}&response_type=code&scope=${scope}&access_type=online&prompt=select_account`;
-
-    window.location.href = authUrl;
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

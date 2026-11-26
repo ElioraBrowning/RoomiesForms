@@ -1,45 +1,98 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api, { readApiError } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { isExitSurveyOnly } from "../utils/roles";
+
+interface CallbackParams {
+  accessToken: string;
+  code: string;
+  state: string;
+  errorParam: string;
+  stateMismatch: boolean;
+}
+
+function parseCallbackParams(): CallbackParams {
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const query = new URLSearchParams(window.location.search);
+
+  const accessToken = hash.get("access_token") || "";
+  const code = query.get("code") || "";
+  const state = hash.get("state") || query.get("state") || "";
+  const errorParam = hash.get("error") || query.get("error") || "";
+
+  let stateMismatch = false;
+  try {
+    const expectedState = sessionStorage.getItem("google_oauth_state");
+    if (expectedState && (!state || state !== expectedState)) {
+      stateMismatch = true;
+    }
+  } catch {
+    // Ignore storage access errors
+  }
+
+  return { accessToken, code, state, errorParam, stateMismatch };
+}
 
 export default function AuthCallback() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { completeLogin } = useAuth();
+  const [params] = useState<CallbackParams>(parseCallbackParams);
   const [asyncError, setAsyncError] = useState("");
   const exchangeAttempted = useRef(false);
 
-  const code = searchParams.get("code");
-  const errorParam = searchParams.get("error");
+  const { accessToken, code, errorParam, stateMismatch } = params;
+
   const paramError = errorParam
     ? `Google sign-in was denied: ${errorParam}`
-    : !code
-      ? "No authorization code was returned from Google."
-      : "";
+    : stateMismatch
+      ? "Google sign-in could not be verified (state mismatch). Please try again."
+      : !accessToken && !code
+        ? "No authorization response was returned from Google."
+        : "";
 
   const error = paramError || asyncError;
 
   useEffect(() => {
-    if (exchangeAttempted.current || !code || errorParam) return;
+    // Remove OAuth token/code from the browser address bar immediately
+    if (window.location.hash || window.location.search) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+
+    try {
+      sessionStorage.removeItem("google_oauth_state");
+    } catch {
+      // Ignore storage access errors
+    }
+
+    if (exchangeAttempted.current || errorParam || stateMismatch || (!accessToken && !code)) {
+      return;
+    }
     exchangeAttempted.current = true;
 
-    const exchangeCode = async () => {
+    const finishGoogleAuth = async () => {
       try {
-        const redirectUri = `${window.location.origin}/auth/callback`;
-        const res = await api.post("/auth/google", { code, redirectUri });
+        const res = accessToken
+          ? await api.post("/auth/google", { accessToken })
+          : await api.post("/auth/google", {
+              code,
+              redirectUri: `${window.location.origin}/auth/callback`,
+            });
 
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        const loggedInUser = completeLogin(res.data.token, res.data.user);
+        const target = isExitSurveyOnly(loggedInUser.roles)
+          ? "/exit-survey-results"
+          : "/dashboard";
 
-        navigate("/dashboard", { replace: true });
-        window.location.reload();
+        navigate(target, { replace: true });
       } catch (err: any) {
         const { message } = readApiError(err, "Google sign-in failed.");
         setAsyncError(message);
       }
     };
 
-    void exchangeCode();
-  }, [code, errorParam, navigate]);
+    void finishGoogleAuth();
+  }, [accessToken, code, errorParam, stateMismatch, completeLogin, navigate]);
 
   if (error) {
     return (
