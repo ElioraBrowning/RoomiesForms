@@ -495,6 +495,7 @@ function ReviewControls({
       {showComment && (
         <textarea
           className="input input-textarea review-comment"
+          aria-label={mark === 'flag' ? 'What does the student need to fix?' : 'Note for the student'}
           rows={2}
           maxLength={1000}
           placeholder={mark === 'flag' ? 'What does the student need to fix?' : 'Note for the student'}

@@ -178,7 +178,7 @@ export default function Assignments() {
                 id="new-email"
                 className="input"
                 type="email"
-                placeholder="Add a student: name@selu.edu"
+                placeholder="Add a student: name@southeastern.edu"
                 value={newEmail}
                 aria-invalid={errors.newEmail ? true : undefined}
                 onChange={(e) => setNewEmail(e.target.value)}

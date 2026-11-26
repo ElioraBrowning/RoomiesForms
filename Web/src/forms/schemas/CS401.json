@@ -28,7 +28,7 @@
       "id": "contact",
       "title": "How can we reach you?",
       "questions": [
-        { "id": "email", "type": "email", "label": "University email", "placeholder": "jane.doe@selu.edu", "domains": ["selu.edu", "southeastern.edu"] },
+        { "id": "email", "type": "email", "label": "University email", "placeholder": "jane.doe@southeastern.edu", "domains": ["selu.edu", "southeastern.edu"] },
         { "id": "cellPhone", "type": "phone", "label": "Cell phone", "placeholder": "(985) 555-0123" }
       ]
     },

@@ -89,7 +89,7 @@ export default function Login() {
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
       </div>
 
-      <div className="login-container">
+      <main className="login-container">
         <h1 className="login-app-title">Roomie&rsquo;s Forms</h1>
 
         <div className="login-panel">
@@ -173,13 +173,13 @@ export default function Login() {
                 alignItems: "center",
                 textAlign: "center",
                 margin: "1rem 0",
-                color: "var(--muted)",
+                color: "var(--text-muted)",
                 fontSize: "0.85rem",
               }}
             >
-              <div style={{ flex: 1, borderBottom: "1px solid var(--line)" }} />
+              <div style={{ flex: 1, borderBottom: "1px solid var(--border)" }} />
               <span style={{ padding: "0 10px" }}>or use test credentials</span>
-              <div style={{ flex: 1, borderBottom: "1px solid var(--line)" }} />
+              <div style={{ flex: 1, borderBottom: "1px solid var(--border)" }} />
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
@@ -192,7 +192,7 @@ export default function Login() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@selu.edu"
+                  placeholder="you@southeastern.edu"
                   aria-describedby={error ? "login-error" : undefined}
                   aria-invalid={error ? true : undefined}
                 />
@@ -255,7 +255,7 @@ export default function Login() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

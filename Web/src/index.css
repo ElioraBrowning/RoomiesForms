@@ -39,12 +39,12 @@
 
   --text: #1e293b;
   --text-heading: #0f172a;
-  --text-muted: #64748b;
+  --text-muted: #475569;
   --link: var(--brand-green);
-  --focus: #ffc72c;
+  --focus: var(--brand-green);
 
   --input-bg: #ffffff;
-  --input-border: #cbd5e1;
+  --input-border: #64748b;
   --input-focus: var(--brand-green);
   --check: var(--brand-green);
 
@@ -69,7 +69,7 @@
   --danger-bg: #fee2e2;
   --danger-border: #fca5a5;
   --danger-text: #991b1b;
-  --danger-strong: var(--brand-salmon);
+  --danger-strong: #b91c1c;
 
   --info-bg: #ffedd5;
   --info-border: #fdba74;
@@ -117,7 +117,7 @@
   --focus: var(--brand-gold);
 
   --input-bg: color-mix(in srgb, var(--brand-green) 28%, black);
-  --input-border: color-mix(in srgb, var(--brand-mint) 45%, var(--surface));
+  --input-border: color-mix(in srgb, var(--brand-mint) 60%, var(--surface));
   --input-focus: var(--brand-gold);
   --check: var(--brand-gold);
 
@@ -424,9 +424,9 @@ pre {
     padding: 0.35rem var(--page-gutter) 0.45rem;
   }
   .breadcrumbs-list {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    white-space: nowrap;
+    flex-wrap: wrap;
+    overflow-x: visible;
+    white-space: normal;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -521,9 +521,17 @@ pre {
 }
 
 .navbar-link.active {
-  background: rgba(255, 198, 41, 0.22);
-  color: var(--brand-gold);
-  border: 1px solid rgba(255, 198, 41, 0.35);
+  background: var(--brand-gold);
+  color: #0f172a;
+  border: 1px solid var(--brand-gold);
+}
+
+.navbar-menu-cue {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+  padding-right: 0.15rem;
 }
 
 /* Notification Bell Wrapper inside capsule */
@@ -645,7 +653,7 @@ pre {
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--surface-2);
-  color: var(--brand-green);
+  color: var(--link);
   border: 1px solid var(--border);
 }
 
@@ -692,6 +700,9 @@ pre {
   .navbar-links-desktop {
     display: none;
   }
+  .navbar-menu-cue {
+    display: inline;
+  }
 }
 
 @media (min-width: 1121px) {
@@ -720,6 +731,28 @@ pre {
 }
 
 @media (max-width: 480px) {
+  .navbar-floating {
+    padding: 0.5rem 0.5rem;
+    gap: 0.35rem;
+  }
+  .navbar-pill-brand {
+    padding: 0.3rem 0.6rem;
+    min-width: 0;
+  }
+  .navbar-seal {
+    height: 22px;
+  }
+  .navbar-pill-actions {
+    padding: 0.25rem 0.4rem;
+    gap: 0.25rem;
+  }
+  .navbar-menu-cue {
+    display: none;
+  }
+  .theme-toggle-btn {
+    width: 46px;
+    height: 28px;
+  }
   .navbar-brand-divider {
     display: none;
   }
@@ -1516,7 +1549,7 @@ fieldset:disabled .choice {
 .review-btn-flag.is-on {
   background: var(--danger-strong);
   border-color: var(--danger-strong);
-  color: var(--surface);
+  color: #ffffff;
 }
 .review-btn-note.is-on {
   background: var(--brand-gold);
@@ -3078,7 +3111,7 @@ fieldset:disabled .choice {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--brand-green);
+  color: var(--link);
   display: block;
   margin-bottom: 0.2rem;
 }
@@ -3676,18 +3709,18 @@ fieldset:disabled .choice {
 }
 
 .dean-metric-badge.tone-revised {
-  background: rgba(2, 132, 199, 0.12);
-  color: #0284c7;
+  background: var(--surface-2);
+  color: var(--link);
 }
 
 .dean-metric-badge.tone-waiting {
-  background: rgba(217, 119, 6, 0.12);
-  color: #d97706;
+  background: var(--warning-bg);
+  color: var(--warning-text);
 }
 
 .dean-metric-badge.tone-approved {
-  background: rgba(16, 185, 129, 0.12);
-  color: #059669;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .dean-metric-count {
@@ -3723,7 +3756,7 @@ fieldset:disabled .choice {
 .dean-clear-filter {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--brand-green);
+  color: var(--link);
   padding: 0;
   background: none;
   border: none;
@@ -3968,8 +4001,8 @@ select.input {
 }
 
 .origin-badge-faculty {
-  background: rgba(30, 41, 59, 0.1);
-  color: #1e293b;
+  background: var(--surface-2);
+  color: var(--text-heading);
 }
 
 .dean-drawer-close {
@@ -4294,7 +4327,7 @@ select.input {
 }
 
 .kicker-cleared {
-  color: #006747;
+  color: var(--success-text);
 }
 
 .dean-clearance-title {
@@ -4446,7 +4479,7 @@ select.input {
 .dean-manage-notes-btn {
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--brand-green);
+  color: var(--link);
   padding: 0;
   border: none;
   background: none;
@@ -4484,9 +4517,9 @@ select.input {
 }
 
 .dean-chip.is-active {
-  background: rgba(0, 103, 71, 0.1);
-  border-color: var(--brand-green);
-  color: var(--brand-green);
+  background: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success-text);
 }
 
 .dean-chip-check {
@@ -4617,8 +4650,8 @@ select.input {
 .dean-note-chip-preview {
   font-size: 0.76rem;
   font-weight: 800;
-  background: rgba(0, 103, 71, 0.1);
-  color: var(--brand-green);
+  background: var(--success-bg);
+  color: var(--success-text);
   padding: 0.15rem 0.5rem;
   border-radius: 12px;
   align-self: flex-start;
@@ -4804,8 +4837,8 @@ select.input {
 .dean-notif-badge {
   font-size: 0.7rem;
   font-weight: 800;
-  background: rgba(0, 103, 71, 0.12);
-  color: var(--brand-green);
+  background: var(--success-bg);
+  color: var(--success-text);
   padding: 0.1rem 0.45rem;
   border-radius: 4px;
 }

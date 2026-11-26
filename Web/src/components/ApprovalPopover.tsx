@@ -52,7 +52,7 @@ export function ApprovalPopover({ steps, label = 'Track progress' }: { steps: Ap
         {label}
       </button>
       {open && (
-        <div className="approval-popover-panel" id={id} role="dialog" aria-label="Approval progress">
+        <div className="approval-popover-panel" id={id} role="region" aria-label="Approval progress">
           {/* Mount fresh each time so the bar animates from empty. */}
           <ApprovalProgress steps={steps} />
         </div>

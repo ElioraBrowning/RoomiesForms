@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { cloneElement, isValidElement, useEffect, useId, useState } from 'react';
 import api, { readApiError } from '../services/api';
 import type { FormDetail, FormMeta } from '../types';
 import type { FormPage, FormQuestion, FormSchema, QuestionType } from '../forms/types';
@@ -500,21 +500,41 @@ function groupForms(forms: FormMeta[]): [string, FormMeta[]][] {
 }
 
 function Field({ label, help, optional, children }: { label: string; help?: string; optional?: boolean; children: React.ReactNode }) {
+  const autoId = useId();
+  const childEl = isValidElement<{ id?: string }>(children) ? children : null;
+  const isLabelable = Boolean(
+    childEl && (typeof childEl.type === 'string'
+      ? ['input', 'select', 'textarea'].includes(childEl.type)
+      : childEl.type === NumberInput)
+  );
+  const controlId = isLabelable ? (childEl?.props.id ?? autoId) : undefined;
+  const renderedChild = isLabelable && childEl && !childEl.props.id
+    ? cloneElement(childEl, { id: controlId })
+    : children;
+
   return (
     <div className="question builder-field">
-      <span className="question-label">
-        {label}
-        {optional && <span className="question-optional"> (optional)</span>}
-      </span>
+      {controlId ? (
+        <label className="question-label" htmlFor={controlId}>
+          {label}
+          {optional && <span className="question-optional"> (optional)</span>}
+        </label>
+      ) : (
+        <span className="question-label">
+          {label}
+          {optional && <span className="question-optional"> (optional)</span>}
+        </span>
+      )}
       {help && <p className="question-help">{help}</p>}
-      {children}
+      {renderedChild}
     </div>
   );
 }
 
-function NumberInput({ value, onChange }: { value?: number; onChange: (v: number | undefined) => void }) {
+function NumberInput({ id, value, onChange }: { id?: string; value?: number; onChange: (v: number | undefined) => void }) {
   return (
     <input
+      id={id}
       className="input"
       inputMode="decimal"
       value={value ?? ''}

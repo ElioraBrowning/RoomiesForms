@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { type QuickNote, DEFAULT_QUICK_NOTES, saveQuickNotes } from '../../utils/quickNotes';
+import { useAccessibleModal } from '../../hooks/useAccessibleModal';
 
 interface ManageNotesModalProps {
   notes: QuickNote[];
@@ -26,15 +27,7 @@ export default function ManageNotesModal({
     onClose(notes);
   }, [notes, onClose]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        handleDone();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleDone]);
+  const modalRef = useAccessibleModal(isOpen, handleDone);
 
   if (!isOpen) return null;
 
@@ -73,12 +66,17 @@ export default function ManageNotesModal({
   };
 
   return (
-    <div className="dean-modal-root" role="dialog" aria-modal="true">
+    <div
+      className="dean-modal-root"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="manage-notes-title"
+    >
       <div className="dean-modal-backdrop" onClick={handleDone} aria-hidden="true" />
-      <div className="dean-modal-box">
+      <div className="dean-modal-box" ref={modalRef} tabIndex={-1}>
         <div className="dean-modal-header">
           <div>
-            <h3 className="dean-modal-title">Manage Quick Notes</h3>
+            <h3 id="manage-notes-title" className="dean-modal-title">Manage Quick Notes</h3>
             <p className="dean-modal-sub">
               Customize the one-click template chips used when requesting form revisions.
             </p>
@@ -217,11 +215,13 @@ function EditNoteForm({
       <input
         type="text"
         className="input dean-edit-input"
+        aria-label="Quick note label"
         value={label}
         onChange={(e) => setLabel(e.target.value)}
       />
       <textarea
         className="input dean-edit-textarea"
+        aria-label="Quick note message"
         rows={3}
         value={text}
         onChange={(e) => setText(e.target.value)}
